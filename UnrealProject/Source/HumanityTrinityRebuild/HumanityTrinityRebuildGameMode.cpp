@@ -61,8 +61,9 @@ void AHumanityTrinityRebuildGameMode::BeginPlay()
     }
     if (!bHasSwitch)
     {
-        // Front-door switch, on the solid wall immediately beside the opening.
-        const FVector SwitchLocation(-565.0f, -95.0f, 125.0f);
+        // Front-door switch on the left wall. The wall's classroom-facing
+        // surface is X=-600 cm; a 2.5 cm plate centered at -598.75 sits flush.
+        const FVector SwitchLocation(-598.75f, -95.0f, 125.0f);
         const FRotator SwitchRotation(0.0f, 0.0f, 0.0f);
         GetWorld()->SpawnActor<AHumanityTrinityRebuildLightSwitch>(
             AHumanityTrinityRebuildLightSwitch::StaticClass(),
@@ -213,10 +214,12 @@ void AHumanityTrinityRebuildGameMode::SelfTestPrepareSwitchView()
 {
     // Put the real player/camera where a visitor would stand to use the switch.
     // This lets the automated test exercise the same visibility trace as E.
-    SelfTestPlayer->SetActorLocation(FVector(-360.0f, -95.0f, 96.0f), false, nullptr, ETeleportType::TeleportPhysics);
+    // Use a close oblique view so the screenshot proves that the paddle
+    // protrudes from the wall instead of being embedded or reversed.
+    SelfTestPlayer->SetActorLocation(FVector(-510.0f, -45.0f, 96.0f), false, nullptr, ETeleportType::TeleportPhysics);
     if (AController* Controller = SelfTestPlayer->GetController())
     {
-        Controller->SetControlRotation(FRotator(-10.5f, 180.0f, 0.0f));
+        Controller->SetControlRotation(FRotator(-20.5f, -150.6f, 0.0f));
     }
 
     FTimerHandle Timer;

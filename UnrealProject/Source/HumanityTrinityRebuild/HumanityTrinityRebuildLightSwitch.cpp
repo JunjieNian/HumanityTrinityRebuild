@@ -30,15 +30,18 @@ AHumanityTrinityRebuildLightSwitch::AHumanityTrinityRebuildLightSwitch()
     BackPlate->SetupAttachment(InteractionBounds);
     BackPlate->SetStaticMesh(CubeMesh);
     BackPlate->SetMaterial(0, BasicMaterial);
-    BackPlate->SetRelativeScale3D(FVector(0.08f, 0.22f, 0.32f));
+    // The switch is mounted on the left wall. Local +X points from the wall
+    // into the classroom, so X is the shallow depth axis of every component.
+    BackPlate->SetRelativeScale3D(FVector(0.025f, 0.12f, 0.18f));
     BackPlate->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     Paddle = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Paddle"));
     Paddle->SetupAttachment(InteractionBounds);
     Paddle->SetStaticMesh(CubeMesh);
     Paddle->SetMaterial(0, BasicMaterial);
-    Paddle->SetRelativeLocation(FVector(-6.0f, 0.0f, 0.0f));
-    Paddle->SetRelativeScale3D(FVector(0.055f, 0.14f, 0.12f));
+    // Sit just in front of the plate and protrude into the classroom (+X).
+    Paddle->SetRelativeLocation(FVector(2.15f, 0.0f, 0.0f));
+    Paddle->SetRelativeScale3D(FVector(0.022f, 0.072f, 0.105f));
     Paddle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     Label = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Label"));
@@ -46,8 +49,8 @@ AHumanityTrinityRebuildLightSwitch::AHumanityTrinityRebuildLightSwitch()
     Label->SetText(FText::FromString(TEXT("LIGHTS")));
     Label->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
     Label->SetWorldSize(10.0f);
-    Label->SetRelativeLocation(FVector(-8.5f, 0.0f, 45.0f));
-    Label->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+    Label->SetRelativeLocation(FVector(1.5f, 0.0f, 15.0f));
+    Label->SetRelativeRotation(FRotator::ZeroRotator);
 }
 
 void AHumanityTrinityRebuildLightSwitch::BeginPlay()
@@ -93,7 +96,8 @@ FString AHumanityTrinityRebuildLightSwitch::GetInteractionPrompt() const
 void AHumanityTrinityRebuildLightSwitch::UpdateVisualState()
 {
     const bool bLightsOn = !LightingController || LightingController->AreMainLightsOn();
-    Paddle->SetRelativeRotation(FRotator(0.0f, bLightsOn ? -14.0f : 14.0f, 0.0f));
+    // Rock around local Y so the upper/lower edge tips away from the wall.
+    Paddle->SetRelativeRotation(FRotator(bLightsOn ? -14.0f : 14.0f, 0.0f, 0.0f));
 
     if (UMaterialInstanceDynamic* PlateMaterial = BackPlate->CreateAndSetMaterialInstanceDynamic(0))
     {
