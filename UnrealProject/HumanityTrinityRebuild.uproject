@@ -1,0 +1,23 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "5.7",
+  "Category": "Architecture",
+  "Description": "Interactive reconstruction of FDFZ Humanity Trinity Space",
+  "Modules": [
+    {
+      "Name": "HumanityTrinityRebuild",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "PythonScriptPlugin",
+      "Enabled": true
+    },
+    {
+      "Name": "EditorScriptingUtilities",
+      "Enabled": true
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+# Unreal Engine generated files
+UnrealProject/Binaries/
+UnrealProject/DerivedDataCache/
+UnrealProject/Intermediate/
+UnrealProject/Saved/
+UnrealProject/.vs/
+
+# Local pre-rename assets; the public project uses Content/HumanityTrinityRebuild.
+UnrealProject/Content/Sanyi/
+
+# IDE and local user state
+.vs/
+.idea/
+.vscode/
+*.sln
+*.suo
+*.user
+*.userprefs
+*.VC.db
+*.VC.opendb
+
+# Build/package output
+Build/
+Dist/
+*.log
+
+# Blender recovery and temporary files
+*.blend1
+*.blend2
+*.blend@
+*.tmp
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+desktop.ini
