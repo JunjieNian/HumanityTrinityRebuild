@@ -6,6 +6,7 @@
 
 class AHumanityTrinityRebuildLightingController;
 class AHumanityTrinityRebuildPlayerCharacter;
+class AHumanityTrinityRebuildRoomInteraction;
 
 UCLASS()
 class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildGameMode : public AGameModeBase
@@ -25,6 +26,9 @@ private:
     UPROPERTY()
     TObjectPtr<AHumanityTrinityRebuildPlayerCharacter> SelfTestPlayer;
 
+    UPROPERTY()
+    TObjectPtr<AHumanityTrinityRebuildRoomInteraction> SelfTestRoom;
+
     float SelfTestDarkExposureStart = 0.0f;
     float SelfTestDarkExposureObserved = 0.0f;
     bool bSelfTestPassed = true;
@@ -39,6 +43,16 @@ private:
     void SelfTestFinish();
     void SelfTestPrepareSwitchView();
     void SelfTestValidateSwitch();
+    void SelfTestPrepareStageView();
+    void SelfTestValidateCurtainsOpen();
+    void SelfTestValidateCurtainsClosed();
+    void SelfTestValidateCurtainsReopened();
+    void SelfTestPrepareScreenControl();
+    void SelfTestValidateScreenControl();
+    void SelfTestCaptureTeachingView();
+    void SelfTestValidateScreenOff();
+    void SelfTestReportResult();
+    bool SelfTestCurtainBlocksPassage() const;
     void SelfTestExit();
     void CaptureSelfTestScreenshot(const FString& FileName);
 };

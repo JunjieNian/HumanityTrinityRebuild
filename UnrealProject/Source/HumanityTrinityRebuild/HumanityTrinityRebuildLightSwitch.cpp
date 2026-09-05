@@ -11,7 +11,8 @@
 
 AHumanityTrinityRebuildLightSwitch::AHumanityTrinityRebuildLightSwitch()
 {
-    PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.TickInterval = 0.10f;
 
     InteractionBounds = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionBounds"));
     InteractionBounds->SetBoxExtent(FVector(12.0f, 24.0f, 34.0f));
@@ -66,6 +67,15 @@ void AHumanityTrinityRebuildLightSwitch::BeginPlay()
     UpdateVisualState();
 }
 
+void AHumanityTrinityRebuildLightSwitch::Tick(const float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+    if (LightingController && bLastLightsOn != LightingController->AreMainLightsOn())
+    {
+        UpdateVisualState();
+    }
+}
+
 void AHumanityTrinityRebuildLightSwitch::Interact(AActor* Interactor)
 {
     if (!LightingController)
@@ -96,6 +106,7 @@ FString AHumanityTrinityRebuildLightSwitch::GetInteractionPrompt() const
 void AHumanityTrinityRebuildLightSwitch::UpdateVisualState()
 {
     const bool bLightsOn = !LightingController || LightingController->AreMainLightsOn();
+    bLastLightsOn = bLightsOn;
     // Rock around local Y so the upper/lower edge tips away from the wall.
     Paddle->SetRelativeRotation(FRotator(bLightsOn ? -14.0f : 14.0f, 0.0f, 0.0f));
 

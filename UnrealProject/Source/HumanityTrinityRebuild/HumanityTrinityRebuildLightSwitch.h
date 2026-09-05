@@ -19,6 +19,7 @@ public:
     AHumanityTrinityRebuildLightSwitch();
 
     virtual void BeginPlay() override;
+    virtual void Tick(float DeltaSeconds) override;
 
     UFUNCTION(BlueprintCallable, Category = "HumanityTrinityRebuild|Interaction")
     void Interact(AActor* Interactor);
@@ -43,4 +44,5 @@ private:
     TObjectPtr<AHumanityTrinityRebuildLightingController> LightingController;
 
     void UpdateVisualState();
+    bool bLastLightsOn = true;
 };

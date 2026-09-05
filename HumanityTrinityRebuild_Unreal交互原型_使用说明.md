@@ -3,13 +3,15 @@
 ## 当前实现
 
 - Unreal Engine 5.7.4 原生 C++ 项目。
-- 完整导入 Blender 三一模型，保留 20 种材质。
+- 导入经过照片细化的 Blender 模型，包括木纹舞台、灰绿地坪、酒红幕布、白色高柜、蓝黄白桌面和脚轮家具，并保留可移植材质贴图。
 - 模型使用复杂碰撞，可阻止人物穿过墙体、舞台、书架和桌椅。
-- 第一人称行走与鼠标观察。
+- 第一人称行走、鼠标观察，以及便于近看材质和物件的慢行模式。
 - 前门门框旁实墙上的暂定总开关，使用视线射线交互。
-- 屏幕中央准星、开关操作提示和底部快捷键提示。
-- 九盏动态主灯，分为前方教学区、中央桌区、后排桌区和舞台区。
-- 关灯后主灯功率真正归零。
+- 屏幕中央准星、近距离交互提示和底部快捷键提示。
+- 幕布可缓动开合；关闭时遮挡舞台并阻挡人物直接通过。
+- 教学屏可独立开关，带局部光照；默认关闭，以便看到两扇深绿书写板。
+- 二十个可见矩形灯板配合九盏动态主光源，分为前方教学区、中央桌区、后排桌区和舞台区。
+- 关闭某个分区时，该区光源与可见灯板发光同步归零；四个分区全灭时也会进入暗适应。
 - 可关闭的、带方向性的微弱门缝光和大屏待机面光。
 - 暗适应慢、亮适应快的曝光变化。
 - 无模型时仍可生成封闭的 12 × 18 × 3.4 米备用房间，便于调试。
@@ -33,8 +35,11 @@
 | W / A / S / D | 行走 |
 | 鼠标 | 转动视线 |
 | Space | 跳跃 |
-| E | 当准星指向墙面开关时，开/关教室总灯 |
+| 按住 Shift | 慢行，便于靠近观察 |
+| E | 对准附近墙面开关、幕布或讲台上的深灰控制器，操作对应对象 |
 | L | 无需靠近开关，直接切换总灯，供调试 |
+| C | 缓动打开／关闭幕布 |
+| P | 打开／关闭教学屏 |
 | 1 | 切换前方教学区灯 |
 | 2 | 切换中央桌区灯 |
 | 3 | 切换后排桌区灯 |
@@ -43,15 +48,29 @@
 
 ## 灯光体验
 
-主灯关闭时：
+默认进入时主灯开启、幕布两侧打开、教学屏关闭。可先走到前门旁的总开关，或直接按 L，比较灯光变化；走到舞台附近按 C 可观察幕布开合，再按 P 单独开启教学屏，观察它在暗处提供的局部照明。
+
+主灯和教学屏均关闭时：
 
 1. 九盏主灯全部关闭；
 2. 前门附近保留约 12 流明的窄条暖色门缝光；
-3. 大屏附近保留约 4 流明的蓝色待机面光；
+3. 大屏附近仅保留暂定的极弱待机光；
 4. 观察者刚关灯时几乎全黑；
-5. 曝光缓慢增加，约十几秒后只能勉强辨认近处家具轮廓，教室深处仍接近全黑。
+5. 曝光缓慢增加，暗适应后仅能勉强辨认近处家具轮廓，教室深处仍接近全黑。
 
 重新开灯时，曝光会更快回到正常值，以模拟从暗处突然见光的短暂刺眼。
+
+教学屏开启时会发光，并在附近形成弱的冷白照明，因此不会呈现全室近黑的同一状态。相机有专门的屏幕照明曝光目标，避免照搬“所有光源都灭”的曝光导致屏幕过亮。检查纯粹关灯效果时，应同时关闭教学屏。
+
+二十个灯板与九个实际光源数量不同，是当前性能和外观之间的实现选择；灯板数量、分区、亮度、色温、残光和人眼适应参数均是可调整的近似值，不是根据照片测出的现场数值。
+
+## 幕布、教学屏与慢行
+
+幕布在约 2.4 秒内缓动打开或关闭。C 可直接控制；靠近并对准幕布按 E 也可操作。关闭的布面遮挡可见射线和人物通路，开启后恢复舞台通路。这里提供的是交互演示，真实幕布是否电动、如何拉动仍待确认。
+
+P 直接开关教学屏；走到讲台附近，对准顶部深灰色小控制器按 E 可进行同样操作。屏幕关闭时隐藏，呈现两块深绿板；开启时展示面临时覆盖中央。照片尚不能确定屏幕与滑动黑板的真实机械结构。
+
+默认行走速度为 240 cm/s，按住 Shift 后为 120 cm/s。人物尺度和速度用于原型体验，仍可根据实际空间感继续调整。
 
 ## 关键参数
 
@@ -61,9 +80,9 @@ UnrealProject\Source\HumanityTrinityRebuild\HumanityTrinityRebuildLightingContro
 
 默认参数：
 
-- 主灯：2600 lm / 盏；
+- 教室主灯：3400 lm / 4500 K，舞台主灯：5200 lm / 4000 K；
 - 前门门缝光：12.0 lm；
-- 屏幕待机光：4.0 lm。
+- 设备待机残光：0.6 lm。
 
 明暗适应位于：
 
@@ -71,8 +90,8 @@ UnrealProject\Source\HumanityTrinityRebuild\HumanityTrinityRebuildPlayerCharacte
 
 默认参数：
 
-- 正常开灯曝光：-3.2 EV；
-- 暗适应目标曝光：+1.25 EV（相对增加 4.45 EV）；
+- 正常开灯曝光：-4.7 EV；
+- 暗适应目标曝光：+1.25 EV（相对增加 5.95 EV）；
 - 暗适应速度：0.16；
 - 亮适应速度：2.7。
 
@@ -80,27 +99,38 @@ UnrealProject\Source\HumanityTrinityRebuild\HumanityTrinityRebuildPlayerCharacte
 
 UnrealProject\Source\HumanityTrinityRebuild\HumanityTrinityRebuildGameMode.cpp
 
-## 已完成的自动验收
+## 自检与截图核对
 
-最终版本已在 Unreal Engine 5.7.4 中重新编译、重新导入模型，并以实际游戏关卡运行自检：
+项目提供在实际游戏关卡中运行的自动自检入口，当前核对范围包括：
 
-- 开灯：9 盏主灯开启，2 盏残余光关闭；
-- 关灯：9 盏主灯关闭，2 盏残余光开启；
-- 8 秒暗适应：曝光由 -3.200 EV 变化至 +0.014 EV；
-- 重新开灯 2 秒：曝光恢复至 -3.185 EV；
-- 玩家视角射线在 196.3 cm 处命中墙面开关；
-- 同一个开关可实际关闭全部主灯，再次操作可恢复；
-- 自检最终结果：PASS。
+- 总灯和各分区的有效光源状态；
+- 灯板发光与对应分区同步关闭；
+- 四分区全灭后的暗适应及重新开灯后的恢复；
+- 玩家视角射线命中墙面开关并真正完成开关灯；
+- 幕布开合后的状态、遮挡与交互；
+- 教学屏开关及其对应的曝光条件。
+
+运行示例：
+
+```powershell
+& 'D:\EpicGames\UE_5.7\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' `
+  '.\UnrealProject\HumanityTrinityRebuild.uproject' `
+  '/Game/HumanityTrinityRebuild/Maps/L_HumanityTrinityRebuildWalkthrough' `
+  -game -RenderOffscreen -ResX=1280 -ResY=720 -unattended -nosound `
+  -HumanityTrinityRebuildSelfTest -HumanityTrinityRebuildCapture -log
+```
+
+结果应查看当次运行日志 `UnrealProject\Saved\Logs\HumanityTrinityRebuild.log` 中的 `[HUMANITY_TRINITY_REBUILD_SELFTEST]` 记录；旧版本通过记录不代表修改后的版本也已通过。
 
 核对截图位于：
 
 UnrealProject\Saved\Screenshots\HumanityTrinityRebuild
 
-其中包含开灯、刚关灯、暗适应后、重新开灯和墙面开关近景五张图。
+其中包括开灯、刚关灯、暗适应后、重新开灯、墙面开关近景，以及 `05_StageOpen`、`06_StageClosed`、`07_TeachingView` 等新增状态图。用于交付核对的精选截图放在 `Docs\Previews`；临时日志和完整 Saved 目录不纳入版本库。
 
 ## 模型修改后的更新流程
 
-1. 在 Blender 中修改并保存 HumanityTrinityRebuild.blend。
+1. 修改 HumanityTrinityRebuild_BlenderGenerator.py 的参数或 Tools/Blender/photo_details.py 的细节，再运行生成脚本；也可直接在 Blender 中修改并保存 HumanityTrinityRebuild.blend，但下次重新生成时会覆盖手工改动。
 2. 运行 Unreal 专用导出：
 
    D:\Blender\blender-4.5.13-windows-x64\blender.exe --background D:\HumanityTrinityRebuild\HumanityTrinityRebuild.blend --python D:\HumanityTrinityRebuild\Tools\Blender\export_humanity_trinity_rebuild.py
@@ -111,6 +141,8 @@ UnrealProject\Saved\Screenshots\HumanityTrinityRebuild
 
 脚本会重新编译 C++、导入模型、更新复杂碰撞并保存关卡。
 
+可动幕布、教学屏、实体控制器和可切换灯板由 Unreal 运行时逻辑管理。只修改 C++ 交互逻辑时，需要重新编译并启动体验；修改静态场景或贴图后，需要重新导出与导入。两类内容都修改时按上述完整流程更新。
+
 ## 当前仍为暂定的内容
 
 - 墙面开关的准确位置和样式；
@@ -119,6 +151,8 @@ UnrealProject\Saved\Screenshots\HumanityTrinityRebuild
 - 人眼适应参数；
 - 人物起始位置；
 - 真实门扇开启方向和能否交互。
+- 幕布实际操作方式、教学屏与黑板的机械关系；
+- 桌椅总数与位置、台阶和吧台的实测尺寸。
 
 这些参数均与已确认的空间几何分离，可以在不重建教室的情况下继续调整。
 

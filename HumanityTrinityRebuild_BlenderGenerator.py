@@ -22,6 +22,7 @@
 from pathlib import Path
 import json
 import math
+import runpy
 
 import bpy
 from mathutils import Vector
@@ -50,8 +51,14 @@ P = {
 
     # 幕布（位置已确认；第一版拉开以展示舞台）
     "CURTAIN_Y": 14.36,
-    "CURTAIN_RAIL_HEIGHT": 3.05,
-    "CURTAIN_OPENING_HALF_WIDTH": 4.48,
+    "CURTAIN_RAIL_HEIGHT": 3.24,
+    "CURTAIN_OPENING_HALF_WIDTH": 4.60,
+    # 照片确认的两级台阶与室内细节，尺度仍为估计。
+    "PHOTO_DETAILS": True,
+    "STAGE_STEP_FRONT_Y": 13.80,
+    "STAGE_STEP_HEIGHT": 0.21,
+    "STAGE_STEP_WIDTH": 11.40,
+    "CABINET_PHOTO_HEIGHT": 3.18,
 
     # 左侧三门（顺序和作用已确认，具体位置/宽度暂定）
     "DOOR_WIDTH": 1.15,
@@ -158,14 +165,17 @@ def make_material(name, color, roughness=0.55, metallic=0.0, emission=None):
 
 
 def add_box(name, dimensions, location, material, collection, rotation_z=0.0, bevel=0.0):
-    bpy.ops.mesh.primitive_cube_add(
-        location=mirror_location(location),
-        rotation=(0.0, 0.0, MODEL_X_SIGN * rotation_z),
-    )
-    obj = bpy.context.object
-    obj.name = mirror_side_text(name)
-    obj.dimensions = dimensions
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    # Direct mesh creation keeps thousands-of-parts rebuilds fast.
+    dx, dy, dz = (d / 2 for d in dimensions)
+    verts = [(-dx,-dy,-dz),(dx,-dy,-dz),(dx,dy,-dz),(-dx,dy,-dz),
+             (-dx,-dy,dz),(dx,-dy,dz),(dx,dy,dz),(-dx,dy,dz)]
+    mesh = bpy.data.meshes.new(name + "_Mesh")
+    mesh.from_pydata(verts, [], [(3,2,1,0),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)])
+    mesh.update()
+    obj = bpy.data.objects.new(mirror_side_text(name), mesh)
+    obj.location = mirror_location(location)
+    obj.rotation_euler.z = MODEL_X_SIGN * rotation_z
+    collection.objects.link(obj)
     if material:
         obj.data.materials.append(material)
     if bevel > 0.0:
@@ -177,14 +187,16 @@ def add_box(name, dimensions, location, material, collection, rotation_z=0.0, be
 
 
 def add_cylinder(name, radius, depth, location, material, collection, vertices=32):
-    bpy.ops.mesh.primitive_cylinder_add(
-        vertices=vertices,
-        radius=radius,
-        depth=depth,
-        location=mirror_location(location),
-    )
-    obj = bpy.context.object
-    obj.name = mirror_side_text(name)
+    pts = [(radius*math.cos(i*2*math.pi/vertices), radius*math.sin(i*2*math.pi/vertices), z)
+           for z in (-depth/2, depth/2) for i in range(vertices)]
+    faces = [tuple(reversed(range(vertices))), tuple(range(vertices,2*vertices))]
+    faces += [(i,(i+1)%vertices,(i+1)%vertices+vertices,i+vertices) for i in range(vertices)]
+    mesh = bpy.data.meshes.new(name + "_Mesh")
+    mesh.from_pydata(pts, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(mirror_side_text(name), mesh)
+    obj.location = mirror_location(location)
+    collection.objects.link(obj)
     if material:
         obj.data.materials.append(material)
     move_to_collection(obj, collection)
@@ -734,7 +746,7 @@ def create_curtain_panel(name, x0, x1, y, z0, z1, material, collection, folds=14
     return obj
 
 
-rail_half = W / 2 - 0.38
+rail_half = W / 2 - 0.30
 add_curve_line(
     "Curtain_Rail_幕布轨道_位于桌区与舞台之间",
     [(-rail_half, P["CURTAIN_Y"], P["CURTAIN_RAIL_HEIGHT"]),
@@ -968,12 +980,15 @@ for cy in P["TABLE_CLUSTER_Y"]:
 # 10. 顶部人工照明（无窗）
 # ============================================================================
 
+if P["PHOTO_DETAILS"]:
+    runpy.run_path(str(OUT_DIR / "Tools" / "Blender" / "photo_details.py"), init_globals=globals())
+
 for row, y in enumerate((2.0, 5.3, 8.6, 11.9, 15.8), start=1):
     for column, x in enumerate((-3.75, -1.25, 1.25, 3.75), start=1):
         panel = add_box(
             f"CeilingLightPanel_{row}_{column}",
-            (1.25, 0.32, 0.045),
-            (x, y, H - 0.10),
+            (1.20, 0.60, 0.025),
+            (x, y, H - 0.0125),
             MAT["light_panel"],
             COL["lights"],
             bevel=0.025,
@@ -1174,7 +1189,7 @@ top_camera = make_camera(
     "Camera_Top_俯视核对",
     (0.0, L / 2, 25.0),
     (0.0, L / 2, 0.0),
-    ortho_scale=20.6,
+    ortho_scale=27.6,
 )
 stage_camera = make_camera(
     "Camera_Perspective_FrontToStage_从教学端看舞台",
@@ -1229,7 +1244,7 @@ scene.camera = stage_camera
 # 13. 元数据、可编辑文件与通用交换格式
 # ============================================================================
 
-scene["model_title"] = "复旦附中笃志楼 B1 三一人文空间：参数化粗模 v01"
+scene["model_title"] = "HumanityTrinityRebuild：照片参考细化 v02"
 scene["model_status"] = "结构推定模型，不是实测建筑图或施工图"
 scene["confirmed_layout"] = (
     "无窗矩形地下教室；前方教学端；中央小组桌；两侧书架柜体；"
@@ -1240,13 +1255,13 @@ scene["provisional_parameters_json"] = json.dumps(P, ensure_ascii=False)
 
 notes = bpy.data.texts.new("README_参数与证据说明")
 notes.write(
-    "这是根据用户现场记忆、原对话中公开照片旁证和建筑位置线索建立的参数化粗模。\\n"
-    "它不是实测图，也不应被当作笃志楼 B1 的正式建筑/消防/施工资料。\\n\\n"
-    "主要修改入口：外部脚本 HumanityTrinityRebuild_BlenderGenerator.py 顶部的 P 字典。\\n"
-    "坐标：Y=0 为前方教学墙，Y=ROOM_LENGTH 为后墙；右侧为 X 正方向。\\n\\n"
-    "桌组：每组由 6 张等形梯形桌拼成中空的正六边形，中央无支柱。\\n"
-    "未加入：来源不确定的吧台；未确认的舞台台阶、内部道具间门、精确灯具与设备。\\n"
-    "幕布按正确位置建立，但为便于核对舞台几何，当前呈拉开状态。\\n"
+    "本模型结合现场记忆与2026-09-05提供的四张室内照片，尺寸仍为暂定。\n"
+    "主要入口：生成脚本顶部 P 参数；细化代码：Tools/Blender/photo_details.py。\n"
+    "Y=0为教学墙，Y=ROOM_LENGTH为后墙；三门已镜像到X负侧。\n"
+    "每组为六张等形梯形桌围成中空正六边形；九组总数仍是假设。\n"
+    "照片确认：浅木色两级舞台、吧台、高白柜、灰绿地板色带、白色脚轮椅和吊顶空调。\n"
+    "幕布默认打开，Unreal可缓动开合；屏幕与黑板真实机械关系仍待确认。\n"
+    "木纹、地坪与织物贴图为代码生成的近似材质，原始照片未嵌入。\n"
 )
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)

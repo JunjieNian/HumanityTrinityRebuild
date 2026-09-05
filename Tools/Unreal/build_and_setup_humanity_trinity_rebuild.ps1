@@ -37,5 +37,9 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Unreal setup script failed with exit code $LASTEXITCODE"
 }
+$ProjectLog = Join-Path $ProjectRoot 'UnrealProject\Saved\Logs\HumanityTrinityRebuild.log'
+if (-not (Select-String -LiteralPath $ProjectLog -Pattern '\[HUMANITY_TRINITY_REBUILD_SETUP\] SETUP_COMPLETE' -Quiet)) {
+    throw 'Unreal did not confirm a complete asset setup. See the project log for the Python error.'
+}
 
 Write-Output "HumanityTrinityRebuild build and setup completed with $ResolvedUnrealRoot."

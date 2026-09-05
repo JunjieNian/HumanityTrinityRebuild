@@ -6,6 +6,7 @@
 #include "Engine/Engine.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace
@@ -19,15 +20,15 @@ namespace
 
     const FMainLightSpec MainLightSpecs[] =
     {
-        { TEXT("FrontLight_Left"),   FVector(-300.0,  -260.0, 322.0), EHumanityTrinityRebuildLightZone::Front },
-        { TEXT("FrontLight_Right"),  FVector( 300.0,  -260.0, 322.0), EHumanityTrinityRebuildLightZone::Front },
-        { TEXT("MiddleLight_LeftA"), FVector(-300.0,  -650.0, 322.0), EHumanityTrinityRebuildLightZone::Middle },
-        { TEXT("MiddleLight_RightA"),FVector( 300.0,  -650.0, 322.0), EHumanityTrinityRebuildLightZone::Middle },
-        { TEXT("MiddleLight_LeftB"), FVector(-300.0,  -990.0, 322.0), EHumanityTrinityRebuildLightZone::Middle },
-        { TEXT("MiddleLight_RightB"),FVector( 300.0,  -990.0, 322.0), EHumanityTrinityRebuildLightZone::Middle },
-        { TEXT("RearLight_Left"),    FVector(-300.0, -1280.0, 322.0), EHumanityTrinityRebuildLightZone::Rear },
-        { TEXT("RearLight_Right"),   FVector( 300.0, -1280.0, 322.0), EHumanityTrinityRebuildLightZone::Rear },
-        { TEXT("StageLight"),        FVector(   0.0, -1580.0, 322.0), EHumanityTrinityRebuildLightZone::Stage }
+        { TEXT("FrontLight_Left"),   FVector(-250.0,  -200.0, 336.5), EHumanityTrinityRebuildLightZone::Front },
+        { TEXT("FrontLight_Right"),  FVector( 250.0,  -200.0, 336.5), EHumanityTrinityRebuildLightZone::Front },
+        { TEXT("MiddleLight_LeftA"), FVector(-250.0,  -530.0, 336.5), EHumanityTrinityRebuildLightZone::Middle },
+        { TEXT("MiddleLight_RightA"),FVector( 250.0,  -530.0, 336.5), EHumanityTrinityRebuildLightZone::Middle },
+        { TEXT("MiddleLight_LeftB"), FVector(-250.0,  -860.0, 336.5), EHumanityTrinityRebuildLightZone::Middle },
+        { TEXT("MiddleLight_RightB"),FVector( 250.0,  -860.0, 336.5), EHumanityTrinityRebuildLightZone::Middle },
+        { TEXT("RearLight_Left"),    FVector(-250.0, -1190.0, 336.5), EHumanityTrinityRebuildLightZone::Rear },
+        { TEXT("RearLight_Right"),   FVector( 250.0, -1190.0, 336.5), EHumanityTrinityRebuildLightZone::Rear },
+        { TEXT("StageLight"),        FVector(   0.0, -1580.0, 336.5), EHumanityTrinityRebuildLightZone::Stage }
     };
 
     EHumanityTrinityRebuildLightZone ZoneForPanelRow(const int32 Row)
@@ -64,10 +65,15 @@ AHumanityTrinityRebuildLightingController::AHumanityTrinityRebuildLightingContro
         Light->SetMobility(EComponentMobility::Movable);
         Light->SetIntensityUnits(ELightUnits::Lumens);
         Light->SetIntensity(MainLightIntensityLumens);
-        Light->SetSourceWidth(220.0f);
-        Light->SetSourceHeight(90.0f);
-        Light->SetAttenuationRadius(900.0f);
-        Light->SetLightColor(FLinearColor(0.91f, 0.95f, 1.0f));
+        // Each economical area light represents a pair of the visible LED
+        // panels; the stage light represents the wider bank over the platform.
+        Light->SetSourceWidth(Spec.Zone == EHumanityTrinityRebuildLightZone::Stage ? 520.0f : 300.0f);
+        Light->SetSourceHeight(60.0f);
+        Light->SetAttenuationRadius(760.0f);
+        Light->SetLightColor(FLinearColor::White);
+        Light->SetUseTemperature(true);
+        Light->SetTemperature(Spec.Zone == EHumanityTrinityRebuildLightZone::Stage
+            ? StageTemperatureKelvin : ClassroomTemperatureKelvin);
         Light->SetCastShadows(true);
         MainLights.Add(Light);
         MainLightZones.Add(Spec.Zone);
@@ -84,13 +90,30 @@ AHumanityTrinityRebuildLightingController::AHumanityTrinityRebuildLightingContro
         for (int32 Column = 0; Column < 4; ++Column)
         {
             const FString Name = FString::Printf(TEXT("CeilingPanel_%d_%d"), Row + 1, Column + 1);
+            const FString HousingName = FString::Printf(TEXT("CeilingPanelHousing_%d_%d"), Row + 1, Column + 1);
+            UStaticMeshComponent* Housing = CreateDefaultSubobject<UStaticMeshComponent>(*HousingName);
+            Housing->SetupAttachment(SceneRoot);
+            Housing->SetStaticMesh(CubeMesh);
+            Housing->SetRelativeLocation(FVector(PanelX[Column], PanelY[Row], 339.0));
+            Housing->SetRelativeScale3D(FVector(1.24, 0.64, 0.02));
+            Housing->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            Housing->SetCastShadow(false);
+            PanelHousings.Add(Housing);
+
             UStaticMeshComponent* Panel = CreateDefaultSubobject<UStaticMeshComponent>(*Name);
             Panel->SetupAttachment(SceneRoot);
             Panel->SetStaticMesh(CubeMesh);
-            Panel->SetRelativeLocation(FVector(PanelX[Column], PanelY[Row], 329.0));
-            Panel->SetRelativeScale3D(FVector(1.25, 0.32, 0.045));
+            // Underside is 337.5 cm; the backing meets the 340 cm ceiling.
+            Panel->SetRelativeLocation(FVector(PanelX[Column], PanelY[Row], 338.0));
+            Panel->SetRelativeScale3D(FVector(1.20, 0.60, 0.01));
+            Panel->SetMobility(EComponentMobility::Movable);
             Panel->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             Panel->SetCastShadow(false);
+            // The rect lights supply indirect light. Excluding the emissive
+            // diffuser from the distance-field scene avoids duplicate GI and
+            // persistent glowing surfaces when a circuit is switched off.
+            Panel->SetAffectDynamicIndirectLighting(false);
+            Panel->SetAffectDistanceFieldLighting(false);
             PanelVisuals.Add(Panel);
             PanelZones.Add(ZoneForPanelRow(Row));
         }
@@ -112,19 +135,19 @@ AHumanityTrinityRebuildLightingController::AHumanityTrinityRebuildLightingContro
     DoorLeak->SetCastShadows(true);
     ResidualLights.Add(DoorLeak);
 
-    // The screen is on the front teaching wall and therefore throws its very
-    // weak standby light down the length of the otherwise sealed room.
+    // A tiny standby indicator on the teaching equipment, not a luminous
+    // blackboard. Its low output leaves the closed basement almost black.
     URectLightComponent* ScreenStandby = CreateDefaultSubobject<URectLightComponent>(TEXT("ScreenStandbyResidualLight"));
     ScreenStandby->SetupAttachment(SceneRoot);
-    ScreenStandby->SetRelativeLocation(FVector(0.0, -45.0, 190.0));
+    ScreenStandby->SetRelativeLocation(FVector(215.0, -45.0, 110.0));
     ScreenStandby->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
     ScreenStandby->SetMobility(EComponentMobility::Movable);
     ScreenStandby->SetIntensityUnits(ELightUnits::Lumens);
     ScreenStandby->SetIntensity(ScreenStandbyIntensityLumens);
-    ScreenStandby->SetSourceWidth(220.0f);
-    ScreenStandby->SetSourceHeight(120.0f);
-    ScreenStandby->SetAttenuationRadius(900.0f);
-    ScreenStandby->SetLightColor(FLinearColor(0.12f, 0.35f, 1.0f));
+    ScreenStandby->SetSourceWidth(8.0f);
+    ScreenStandby->SetSourceHeight(3.0f);
+    ScreenStandby->SetAttenuationRadius(340.0f);
+    ScreenStandby->SetLightColor(FLinearColor(0.56f, 0.72f, 1.0f));
     ScreenStandby->SetCastShadows(false);
     ResidualLights.Add(ScreenStandby);
 }
@@ -133,10 +156,35 @@ void AHumanityTrinityRebuildLightingController::BeginPlay()
 {
     Super::BeginPlay();
 
+    UMaterialInterface* PanelMaterial = LoadObject<UMaterialInterface>(nullptr,
+        TEXT("/Game/HumanityTrinityRebuild/Materials/M_PanelLight.M_PanelLight"));
+    if (!PanelMaterial)
+    {
+        UE_LOG(LogTemp, Error, TEXT("HumanityTrinityRebuild: missing M_PanelLight; rerun the Unreal asset setup."));
+    }
+
+    for (UStaticMeshComponent* Housing : PanelHousings)
+    {
+        if (Housing && PanelMaterial)
+        {
+            Housing->SetMaterial(0, PanelMaterial);
+            if (UMaterialInstanceDynamic* HousingMaterial = Housing->CreateAndSetMaterialInstanceDynamic(0))
+            {
+                HousingMaterial->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.74f, 0.76f, 0.75f));
+                HousingMaterial->SetScalarParameterValue(TEXT("Emission"), 0.0f);
+            }
+        }
+    }
+
+    PanelMaterials.Reset();
     for (UStaticMeshComponent* Panel : PanelVisuals)
     {
         if (Panel)
         {
+            if (PanelMaterial)
+            {
+                Panel->SetMaterial(0, PanelMaterial);
+            }
             if (UMaterialInstanceDynamic* DynamicMaterial = Panel->CreateAndSetMaterialInstanceDynamic(0))
             {
                 PanelMaterials.Add(DynamicMaterial);
@@ -153,12 +201,16 @@ void AHumanityTrinityRebuildLightingController::BeginPlay()
 
 void AHumanityTrinityRebuildLightingController::ToggleMaster()
 {
-    SetMasterLights(!bMasterLightsOn);
+    SetMasterLights(!AreMainLightsOn());
 }
 
 void AHumanityTrinityRebuildLightingController::SetMasterLights(const bool bEnabled)
 {
     bMasterLightsOn = bEnabled;
+    if (bEnabled && !bFrontZoneOn && !bMiddleZoneOn && !bRearZoneOn && !bStageZoneOn)
+    {
+        bFrontZoneOn = bMiddleZoneOn = bRearZoneOn = bStageZoneOn = true;
+    }
     ApplyLightingState();
 
     if (GEngine)
@@ -172,13 +224,18 @@ void AHumanityTrinityRebuildLightingController::SetMasterLights(const bool bEnab
 
 void AHumanityTrinityRebuildLightingController::ToggleZone(const EHumanityTrinityRebuildLightZone Zone)
 {
-    bool& ZoneState = GetMutableZoneState(Zone);
-    ZoneState = !ZoneState;
-    ApplyLightingState();
+    SetZoneEnabled(Zone, !(bMasterLightsOn && IsZoneEnabled(Zone)));
 }
 
 void AHumanityTrinityRebuildLightingController::SetZoneEnabled(const EHumanityTrinityRebuildLightZone Zone, const bool bEnabled)
 {
+    if (bEnabled && !bMasterLightsOn)
+    {
+        // Selecting a circuit from blackout should illuminate only that
+        // circuit, instead of unexpectedly restoring every remembered zone.
+        bFrontZoneOn = bMiddleZoneOn = bRearZoneOn = bStageZoneOn = false;
+        bMasterLightsOn = true;
+    }
     GetMutableZoneState(Zone) = bEnabled;
     ApplyLightingState();
 }
@@ -200,7 +257,21 @@ int32 AHumanityTrinityRebuildLightingController::GetActiveMainLightCount() const
     int32 Count = 0;
     for (const URectLightComponent* Light : MainLights)
     {
-        if (Light && Light->IsVisible())
+        if (Light && Light->IsVisible() && Light->Intensity > KINDA_SMALL_NUMBER)
+        {
+            ++Count;
+        }
+    }
+    return Count;
+}
+
+int32 AHumanityTrinityRebuildLightingController::GetEmittingPanelCount() const
+{
+    int32 Count = 0;
+    for (const UMaterialInstanceDynamic* Material : PanelMaterials)
+    {
+        float Emission = 0.0f;
+        if (Material && Material->GetScalarParameterValue(FMaterialParameterInfo(TEXT("Emission")), Emission) && Emission > 0.0f)
         {
             ++Count;
         }
@@ -213,7 +284,7 @@ int32 AHumanityTrinityRebuildLightingController::GetActiveResidualLightCount() c
     int32 Count = 0;
     for (const URectLightComponent* Light : ResidualLights)
     {
-        if (Light && Light->IsVisible())
+        if (Light && Light->IsVisible() && Light->Intensity > KINDA_SMALL_NUMBER)
         {
             ++Count;
         }
@@ -240,7 +311,10 @@ void AHumanityTrinityRebuildLightingController::ApplyLightingState()
         if (URectLightComponent* Light = MainLights[Index])
         {
             const bool bEnabled = bMasterLightsOn && IsZoneEnabled(MainLightZones[Index]);
-            Light->SetIntensity(bEnabled ? MainLightIntensityLumens : 0.0f);
+            const bool bIsStage = MainLightZones[Index] == EHumanityTrinityRebuildLightZone::Stage;
+            const float CircuitIntensity = bIsStage ? StageLightIntensityLumens : MainLightIntensityLumens;
+            Light->SetIntensity(bEnabled ? CircuitIntensity : 0.0f);
+            Light->SetTemperature(bIsStage ? StageTemperatureKelvin : ClassroomTemperatureKelvin);
             Light->SetVisibility(bEnabled, true);
         }
     }
@@ -256,7 +330,9 @@ void AHumanityTrinityRebuildLightingController::ApplyLightingState()
         {
             PanelMaterials[Index]->SetVectorParameterValue(
                 TEXT("Color"),
-                bEnabled ? FLinearColor(0.95f, 0.98f, 1.0f) : FLinearColor(0.025f, 0.03f, 0.04f));
+                PanelZones[Index] == EHumanityTrinityRebuildLightZone::Stage
+                    ? FLinearColor(1.0f, 0.90f, 0.75f) : FLinearColor(0.94f, 0.97f, 1.0f));
+            PanelMaterials[Index]->SetScalarParameterValue(TEXT("Emission"), bEnabled ? PanelEmission : 0.0f);
         }
     }
 
@@ -264,7 +340,7 @@ void AHumanityTrinityRebuildLightingController::ApplyLightingState()
     {
         if (URectLightComponent* Light = ResidualLights[Index])
         {
-            const bool bResidualVisible = !bMasterLightsOn && bResidualLightsEnabled;
+            const bool bResidualVisible = !AreMainLightsOn() && bResidualLightsEnabled;
             const float Intensity = (Index == 0) ? DoorLeakIntensityLumens : ScreenStandbyIntensityLumens;
             Light->SetIntensity(bResidualVisible ? Intensity : 0.0f);
             Light->SetVisibility(bResidualVisible, true);

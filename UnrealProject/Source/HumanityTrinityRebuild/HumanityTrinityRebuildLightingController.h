@@ -41,7 +41,7 @@ public:
     void SetZoneEnabled(EHumanityTrinityRebuildLightZone Zone, bool bEnabled);
 
     UFUNCTION(BlueprintPure, Category = "HumanityTrinityRebuild|Lighting")
-    bool AreMainLightsOn() const { return bMasterLightsOn; }
+    bool AreMainLightsOn() const { return GetActiveMainLightCount() > 0; }
 
     UFUNCTION(BlueprintPure, Category = "HumanityTrinityRebuild|Lighting")
     bool IsZoneEnabled(EHumanityTrinityRebuildLightZone Zone) const;
@@ -52,6 +52,8 @@ public:
     UFUNCTION(BlueprintPure, Category = "HumanityTrinityRebuild|Lighting")
     int32 GetActiveResidualLightCount() const;
 
+    int32 GetEmittingPanelCount() const;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HumanityTrinityRebuild|Lighting")
     bool bMasterLightsOn = true;
 
@@ -59,13 +61,25 @@ public:
     bool bResidualLightsEnabled = true;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HumanityTrinityRebuild|Lighting", meta = (ClampMin = "0.0"))
-    float MainLightIntensityLumens = 2600.0f;
+    float MainLightIntensityLumens = 3400.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HumanityTrinityRebuild|Lighting", meta = (ClampMin = "0.0"))
+    float StageLightIntensityLumens = 5200.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HumanityTrinityRebuild|Lighting", meta = (ClampMin = "1000.0", ClampMax = "12000.0"))
+    float ClassroomTemperatureKelvin = 4500.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HumanityTrinityRebuild|Lighting", meta = (ClampMin = "1000.0", ClampMax = "12000.0"))
+    float StageTemperatureKelvin = 4000.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HumanityTrinityRebuild|Lighting", meta = (ClampMin = "0.0"))
+    float PanelEmission = 60.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HumanityTrinityRebuild|Lighting", meta = (ClampMin = "0.0"))
     float DoorLeakIntensityLumens = 12.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HumanityTrinityRebuild|Lighting", meta = (ClampMin = "0.0"))
-    float ScreenStandbyIntensityLumens = 4.0f;
+    float ScreenStandbyIntensityLumens = 0.6f;
 
 private:
     UPROPERTY(VisibleAnywhere, Category = "HumanityTrinityRebuild|Lighting")
@@ -79,6 +93,9 @@ private:
 
     UPROPERTY(VisibleAnywhere, Category = "HumanityTrinityRebuild|Lighting")
     TArray<TObjectPtr<UStaticMeshComponent>> PanelVisuals;
+
+    UPROPERTY(VisibleAnywhere, Category = "HumanityTrinityRebuild|Lighting")
+    TArray<TObjectPtr<UStaticMeshComponent>> PanelHousings;
 
     UPROPERTY(Transient)
     TArray<TObjectPtr<UMaterialInstanceDynamic>> PanelMaterials;

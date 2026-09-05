@@ -4,22 +4,33 @@ An editable Blender reconstruction and Unreal Engine interactive walkthrough of 
 
 The repository combines a parameter-driven spatial model with a native Unreal Engine first-person prototype. It is intended for iterative reconstruction: dimensions that are not yet known are isolated as editable parameters instead of being presented as measured facts.
 
-> This is a research-based reconstruction assembled from on-site recollection and publicly available contextual material. It is not an official architectural, construction, fire-safety, or survey drawing.
+> This reconstruction uses on-site recollection, contextual material, and four user-provided interior photographs added in September 2026. The photographs guide appearance; they do not establish measured dimensions, fixture specifications, or an exact furniture count. This is not an official architectural or survey drawing.
 
-![Perspective toward the stage](HumanityTrinityRebuild_PerspectiveToStage.png)
+![Unreal runtime perspective toward the stage](HumanityTrinityRebuild_PerspectiveToStage.png)
 
 ## What is included
 
 - Editable Blender source model and a parameterized Python generator.
 - A general-purpose GLB export of the full editable scene.
 - A merged runtime GLB for Unreal import.
+- Photo-informed stage finishes, cabinetry, furniture, floor markings, ceiling details, and bar niches.
+- Reproducible base-color and normal textures for wood, flooring, and curtain fabric, generated in code and usable outside Blender. The reference photographs themselves are not included or used as texture files.
 - Unreal Engine 5.7 native C++ first-person movement and interaction.
-- Nine movable classroom lights in four independently switchable zones.
+- Twenty visible ceiling panels, synchronized with nine movable lights in four independently switchable zones.
 - A wall-mounted light switch operated with a camera-center visibility trace.
+- Animated curtain opening/closing and a separately switchable teaching display, with close-range controls.
 - Slow dark adaptation and faster bright adaptation through manual exposure control.
 - Directional door-leak and display-standby residual light assumptions for the almost-black state.
 - Complex collision for the imported classroom, furniture, stage, shelves, and walls.
-- Runtime self-tests for the lighting state, adaptation behavior, and real player-view switch trace.
+- Runtime self-test coverage for lighting, adaptation, player-view switch interaction, curtain movement, and the teaching display.
+
+## Photo-informed refinement
+
+The stage now has a broad lower tread and a higher main platform, pale oak-colored wood grain, warm wall panels and vertical slats, and burgundy folded curtains. The table area uses pale sage flooring with yellow/lime curved markings, saturated blue/yellow/off-white trapezoid tops, rounded white caster chairs with orange/blue seats, and tall white cupboards mixed with open shelves. Bar niches, outlets, framed decorative panels, a charging cabinet, ceiling joints, and cassette-style air-conditioning units add the details visible in the supplied photographs.
+
+The two visible dark-green sliding boards are represented at the teaching wall. The display starts off; when enabled, it temporarily covers the central board area. Its real concealed or sliding mechanism has not been established by the photographs. Curtains start open. Their animated controls are prototype interactions, not evidence of a motorized installation on site.
+
+See [the photo-reference notes](Docs/HumanityTrinityRebuild_PhotoReferenceNotes.md) for the evidence/assumption boundary. In particular, the current nine table clusters and the two 21 cm stage rises remain editable approximations.
 
 ## Confirmed spatial relationships represented by the model
 
@@ -73,8 +84,11 @@ If Unreal is elsewhere, set `UE_ROOT` to the UE_5.7 directory before running the
 | W / A / S / D | Walk |
 | Mouse | Look |
 | Space | Jump |
-| E | Use the wall light switch when targeted |
+| Shift (hold) | Walk slowly for close inspection |
+| E | Use the targeted nearby light, curtain, or display control |
 | L | Toggle all main lights from anywhere for comparison/debugging |
+| C | Open/close the curtains smoothly |
+| P | Toggle the teaching display |
 | 1 | Toggle front teaching-zone lights |
 | 2 | Toggle central table-zone lights |
 | 3 | Toggle rear table-zone lights |
@@ -89,7 +103,12 @@ HumanityTrinityRebuild.glb
 HumanityTrinityRebuild_BlenderGenerator.py
 HumanityTrinityRebuild_建模说明.md
 HumanityTrinityRebuild_Unreal交互原型_使用说明.md
+Assets/Textures/
+Docs/
+  HumanityTrinityRebuild_PhotoReferenceNotes.md
+  Previews/
 Tools/
+  Blender/photo_details.py
   Blender/export_humanity_trinity_rebuild.py
   Unreal/build_and_setup_humanity_trinity_rebuild.ps1
   Unreal/setup_humanity_trinity_rebuild_unreal.py
@@ -104,7 +123,7 @@ Unreal-generated `Binaries`, `Intermediate`, `DerivedDataCache`, `Saved`, IDE st
 
 ## Regenerate the Blender model
 
-The dimensions and layout parameters are grouped in the `P` dictionary near the top of `HumanityTrinityRebuild_BlenderGenerator.py`.
+The dimensions and layout parameters are grouped in the `P` dictionary near the top of `HumanityTrinityRebuild_BlenderGenerator.py`. Photo-informed detail generation is in `Tools/Blender/photo_details.py`; its reusable textures are stored in `Assets/Textures`. Keep these folders with the generator when moving the project.
 
 ```powershell
 & 'D:\Blender\blender-4.5.13-windows-x64\blender.exe' `
@@ -112,7 +131,7 @@ The dimensions and layout parameters are grouped in the `P` dictionary near the 
   --python '.\HumanityTrinityRebuild_BlenderGenerator.py'
 ```
 
-This regenerates the `.blend`, full-scene `.glb`, top view, and two perspective images.
+This regenerates the `.blend`, full-scene `.glb`, texture assets, top view, and two perspective images. Geometry edits made only by hand in Blender will be replaced when the generator runs; preserve them separately or incorporate them into the source script first.
 
 ## Export the Unreal runtime mesh
 
@@ -135,7 +154,7 @@ powershell -ExecutionPolicy Bypass `
   -File '.\Tools\Unreal\build_and_setup_humanity_trinity_rebuild.ps1'
 ```
 
-The setup script compiles the renamed native module, imports the runtime GLB, applies complex-as-simple collision, and creates or updates:
+The setup script compiles the native module, imports the runtime GLB and its materials, prepares runtime interaction materials, applies complex-as-simple collision, and creates or updates:
 
 ```text
 /Game/HumanityTrinityRebuild/Maps/L_HumanityTrinityRebuildWalkthrough
@@ -143,18 +162,26 @@ The setup script compiles the renamed native module, imports the runtime GLB, ap
 
 ## Lighting and adaptation defaults
 
-- Main lights: 9 rectangular lights, 2600 lm each.
+- Main lights: 8 classroom rectangular lights at 3400 lm / 4500 K, and 1 stage light at 5200 lm / 4000 K.
 - Door-leak residual light: 12 lm, directional and narrow.
-- Display standby residual light: 4 lm, directional.
-- Light-adapted exposure: -3.2 EV.
+- Display standby residual light: 0.6 lm, directional.
+- Light-adapted exposure: -4.7 EV.
 - Dark-adapted target: +1.25 EV.
 - Dark adaptation interpolation speed: 0.16.
 - Bright adaptation interpolation speed: 2.7.
 
 The residual sources are experiential assumptions, not confirmed site fixtures. Setting both residual intensities to zero produces a physically black sealed room; exposure adaptation alone does not create light.
 
+The visible panels and the effective lights are separate for runtime performance: the twenty panels are an approximate visual arrangement, while nine rectangular lights provide illumination. Panel emission follows the associated circuit and reaches zero when that circuit is off. Switching off all four zones triggers the same dark-adaptation behavior as the master switch. Turn the teaching display off as well when evaluating the almost-black classroom; an enabled display is an intentional light source.
+
+Lamp count, color temperature, brightness, circuit assignment, residual light, and adaptation speed are visual tuning parameters. They are not measurements recovered from the photographs.
+
+## Validation and comparison
+
+The runtime self-test exercises the main-light state, extinction of the visible panels, four-zone shutdown, dark/bright adaptation, the actual player-view light-switch trace, and curtain/display interaction. Generated test logs and captures are stored locally under `UnrealProject/Saved`; selected comparison images are kept in `Docs/Previews` for review. A successful result applies to the build and assets used in that run; after geometry or C++ changes, rebuild, reimport, and rerun the checks.
+
 ## Additional views
 
 ![Top view](HumanityTrinityRebuild_TopView.png)
 
-![Perspective toward the teaching wall](HumanityTrinityRebuild_PerspectiveToTeaching.png)
+![Unreal runtime perspective toward the teaching wall](HumanityTrinityRebuild_PerspectiveToTeaching.png)

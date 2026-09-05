@@ -7,7 +7,9 @@
 
 class AHumanityTrinityRebuildLightSwitch;
 class AHumanityTrinityRebuildLightingController;
+class AHumanityTrinityRebuildRoomInteraction;
 class UCameraComponent;
+class UPrimitiveComponent;
 
 UCLASS()
 class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildPlayerCharacter : public ACharacter
@@ -40,11 +42,17 @@ private:
     UPROPERTY()
     TObjectPtr<AHumanityTrinityRebuildLightSwitch> FocusedSwitch;
 
+    UPROPERTY()
+    TObjectPtr<AHumanityTrinityRebuildRoomInteraction> RoomInteraction;
+
+    UPROPERTY()
+    TObjectPtr<UPrimitiveComponent> FocusedRoomComponent;
+
     UPROPERTY(EditAnywhere, Category = "HumanityTrinityRebuild|Interaction")
     float InteractionDistanceCm = 240.0f;
 
     UPROPERTY(EditAnywhere, Category = "HumanityTrinityRebuild|Vision")
-    float LightAdaptedExposure = -3.2f;
+    float LightAdaptedExposure = -4.7f;
 
     UPROPERTY(EditAnywhere, Category = "HumanityTrinityRebuild|Vision")
     float DarkAdaptedExposure = 1.25f;
@@ -63,7 +71,11 @@ private:
     void LookUp(float Value);
     void StartJump();
     void StopJump();
+    void StartSlowWalk();
+    void StopSlowWalk();
     void Interact();
+    void ToggleCurtains();
+    void ToggleScreen();
     void ToggleMasterLights();
     void ToggleFrontZone();
     void ToggleMiddleZone();
@@ -74,4 +86,5 @@ private:
     void UpdateFocusedInteractable();
     void UpdateEyeAdaptation(float DeltaSeconds);
     AHumanityTrinityRebuildLightingController* FindLightingController();
+    AHumanityTrinityRebuildRoomInteraction* FindRoomInteraction();
 };

@@ -1,6 +1,7 @@
 #include "HumanityTrinityRebuildPlayerCharacter.h"
 
 #include "HumanityTrinityRebuildLightSwitch.h"
+#include "HumanityTrinityRebuildRoomInteraction.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/Engine.h"
@@ -26,7 +27,8 @@ AHumanityTrinityRebuildPlayerCharacter::AHumanityTrinityRebuildPlayerCharacter()
     bUseControllerRotationYaw = true;
     bUseControllerRotationRoll = false;
     GetCharacterMovement()->bOrientRotationToMovement = false;
-    GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+    GetCharacterMovement()->MaxWalkSpeed = 240.0f;
+    GetCharacterMovement()->MaxStepHeight = 25.0f;
     GetCharacterMovement()->JumpZVelocity = 420.0f;
     GetCharacterMovement()->AirControl = 0.2f;
 }
@@ -57,15 +59,9 @@ void AHumanityTrinityRebuildPlayerCharacter::BeginPlay()
     Settings.AutoExposureApplyPhysicalCameraExposure = 0;
     Settings.bOverride_AutoExposureBias = 1;
     Settings.AutoExposureBias = CurrentExposure;
+    Settings.bOverride_WhiteTemp = 1;
+    Settings.WhiteTemp = 4500.0f;
 
-    if (GEngine)
-    {
-        GEngine->AddOnScreenDebugMessage(
-            2000,
-            12.0f,
-            FColor::Cyan,
-            TEXT("WASD move | Mouse look | E use switch | L master lights | 1-4 zones"));
-    }
 }
 
 void AHumanityTrinityRebuildPlayerCharacter::Tick(const float DeltaSeconds)
@@ -87,6 +83,10 @@ void AHumanityTrinityRebuildPlayerCharacter::SetupPlayerInputComponent(UInputCom
     PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::StartJump);
     PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &AHumanityTrinityRebuildPlayerCharacter::StopJump);
     PlayerInputComponent->BindAction(TEXT("Interact"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::Interact);
+    PlayerInputComponent->BindAction(TEXT("SlowWalk"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::StartSlowWalk);
+    PlayerInputComponent->BindAction(TEXT("SlowWalk"), IE_Released, this, &AHumanityTrinityRebuildPlayerCharacter::StopSlowWalk);
+    PlayerInputComponent->BindAction(TEXT("ToggleCurtains"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::ToggleCurtains);
+    PlayerInputComponent->BindAction(TEXT("ToggleScreen"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::ToggleScreen);
     PlayerInputComponent->BindAction(TEXT("ToggleMasterLights"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::ToggleMasterLights);
     PlayerInputComponent->BindAction(TEXT("ToggleFrontZone"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::ToggleFrontZone);
     PlayerInputComponent->BindAction(TEXT("ToggleMiddleZone"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::ToggleMiddleZone);
@@ -133,9 +133,40 @@ void AHumanityTrinityRebuildPlayerCharacter::StopJump()
 
 void AHumanityTrinityRebuildPlayerCharacter::Interact()
 {
+    UpdateFocusedInteractable();
     if (FocusedSwitch)
     {
         FocusedSwitch->Interact(this);
+    }
+    else if (RoomInteraction && FocusedRoomComponent)
+    {
+        RoomInteraction->Interact(FocusedRoomComponent);
+    }
+}
+
+void AHumanityTrinityRebuildPlayerCharacter::StartSlowWalk()
+{
+    GetCharacterMovement()->MaxWalkSpeed = 120.0f;
+}
+
+void AHumanityTrinityRebuildPlayerCharacter::StopSlowWalk()
+{
+    GetCharacterMovement()->MaxWalkSpeed = 240.0f;
+}
+
+void AHumanityTrinityRebuildPlayerCharacter::ToggleCurtains()
+{
+    if (AHumanityTrinityRebuildRoomInteraction* Interaction = FindRoomInteraction())
+    {
+        Interaction->ToggleCurtains();
+    }
+}
+
+void AHumanityTrinityRebuildPlayerCharacter::ToggleScreen()
+{
+    if (AHumanityTrinityRebuildRoomInteraction* Interaction = FindRoomInteraction())
+    {
+        Interaction->ToggleScreen();
     }
 }
 
@@ -190,12 +221,18 @@ void AHumanityTrinityRebuildPlayerCharacter::QuitPrototype()
 
 FString AHumanityTrinityRebuildPlayerCharacter::GetCurrentInteractionPrompt() const
 {
-    return FocusedSwitch ? FocusedSwitch->GetInteractionPrompt() : FString();
+    if (FocusedSwitch)
+    {
+        return FocusedSwitch->GetInteractionPrompt();
+    }
+    return RoomInteraction && FocusedRoomComponent
+        ? RoomInteraction->GetInteractionPrompt(FocusedRoomComponent) : FString();
 }
 
 void AHumanityTrinityRebuildPlayerCharacter::UpdateFocusedInteractable()
 {
     FocusedSwitch = nullptr;
+    FocusedRoomComponent = nullptr;
 
     const FVector Start = FirstPersonCamera->GetComponentLocation();
     const FVector End = Start + FirstPersonCamera->GetForwardVector() * InteractionDistanceCm;
@@ -205,15 +242,11 @@ void AHumanityTrinityRebuildPlayerCharacter::UpdateFocusedInteractable()
     if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, QueryParams))
     {
         FocusedSwitch = Cast<AHumanityTrinityRebuildLightSwitch>(Hit.GetActor());
-    }
-
-    if (GEngine)
-    {
-        GEngine->AddOnScreenDebugMessage(
-            2001,
-            0.05f,
-            FColor::Yellow,
-            FocusedSwitch ? FocusedSwitch->GetInteractionPrompt() : TEXT(""));
+        if (AHumanityTrinityRebuildRoomInteraction* Interaction = Cast<AHumanityTrinityRebuildRoomInteraction>(Hit.GetActor()))
+        {
+            RoomInteraction = Interaction;
+            FocusedRoomComponent = Hit.GetComponent();
+        }
     }
 }
 
@@ -221,8 +254,10 @@ void AHumanityTrinityRebuildPlayerCharacter::UpdateEyeAdaptation(const float Del
 {
     AHumanityTrinityRebuildLightingController* LightController = FindLightingController();
     const bool bLightsOn = !LightController || LightController->AreMainLightsOn();
-    const float TargetExposure = bLightsOn ? LightAdaptedExposure : DarkAdaptedExposure;
-    const float AdaptationSpeed = bLightsOn ? BrightAdaptationSpeed : DarkAdaptationSpeed;
+    AHumanityTrinityRebuildRoomInteraction* Interaction = FindRoomInteraction();
+    const bool bScreenOn = Interaction && Interaction->IsScreenOn();
+    const float TargetExposure = bLightsOn ? LightAdaptedExposure : (bScreenOn ? -1.4f : DarkAdaptedExposure);
+    const float AdaptationSpeed = bLightsOn || bScreenOn ? BrightAdaptationSpeed : DarkAdaptationSpeed;
 
     CurrentExposure = FMath::FInterpTo(CurrentExposure, TargetExposure, DeltaSeconds, AdaptationSpeed);
     FirstPersonCamera->PostProcessSettings.AutoExposureBias = CurrentExposure;
@@ -242,4 +277,17 @@ AHumanityTrinityRebuildLightingController* AHumanityTrinityRebuildPlayerCharacte
     }
 
     return LightingController;
+}
+
+AHumanityTrinityRebuildRoomInteraction* AHumanityTrinityRebuildPlayerCharacter::FindRoomInteraction()
+{
+    if (!RoomInteraction)
+    {
+        for (TActorIterator<AHumanityTrinityRebuildRoomInteraction> It(GetWorld()); It; ++It)
+        {
+            RoomInteraction = *It;
+            break;
+        }
+    }
+    return RoomInteraction;
 }

@@ -9,6 +9,7 @@ The source .blend is never saved by this script.
 """
 
 from pathlib import Path
+import math
 import bpy
 
 
@@ -29,6 +30,8 @@ EXCLUDED_COLLECTION_PREFIXES = (
 
 
 def object_is_excluded(obj):
+    if obj.get("runtime_dynamic_curtain", False):
+        return True
     if obj.type in {"LIGHT", "CAMERA"}:
         return True
     for collection in obj.users_collection:
@@ -37,10 +40,42 @@ def object_is_excluded(obj):
     return False
 
 
+def export_curtain_panel():
+    """Unit curtain anchored at its outer lower hem for runtime width animation."""
+    nx, nz = 128, 8
+    vertices = [(ix/nx, .065*math.cos(ix/nx*16*2*math.pi), iz/nz)
+                for iz in range(nz+1) for ix in range(nx+1)]
+    faces = []
+    for iz in range(nz):
+        for ix in range(nx):
+            a=iz*(nx+1)+ix
+            faces.append((a,a+1,a+nx+2,a+nx+1))
+    mesh=bpy.data.meshes.new("SM_CurtainPanel_Mesh")
+    mesh.from_pydata(vertices,[],faces); mesh.update()
+    uv=mesh.uv_layers.new(name="PhotoUV")
+    for poly in mesh.polygons:
+        poly.use_smooth=True
+        for li in poly.loop_indices:
+            co=mesh.vertices[mesh.loops[li].vertex_index].co
+            uv.data[li].uv=(co.x*4,co.z*8)
+    obj=bpy.data.objects.new("SM_CurtainPanel",mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    mesh.materials.append(bpy.data.materials["MAT_Curtain_Burgundy"])
+    solid=obj.modifiers.new("CurtainThickness","SOLIDIFY"); solid.thickness=.006
+    bpy.ops.object.select_all(action="DESELECT")
+    obj.select_set(True); bpy.context.view_layer.objects.active=obj
+    path=OUTPUT_PATH.parent/"SM_CurtainPanel.glb"
+    bpy.ops.export_scene.gltf(filepath=str(path),export_format="GLB",use_selection=True,export_apply=True)
+    bpy.data.objects.remove(obj,do_unlink=True)
+    print("INTERACTIVE_CURTAIN_EXPORT_COMPLETE",path)
+
+
 for obj in bpy.context.scene.objects:
     obj.hide_set(False)
     obj.hide_viewport = False
     obj.hide_render = False
+
+export_curtain_panel()
 
 bpy.ops.object.select_all(action="DESELECT")
 

@@ -6,6 +6,8 @@ level, adds a PlayerStart, and saves all generated assets.
 """
 
 from pathlib import Path
+import json
+import struct
 import unreal
 
 
@@ -87,6 +89,12 @@ def import_environment():
         )
 
     static_mesh.set_editor_property("allow_cpu_access", True)
+    # This entire detailed room is one mesh. Automatic Nanite fallback reduced
+    # it to ~6k triangles on SM5, collapsing chair backs and table frames.
+    # Keep the original triangles on every supported RHI for reliable geometry.
+    nanite = static_mesh.get_editor_property("nanite_settings")
+    nanite.set_editor_property("enabled", False)
+    static_mesh.set_editor_property("nanite_settings", nanite)
     unreal.EditorAssetLibrary.save_loaded_asset(static_mesh, only_if_is_dirty=False)
 
     bounds = static_mesh.get_bounds()
@@ -135,9 +143,141 @@ def create_walkthrough_level():
     log(f"Saved walkthrough level: {LEVEL_PATH}")
 
 
+def create_runtime_materials():
+    """Real emissive graphs: dynamic parameters must be connected, not just named."""
+    editing = unreal.MaterialEditingLibrary
+    for name in ("M_PanelLight", "M_TeachingDisplay"):
+        path = f"/Game/HumanityTrinityRebuild/Materials/{name}"
+        material = unreal.EditorAssetLibrary.load_asset(path) if unreal.EditorAssetLibrary.does_asset_exist(path) else None
+        if material is None:
+            material = unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+                name, "/Game/HumanityTrinityRebuild/Materials", unreal.Material, unreal.MaterialFactoryNew())
+        editing.delete_all_material_expressions(material)
+        color = editing.create_material_expression(material, unreal.MaterialExpressionVectorParameter, -500, 0)
+        color.set_editor_property("parameter_name", "Color")
+        color.set_editor_property("default_value", unreal.LinearColor(.8, .8, .8, 1))
+        intensity = editing.create_material_expression(material, unreal.MaterialExpressionScalarParameter, -500, 180)
+        intensity.set_editor_property("parameter_name", "Emission")
+        intensity.set_editor_property("default_value", 0.0)
+        multiply = editing.create_material_expression(material, unreal.MaterialExpressionMultiply, -200, 130)
+        editing.connect_material_expressions(color, "", multiply, "A")
+        editing.connect_material_expressions(intensity, "", multiply, "B")
+        editing.connect_material_property(color, "", unreal.MaterialProperty.MP_BASE_COLOR)
+        editing.connect_material_property(multiply, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+        rough = editing.create_material_expression(material, unreal.MaterialExpressionConstant, -200, 300)
+        rough.set_editor_property("r", .52 if name == "M_PanelLight" else .26)
+        editing.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+        editing.recompile_material(material)
+        unreal.EditorAssetLibrary.save_loaded_asset(material)
+        log(f"Runtime emissive material ready: {path}")
+
+
+def import_curtain():
+    source = SOURCE_GLB.parent / "SM_CurtainPanel.glb"
+    if not source.exists():
+        raise RuntimeError(f"Missing interactive curtain export: {source}")
+    task = unreal.AssetImportTask()
+    task.set_editor_property("filename", str(source))
+    task.set_editor_property("destination_path", "/Game/HumanityTrinityRebuild/Interactive")
+    task.set_editor_property("destination_name", "SM_CurtainPanel")
+    task.set_editor_property("automated", True)
+    task.set_editor_property("replace_existing", True)
+    task.set_editor_property("save", True)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+    expected = "/Game/HumanityTrinityRebuild/Interactive/SM_CurtainPanel"
+    mesh = unreal.EditorAssetLibrary.load_asset(expected) if unreal.EditorAssetLibrary.does_asset_exist(expected) else None
+    if mesh is None:
+        for path in task.get_editor_property("imported_object_paths"):
+            candidate = unreal.EditorAssetLibrary.load_asset(path)
+            if isinstance(candidate, unreal.StaticMesh):
+                mesh = candidate
+                break
+    if not isinstance(mesh, unreal.StaticMesh):
+        raise RuntimeError("Interactive curtain mesh did not import at its stable asset path")
+    if mesh.get_path_name().split(".")[0] != expected:
+        renamed = unreal.AssetToolsHelpers.get_asset_tools().rename_assets([
+            unreal.AssetRenameData(mesh, "/Game/HumanityTrinityRebuild/Interactive", "SM_CurtainPanel")])
+        if not renamed:
+            raise RuntimeError("Could not normalize the imported curtain mesh path")
+    nanite = mesh.get_editor_property("nanite_settings")
+    nanite.set_editor_property("enabled", False)
+    mesh.set_editor_property("nanite_settings", nanite)
+    unreal.EditorAssetLibrary.save_loaded_asset(mesh)
+    log(f"Curtain bounds: {mesh.get_bounds()}")
+
+
+def bind_portable_surface_materials(source, mesh_path, import_root):
+    """Build explicit PBR graphs; Interchange otherwise reuses old flat materials."""
+    data = source.read_bytes()
+    json_size = struct.unpack_from("<I", data, 12)[0]
+    gltf = json.loads(data[20:20+json_size])
+    editing = unreal.MaterialEditingLibrary
+    mesh = unreal.EditorAssetLibrary.load_asset(mesh_path)
+    materials = {}
+
+    def texture(info):
+        index = gltf["textures"][info["index"]]["source"]
+        name = gltf["images"][index]["name"]
+        path = f"{import_root}/Textures/{name}"
+        asset = unreal.EditorAssetLibrary.load_asset(path)
+        if not isinstance(asset, unreal.Texture2D):
+            raise RuntimeError(f"Missing imported texture: {path}")
+        return asset
+
+    for spec in gltf["materials"]:
+        name = "M_Surface_" + spec["name"].removeprefix("MAT_")
+        folder = "/Game/HumanityTrinityRebuild/Materials/Surfaces"
+        path = folder + "/" + name
+        mat = unreal.EditorAssetLibrary.load_asset(path) if unreal.EditorAssetLibrary.does_asset_exist(path) else None
+        if mat is None:
+            mat = unreal.AssetToolsHelpers.get_asset_tools().create_asset(name, folder, unreal.Material, unreal.MaterialFactoryNew())
+        editing.delete_all_material_expressions(mat)
+        mat.set_editor_property("two_sided", spec.get("doubleSided", False))
+        pbr = spec.get("pbrMetallicRoughness", {})
+        if "baseColorTexture" in pbr:
+            color = editing.create_material_expression(mat, unreal.MaterialExpressionTextureSample, -400, 0)
+            color.set_editor_property("texture", texture(pbr["baseColorTexture"]))
+            editing.connect_material_property(color, "RGB", unreal.MaterialProperty.MP_BASE_COLOR)
+        else:
+            color = editing.create_material_expression(mat, unreal.MaterialExpressionConstant3Vector, -400, 0)
+            rgb = pbr.get("baseColorFactor", [1,1,1,1])
+            color.set_editor_property("constant", unreal.LinearColor(*rgb))
+            editing.connect_material_property(color, "", unreal.MaterialProperty.MP_BASE_COLOR)
+        for key, prop, default in (("roughnessFactor", unreal.MaterialProperty.MP_ROUGHNESS, 1),
+                                   ("metallicFactor", unreal.MaterialProperty.MP_METALLIC, 0)):
+            expr = editing.create_material_expression(mat, unreal.MaterialExpressionConstant, -400, 220 if key.startswith("rough") else 320)
+            expr.set_editor_property("r", pbr.get(key, default))
+            editing.connect_material_property(expr, "", prop)
+        if "normalTexture" in spec:
+            normal = editing.create_material_expression(mat, unreal.MaterialExpressionTextureSample, -400, 420)
+            normal.set_editor_property("texture", texture(spec["normalTexture"]))
+            normal.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL)
+            editing.connect_material_property(normal, "RGB", unreal.MaterialProperty.MP_NORMAL)
+        editing.recompile_material(mat)
+        unreal.EditorAssetLibrary.save_loaded_asset(mat)
+        materials[spec["name"]] = mat
+
+    for index, slot in enumerate(mesh.get_editor_property("static_materials")):
+        imported_name = str(slot.get_editor_property("imported_material_slot_name"))
+        existing = slot.get_editor_property("material_interface")
+        source_name = imported_name if imported_name in materials else (existing.get_name() if existing else "")
+        if source_name not in materials:
+            raise RuntimeError(f"Unmatched material slot: {source_name}")
+        mesh.set_material(index, materials[source_name])
+    unreal.EditorAssetLibrary.save_loaded_asset(mesh)
+    log(f"Explicit PBR binding ready: {mesh_path}, {len(materials)} materials")
+
+
 def main():
     log(f"Project directory: {PROJECT_DIR}")
     mesh = import_environment()
+    import_curtain()
+    create_runtime_materials()
+    bind_portable_surface_materials(SOURCE_GLB, EXPECTED_MESH_PATH,
+        DESTINATION_PATH + "/HumanityTrinityRebuildEnvironment_Runtime")
+    bind_portable_surface_materials(SOURCE_GLB.parent / "SM_CurtainPanel.glb",
+        "/Game/HumanityTrinityRebuild/Interactive/SM_CurtainPanel",
+        "/Game/HumanityTrinityRebuild/Interactive/SM_CurtainPanel")
     create_walkthrough_level()
     log(f"SETUP_COMPLETE mesh={mesh.get_path_name()} level={LEVEL_PATH}")
 
