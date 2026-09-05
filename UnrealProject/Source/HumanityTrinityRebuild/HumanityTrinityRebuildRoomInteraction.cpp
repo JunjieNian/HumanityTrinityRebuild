@@ -1,4 +1,6 @@
 #include "HumanityTrinityRebuildRoomInteraction.h"
+#include "HumanityTrinityRebuildDoorLayout.h"
+#include "Engine/World.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/RectLightComponent.h"
@@ -40,6 +42,29 @@ AHumanityTrinityRebuildRoomInteraction::AHumanityTrinityRebuildRoomInteraction()
         TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
     UStaticMesh* Cube = CubeFinder.Succeeded() ? CubeFinder.Object : nullptr;
     UMaterialInterface* BasicMaterial = BasicMaterialFinder.Succeeded() ? BasicMaterialFinder.Object : nullptr;
+
+    for (int32 Index = 0; Index < 2; ++Index)
+    {
+        const FHumanityPropDoorSpec& Spec = HumanityPropDoors[Index];
+        USceneComponent* Pivot = CreateDefaultSubobject<USceneComponent>(*FString::Printf(TEXT("PropDoorPivot%d"), Index));
+        Pivot->SetupAttachment(SceneRoot);
+        Pivot->SetRelativeLocation(Spec.Hinge);
+        Pivot->SetRelativeRotation(FRotator(0, Spec.Yaw, 0));
+        UStaticMeshComponent* Leaf = CreateDefaultSubobject<UStaticMeshComponent>(*FString::Printf(TEXT("PropDoorLeaf%d"), Index));
+        Leaf->SetupAttachment(Pivot);
+        Leaf->SetStaticMesh(Cube);
+        Leaf->SetMobility(EComponentMobility::Movable);
+        Leaf->SetRelativeLocation(FVector(Spec.Width/2, 0, Spec.Height/2));
+        Leaf->SetRelativeScale3D(FVector(Spec.Width, Spec.Thickness, Spec.Height)/100.0f);
+        Leaf->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        Leaf->SetCollisionResponseToAllChannels(ECR_Block);
+        Leaf->CanCharacterStepUpOn = ECB_No;
+        PropDoorPivots.Add(Pivot);
+        PropDoorLeaves.Add(Leaf);
+        PropDoorFractions.Add(0.0f);
+        PropDoorTargets.Add(false);
+
+    }
 
     ScreenFace = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TeachingDisplay"));
     ScreenFace->SetupAttachment(SceneRoot);
@@ -129,6 +154,12 @@ void AHumanityTrinityRebuildRoomInteraction::BeginPlay()
     }
     ScreenMaterial = ScreenFace->CreateAndSetMaterialInstanceDynamic(0);
     ControlMaterial = ScreenControl->CreateAndSetMaterialInstanceDynamic(0);
+    UMaterialInterface* Wood = LoadObject<UMaterialInterface>(nullptr,
+        TEXT("/Game/HumanityTrinityRebuild/Materials/Surfaces/M_Surface_Acoustic_WarmOak.M_Surface_Acoustic_WarmOak"));
+    for (UStaticMeshComponent* Leaf : PropDoorLeaves)
+    {
+        Leaf->SetMaterial(0, Wood);
+    }
     UpdateCurtainGeometry();
     SetScreenOn(false);
 }
@@ -136,6 +167,25 @@ void AHumanityTrinityRebuildRoomInteraction::BeginPlay()
 void AHumanityTrinityRebuildRoomInteraction::Tick(const float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    for (int32 Index = 0; Index < PropDoorLeaves.Num(); ++Index)
+    {
+        const FHumanityPropDoorSpec& Spec = HumanityPropDoors[Index];
+        const float Next = FMath::FInterpConstantTo(PropDoorFractions[Index], PropDoorTargets[Index] ? 1.0f : 0.0f,
+            DeltaSeconds, 1.0f);
+        const FQuat Rotation = FRotator(0, Spec.Yaw + Spec.Swing*FMath::SmoothStep(0.0f,1.0f,Next), 0).Quaternion();
+        const FVector Centre = Spec.Hinge + Rotation.RotateVector(FVector(Spec.Width/2,0,Spec.Height/2));
+        // Pause the leaf when the visitor occupies its next position; closing a
+        // concealed door must never sweep the player through the partition.
+        FCollisionObjectQueryParams Objects;
+        Objects.AddObjectTypesToQuery(ECC_Pawn);
+        FCollisionQueryParams Query(SCENE_QUERY_STAT(PropDoorVisitor), false, this);
+        if (!GetWorld()->OverlapAnyTestByObjectType(Centre, Rotation, Objects,
+            FCollisionShape::MakeBox(FVector(Spec.Width/2,Spec.Thickness/2+2,Spec.Height/2)), Query))
+        {
+            PropDoorFractions[Index] = Next;
+            PropDoorPivots[Index]->SetRelativeRotation(Rotation);
+        }
+    }
     const float Target = bCurtainsTargetOpen ? 1.0f : 0.0f;
     if (!FMath::IsNearlyEqual(CurtainOpenFraction, Target))
     {
@@ -214,6 +264,11 @@ bool AHumanityTrinityRebuildRoomInteraction::IsScreenComponent(const UPrimitiveC
 
 FString AHumanityTrinityRebuildRoomInteraction::GetInteractionPrompt(const UPrimitiveComponent* Component) const
 {
+    const int32 DoorIndex = GetPropDoorIndex(Component);
+    if (DoorIndex != INDEX_NONE)
+    {
+        return PropDoorTargets[DoorIndex] ? TEXT("E - Close concealed prop-room door") : TEXT("E - Open concealed prop-room door");
+    }
     if (IsCurtainComponent(Component))
     {
         return bCurtainsTargetOpen ? TEXT("E - Close stage curtains") : TEXT("E - Open stage curtains");
@@ -227,6 +282,11 @@ FString AHumanityTrinityRebuildRoomInteraction::GetInteractionPrompt(const UPrim
 
 void AHumanityTrinityRebuildRoomInteraction::Interact(UPrimitiveComponent* Component)
 {
+    const int32 DoorIndex = GetPropDoorIndex(Component);
+    if (DoorIndex != INDEX_NONE)
+    {
+        SetPropDoorOpen(DoorIndex, !PropDoorTargets[DoorIndex]);
+    }
     if (IsCurtainComponent(Component))
     {
         ToggleCurtains();
@@ -235,4 +295,23 @@ void AHumanityTrinityRebuildRoomInteraction::Interact(UPrimitiveComponent* Compo
     {
         ToggleScreen();
     }
+}
+
+int32 AHumanityTrinityRebuildRoomInteraction::GetPropDoorIndex(const UPrimitiveComponent* Component) const
+{
+    for (int32 Index = 0; Index < PropDoorLeaves.Num(); ++Index)
+    {
+        if (Component == PropDoorLeaves[Index]) return Index;
+    }
+    return INDEX_NONE;
+}
+
+void AHumanityTrinityRebuildRoomInteraction::SetPropDoorOpen(int32 Index, bool bOpen)
+{
+    if (PropDoorTargets.IsValidIndex(Index)) PropDoorTargets[Index] = bOpen;
+}
+
+float AHumanityTrinityRebuildRoomInteraction::GetPropDoorOpenFraction(int32 Index) const
+{
+    return PropDoorFractions.IsValidIndex(Index) ? PropDoorFractions[Index] : -1.0f;
 }

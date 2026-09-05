@@ -77,6 +77,24 @@ AHumanityTrinityRebuildLightingController::AHumanityTrinityRebuildLightingContro
         Light->SetCastShadows(true);
         MainLights.Add(Light);
         MainLightZones.Add(Spec.Zone);
+
+        // Approximate diffuse room bounce independently of screen-space GI.
+        // Looking up from a table can otherwise lose all ceiling illumination
+        // when the lit floor leaves the screen. Every fill follows its circuit.
+        URectLightComponent* Bounce = CreateDefaultSubobject<URectLightComponent>(
+            *FString::Printf(TEXT("CeilingBounce_%s"), Spec.Name));
+        Bounce->SetupAttachment(SceneRoot);
+        Bounce->SetRelativeLocation(FVector(Spec.Location.X, Spec.Location.Y, 205.0f));
+        Bounce->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
+        Bounce->SetMobility(EComponentMobility::Movable);
+        Bounce->SetIntensityUnits(ELightUnits::Lumens);
+        Bounce->SetSourceWidth(300.0f);
+        Bounce->SetSourceHeight(250.0f);
+        Bounce->SetAttenuationRadius(650.0f);
+        Bounce->SetUseTemperature(true);
+        Bounce->SetCastShadows(true);
+        Bounce->SetIndirectLightingIntensity(0.0f);
+        CeilingBounceLights.Add(Bounce);
     }
 
     static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeFinder(TEXT("/Engine/BasicShapes/Cube.Cube"));
@@ -292,6 +310,14 @@ int32 AHumanityTrinityRebuildLightingController::GetActiveResidualLightCount() c
     return Count;
 }
 
+int32 AHumanityTrinityRebuildLightingController::GetActiveCeilingBounceCount() const
+{
+    int32 Count = 0;
+    for (const URectLightComponent* Light : CeilingBounceLights)
+        if (Light && Light->IsVisible() && Light->Intensity > 0.0f) ++Count;
+    return Count;
+}
+
 bool& AHumanityTrinityRebuildLightingController::GetMutableZoneState(const EHumanityTrinityRebuildLightZone Zone)
 {
     switch (Zone)
@@ -316,6 +342,10 @@ void AHumanityTrinityRebuildLightingController::ApplyLightingState()
             Light->SetIntensity(bEnabled ? CircuitIntensity : 0.0f);
             Light->SetTemperature(bIsStage ? StageTemperatureKelvin : ClassroomTemperatureKelvin);
             Light->SetVisibility(bEnabled, true);
+            URectLightComponent* Bounce = CeilingBounceLights[Index];
+            Bounce->SetIntensity(bEnabled ? CircuitIntensity*CeilingBounceFraction : 0.0f);
+            Bounce->SetTemperature(bIsStage ? StageTemperatureKelvin : ClassroomTemperatureKelvin);
+            Bounce->SetVisibility(bEnabled, true);
         }
     }
 

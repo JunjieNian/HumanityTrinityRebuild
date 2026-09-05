@@ -42,6 +42,9 @@ public:
     bool IsScreenComponent(const UPrimitiveComponent* Component) const;
     FString GetInteractionPrompt(const UPrimitiveComponent* Component) const;
     void Interact(UPrimitiveComponent* Component);
+    int32 GetPropDoorIndex(const UPrimitiveComponent* Component) const;
+    void SetPropDoorOpen(int32 Index, bool bOpen);
+    float GetPropDoorOpenFraction(int32 Index) const;
 
     UPROPERTY(EditAnywhere, Category = "HumanityTrinityRebuild|Curtains", meta = (ClampMin = "0.2"))
     float CurtainTravelSeconds = 2.4f;
@@ -60,6 +63,10 @@ private:
     UPROPERTY() TObjectPtr<URectLightComponent> ScreenLight;
     UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> ScreenMaterial;
     UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> ControlMaterial;
+    UPROPERTY() TArray<TObjectPtr<USceneComponent>> PropDoorPivots;
+    UPROPERTY() TArray<TObjectPtr<UStaticMeshComponent>> PropDoorLeaves;
+    TArray<float> PropDoorFractions;
+    TArray<bool> PropDoorTargets;
 
     bool bCurtainsTargetOpen = true;
     bool bScreenOn = false;

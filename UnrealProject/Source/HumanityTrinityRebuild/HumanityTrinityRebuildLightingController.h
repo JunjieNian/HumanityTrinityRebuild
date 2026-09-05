@@ -53,6 +53,9 @@ public:
     int32 GetActiveResidualLightCount() const;
 
     int32 GetEmittingPanelCount() const;
+    int32 GetActiveCeilingBounceCount() const;
+    UPROPERTY(EditAnywhere, Category = "HumanityTrinityRebuild|Lighting", meta = (ClampMin = "0.0"))
+    float CeilingBounceFraction = 0.12f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HumanityTrinityRebuild|Lighting")
     bool bMasterLightsOn = true;
@@ -87,6 +90,7 @@ private:
 
     UPROPERTY(VisibleAnywhere, Category = "HumanityTrinityRebuild|Lighting")
     TArray<TObjectPtr<URectLightComponent>> MainLights;
+    UPROPERTY() TArray<TObjectPtr<URectLightComponent>> CeilingBounceLights;
 
     UPROPERTY(VisibleAnywhere, Category = "HumanityTrinityRebuild|Lighting")
     TArray<TObjectPtr<URectLightComponent>> ResidualLights;

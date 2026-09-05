@@ -6,6 +6,8 @@
 #include "HumanityTrinityRebuildLightingController.h"
 #include "HumanityTrinityRebuildPlayerCharacter.h"
 #include "HumanityTrinityRebuildRoomInteraction.h"
+#include "HumanityTrinityRebuildDoorLayout.h"
+#include "Components/CapsuleComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -124,13 +126,19 @@ void AHumanityTrinityRebuildGameMode::StartSelfTest()
         SelfTestPlayer->GetCurrentExposure());
 
     bSelfTestPassed &= SelfTestRoom->HasCurtainMesh() && !SelfTestRoom->IsScreenOn();
+    if (FParse::Param(FCommandLine::Get(), TEXT("HumanityTrinityRebuildDoorTest")))
+    {
+        SelfTestPreparePropDoor();
+        return;
+    }
     const bool bPanelsInitiallyOn = SelfTestLighting->GetEmittingPanelCount() == 20;
     for (const EHumanityTrinityRebuildLightZone Zone : {EHumanityTrinityRebuildLightZone::Front,
         EHumanityTrinityRebuildLightZone::Middle, EHumanityTrinityRebuildLightZone::Rear, EHumanityTrinityRebuildLightZone::Stage})
     {
         SelfTestLighting->SetZoneEnabled(Zone, false);
     }
-    const bool bZonesDark = !SelfTestLighting->AreMainLightsOn() && SelfTestLighting->GetEmittingPanelCount() == 0;
+    const bool bZonesDark = !SelfTestLighting->AreMainLightsOn() && SelfTestLighting->GetEmittingPanelCount() == 0
+        && SelfTestLighting->GetActiveCeilingBounceCount() == 0;
     SelfTestLighting->ToggleMaster();
     const bool bMasterRecovered = SelfTestLighting->GetActiveMainLightCount() == 9 && SelfTestLighting->GetEmittingPanelCount() == 20;
     bSelfTestPassed &= bPanelsInitiallyOn && bZonesDark && bMasterRecovered;
@@ -162,6 +170,7 @@ void AHumanityTrinityRebuildGameMode::SelfTestSwitchOff()
     bSelfTestPassed &= MainAfterOff == 0;
     bSelfTestPassed &= ResidualAfterOff == 2;
     bSelfTestPassed &= SelfTestLighting->GetEmittingPanelCount() == 0;
+    bSelfTestPassed &= SelfTestLighting->GetActiveCeilingBounceCount() == 0;
 
     UE_LOG(
         LogTemp,
@@ -425,7 +434,155 @@ void AHumanityTrinityRebuildGameMode::SelfTestValidateScreenOff()
     const bool bScreenOff = !SelfTestRoom->IsScreenOn() && !SelfTestRoom->IsScreenIlluminating();
     bSelfTestPassed &= bScreenOff;
     UE_LOG(LogTemp, Display, TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] SCREEN_OFF %s"), bScreenOff ? TEXT("PASS") : TEXT("FAIL"));
-    SelfTestReportResult();
+    SelfTestPrepareCeilingView();
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestPrepareCeilingView()
+{
+    SelfTestPlayer->SetActorLocation(FVector(-80,-465,169), false, nullptr, ETeleportType::TeleportPhysics);
+    SelfTestPlayer->GetController()->SetControlRotation(FRotator(48,-80,0));
+    FTimerHandle Timer;
+    GetWorldTimerManager().SetTimer(Timer,this,&AHumanityTrinityRebuildGameMode::SelfTestCaptureCeilingView,2.0f,false);
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestCaptureCeilingView()
+{
+    FVector View; FRotator Rotation;
+    UGameplayStatics::GetPlayerController(this,0)->GetPlayerViewPoint(View,Rotation);
+    FHitResult Support;
+    FCollisionQueryParams Query(SCENE_QUERY_STAT(TableSupport),false,SelfTestPlayer);
+    const FVector Position = SelfTestPlayer->GetActorLocation();
+    const bool bSupport = GetWorld()->LineTraceSingleByChannel(Support,Position,Position-FVector(0,0,120),ECC_Visibility,Query);
+    const float FootGap = Position.Z-SelfTestPlayer->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()-Support.ImpactPoint.Z;
+    const bool bOnTable = bSupport && FMath::IsNearlyEqual(Support.ImpactPoint.Z,76.0f,1.0f) && FootGap>=0 && FootGap<3;
+    bSelfTestPassed &= bOnTable && View.Z < 250.0f && SelfTestLighting->GetActiveCeilingBounceCount()==9;
+    UE_LOG(LogTemp,Display,TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] TABLE_VIEW on_table=%s eye_z=%.1f ceiling_clearance=%.1f bounce=%d"),
+        bOnTable?TEXT("yes"):TEXT("no"),View.Z,340.0f-View.Z,SelfTestLighting->GetActiveCeilingBounceCount());
+    CaptureSelfTestScreenshot(TEXT("HumanityTrinityRebuild_08_TableCeiling.png"));
+    FTimerHandle Timer;
+    GetWorldTimerManager().SetTimer(Timer,[this]() {
+        SelfTestPlayer->SetActorLocation(FVector(-162,-390,96),false,nullptr,ETeleportType::TeleportPhysics);
+        SelfTestPlayer->GetController()->SetControlRotation(FRotator(-32,-90,0));
+        FTimerHandle Next;
+        GetWorldTimerManager().SetTimer(Next,this,&AHumanityTrinityRebuildGameMode::SelfTestCaptureChairView,1.5f,false);
+    },0.7f,false);
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestCaptureChairView()
+{
+    CaptureSelfTestScreenshot(TEXT("HumanityTrinityRebuild_09_ChairClearance.png"));
+    FTimerHandle Timer;
+    GetWorldTimerManager().SetTimer(Timer,this,&AHumanityTrinityRebuildGameMode::SelfTestPreparePropDoor,0.7f,false);
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestPreparePropDoor()
+{
+    const auto& Spec = HumanityPropDoors[SelfTestDoorIndex];
+    const FVector Centre = Spec.Hinge + FRotator(0,Spec.Yaw,0).RotateVector(FVector(Spec.Width/2,0,0));
+    SelfTestPlayer->SetActorLocation(Centre+Spec.StageNormal*200+FVector(0,0,94),false,nullptr,ETeleportType::TeleportPhysics);
+    const FVector Aim = Centre+FVector(0,0,Spec.Height*.55f);
+    SelfTestPlayer->GetController()->SetControlRotation((Aim-(SelfTestPlayer->GetActorLocation()+FVector(0,0,66))).Rotation());
+    FTimerHandle Timer;
+    GetWorldTimerManager().SetTimer(Timer,this,&AHumanityTrinityRebuildGameMode::SelfTestOpenPropDoor,1.5f,false);
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestOpenPropDoor()
+{
+    CaptureSelfTestScreenshot(FString::Printf(TEXT("HumanityTrinityRebuild_10_PropDoor%d_Closed.png"),SelfTestDoorIndex));
+    FVector View; FRotator Rotation;
+    UGameplayStatics::GetPlayerController(this,0)->GetPlayerViewPoint(View,Rotation);
+    FHitResult Hit;
+    FCollisionQueryParams Query(SCENE_QUERY_STAT(PropDoorUse),false,SelfTestPlayer);
+    const bool bHit = GetWorld()->LineTraceSingleByChannel(Hit,View,View+Rotation.Vector()*240,ECC_Visibility,Query);
+    const bool bDoor = bHit && Hit.GetActor()==SelfTestRoom && SelfTestRoom->GetPropDoorIndex(Hit.GetComponent())==SelfTestDoorIndex;
+    bSelfTestPassed &= bDoor;
+    UE_LOG(LogTemp,Display,TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR%d trace=%s"),SelfTestDoorIndex,bDoor?TEXT("PASS"):TEXT("FAIL"));
+    UPrimitiveComponent* Target = Hit.GetComponent();
+    FTimerHandle Timer;
+    GetWorldTimerManager().SetTimer(Timer,[this,bDoor,Target]() {
+        if (bDoor) SelfTestRoom->Interact(Target);
+        else SelfTestRoom->SetPropDoorOpen(SelfTestDoorIndex,true);
+        FTimerHandle Next;
+        GetWorldTimerManager().SetTimer(Next,this,&AHumanityTrinityRebuildGameMode::SelfTestValidatePropDoorOpen,1.7f,false);
+    },0.6f,false);
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestValidatePropDoorOpen()
+{
+    const bool bOpen = SelfTestRoom->GetPropDoorOpenFraction(SelfTestDoorIndex)>.99f;
+    bSelfTestPassed &= bOpen;
+    UE_LOG(LogTemp,Display,TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR%d open=%s"),SelfTestDoorIndex,bOpen?TEXT("PASS"):TEXT("FAIL"));
+    CaptureSelfTestScreenshot(FString::Printf(TEXT("HumanityTrinityRebuild_11_PropDoor%d_Open.png"),SelfTestDoorIndex));
+    FTimerHandle Timer;
+    GetWorldTimerManager().SetTimer(Timer,this,&AHumanityTrinityRebuildGameMode::SelfTestEnterPropRoom,0.7f,false);
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestEnterPropRoom()
+{
+    const auto& Spec = HumanityPropDoors[SelfTestDoorIndex];
+    const FVector Centre = Spec.Hinge+FRotator(0,Spec.Yaw,0).RotateVector(FVector(Spec.Width/2,0,0));
+    // Sweep the actual player capsule through the hole, including the threshold.
+    SelfTestPlayer->SetActorLocation(Centre+Spec.StageNormal*80+FVector(0,0,94),false,nullptr,ETeleportType::TeleportPhysics);
+    FHitResult Hit;
+    SelfTestPlayer->SetActorLocation(Centre-Spec.StageNormal*85+FVector(0,0,94),true,&Hit);
+    const bool bEntered = !Hit.bBlockingHit && FVector::DotProduct(SelfTestPlayer->GetActorLocation()-Centre,Spec.StageNormal)<-70;
+    bSelfTestPassed &= bEntered;
+    UE_LOG(LogTemp,Display,TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR%d capsule_entry=%s blocker=%s"),SelfTestDoorIndex,
+        bEntered?TEXT("PASS"):TEXT("FAIL"),Hit.GetActor()?*Hit.GetActor()->GetName():TEXT("none"));
+    FTimerHandle Timer;
+    GetWorldTimerManager().SetTimer(Timer,this,&AHumanityTrinityRebuildGameMode::SelfTestExitPropRoom,1.0f,false);
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestExitPropRoom()
+{
+    const auto& Spec = HumanityPropDoors[SelfTestDoorIndex];
+    const FVector Centre = Spec.Hinge+FRotator(0,Spec.Yaw,0).RotateVector(FVector(Spec.Width/2,0,0));
+    SelfTestPlayer->GetController()->SetControlRotation(Spec.StageNormal.Rotation());
+    // Walk from the lower interior floor up both transitions with the real
+    // character movement component: no teleport, raised capsule or jump.
+    bSelfTestWalking = true;
+    SelfTestWalkInput();
+    FTimerHandle Timer;
+    GetWorldTimerManager().SetTimer(Timer,this,&AHumanityTrinityRebuildGameMode::SelfTestFinishPropWalkOut,1.2f,false);
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestFinishPropWalkOut()
+{
+    bSelfTestWalking = false;
+    const auto& Spec = HumanityPropDoors[SelfTestDoorIndex];
+    const FVector Centre = Spec.Hinge+FRotator(0,Spec.Yaw,0).RotateVector(FVector(Spec.Width/2,0,0));
+    const float Distance = FVector::DotProduct(SelfTestPlayer->GetActorLocation()-Centre,Spec.StageNormal);
+    const bool bExited = Distance>60 && SelfTestPlayer->GetActorLocation().Z>132;
+    bSelfTestPassed &= bExited;
+    UE_LOG(LogTemp,Display,TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR%d walk_up_steps=%s distance=%.1f z=%.1f"),
+        SelfTestDoorIndex,bExited?TEXT("PASS"):TEXT("FAIL"),Distance,SelfTestPlayer->GetActorLocation().Z);
+    SelfTestRoom->SetPropDoorOpen(SelfTestDoorIndex,false);
+    FTimerHandle Timer;
+    GetWorldTimerManager().SetTimer(Timer,this,&AHumanityTrinityRebuildGameMode::SelfTestValidatePropDoorClosed,1.7f,false);
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestWalkInput()
+{
+    if (!bSelfTestWalking) return;
+    // Movement input is consumed every frame, like a held W key. A fixed-rate
+    // timer leaves empty frames and causes braking on high-refresh systems.
+    SelfTestPlayer->AddMovementInput(HumanityPropDoors[SelfTestDoorIndex].StageNormal);
+    GetWorldTimerManager().SetTimerForNextTick(this,&AHumanityTrinityRebuildGameMode::SelfTestWalkInput);
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestValidatePropDoorClosed()
+{
+    const auto& Spec = HumanityPropDoors[SelfTestDoorIndex];
+    const FVector Centre = Spec.Hinge+FRotator(0,Spec.Yaw,0).RotateVector(FVector(Spec.Width/2,0,94));
+    FHitResult Hit;
+    FCollisionQueryParams Query(SCENE_QUERY_STAT(PropDoorClosed),false,SelfTestPlayer);
+    const bool bHit = GetWorld()->SweepSingleByChannel(Hit,Centre+Spec.StageNormal*80,Centre-Spec.StageNormal*80,
+        FQuat::Identity,ECC_Pawn,FCollisionShape::MakeCapsule(34,92),Query);
+    const bool bClosed = SelfTestRoom->GetPropDoorOpenFraction(SelfTestDoorIndex)<.01f && bHit && Hit.GetActor()==SelfTestRoom;
+    bSelfTestPassed &= bClosed;
+    UE_LOG(LogTemp,Display,TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR%d closed_blocks=%s"),SelfTestDoorIndex,bClosed?TEXT("PASS"):TEXT("FAIL"));
+    if (++SelfTestDoorIndex<2) SelfTestPreparePropDoor();
+    else SelfTestReportResult();
 }
 
 void AHumanityTrinityRebuildGameMode::SelfTestReportResult()

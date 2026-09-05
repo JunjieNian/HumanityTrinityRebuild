@@ -17,6 +17,8 @@ An editable Blender reconstruction and Unreal Engine interactive walkthrough of 
 - Twenty visible ceiling panels, synchronized with nine movable lights in four independently switchable zones.
 - A wall-mounted light switch operated with a camera-center visibility trace.
 - Animated curtain opening/closing and a separately switchable teaching display, with close-range controls.
+- Two flush wooden doors in the sloping stage walls, opening into the prop rooms with E.
+- Checked chair clearances and circuit-linked ceiling bounce for stable lighting when looking up from a tabletop.
 - Slow dark adaptation and faster bright adaptation through manual exposure control.
 - Directional door-leak and display-standby residual light assumptions for the almost-black state.
 - Complex collision for the imported classroom, furniture, stage, shelves, and walls.
@@ -83,7 +85,7 @@ If Unreal is elsewhere, set `UE_ROOT` to the UE_5.7 directory before running the
 | Mouse | Look |
 | Space | Jump |
 | Shift (hold) | Walk slowly for close inspection |
-| E | Use the targeted nearby light, curtain, or display control |
+| E | Use a nearby light switch, curtain, display control, or concealed prop-room door |
 | L | Toggle all main lights from anywhere for comparison/debugging |
 | C | Open/close the curtains smoothly |
 | P | Toggle the teaching display |
@@ -172,6 +174,10 @@ The residual sources are experiential assumptions, not confirmed site fixtures. 
 
 The visible panels and the effective lights are separate for runtime performance: the twenty panels are an approximate visual arrangement, while nine rectangular lights provide illumination. Panel emission follows the associated circuit and reaches zero when that circuit is off. Switching off all four zones triggers the same dark-adaptation behavior as the master switch. Turn the teaching display off as well when evaluating the almost-black classroom; an enabled display is an intentional light source.
 
+Nine upward-facing fill lights approximate diffuse reflection onto the ceiling at 12% of each main light's output. They follow their circuit and turn fully off with it; this stabilizes the ceiling when the lit floor is outside the camera view. They represent reflected light, not additional physical fixtures. The room height remains 3.4 m; the tabletop is 0.76 m high and standing eye height is approximately 1.58 m above the support surface.
+
+Both sloping stage partitions have real door openings with flush leaves using the same wood-panel material. Approach a leaf and press E to open or close it. The moving leaf pauses if a visitor occupies its path. Door dimensions and hinge positions are editable in the Blender generator's `PROP_DOOR_*` parameters; the runtime exporter generates `HumanityTrinityRebuildDoorLayout.h` to keep the doors aligned with their openings. The inner 21 cm transition steps and hinge directions are provisional.
+
 Lamp count, color temperature, brightness, circuit assignment, residual light, and adaptation speed are visual tuning parameters. They are not measurements recovered from the photographs.
 
 ## Validation and comparison
@@ -179,6 +185,8 @@ Lamp count, color temperature, brightness, circuit assignment, residual light, a
 The runtime self-test exercises the main-light state, extinction of the visible panels, four-zone shutdown, dark/bright adaptation, the actual player-view light-switch trace, and curtain/display interaction. Generated test logs and captures are stored locally under `UnrealProject/Saved`; selected comparison images are kept in `Docs/Previews` for review. A successful result applies to the build and assets used in that run; after geometry or C++ changes, rebuild, reimport, and rerun the checks.
 
 ## Additional views
+
+Close-up checks: [chair spacing](Docs/Previews/HumanityTrinityRebuild_09_ChairClearance.png), [ceiling from a tabletop](Docs/Previews/HumanityTrinityRebuild_08_TableCeiling.png), and the concealed prop-room door [closed](Docs/Previews/HumanityTrinityRebuild_10_PropDoor0_Closed.png) / [open](Docs/Previews/HumanityTrinityRebuild_11_PropDoor0_Open.png).
 
 ![Top view](HumanityTrinityRebuild_TopView.png)
 

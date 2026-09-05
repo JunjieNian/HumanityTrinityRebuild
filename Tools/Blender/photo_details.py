@@ -177,7 +177,8 @@ for cy in P["TABLE_CLUSTER_Y"]:
             add_wall_between(label+"_ModestyPanel",ends[0][:2],ends[1][:2],.02,.39,MAT["shelf"],DETAIL,z0=.27)
             sx=cx+P["CHAIR_RADIUS"]*math.cos(a); sy=cy+P["CHAIR_RADIUS"]*math.sin(a)
             # Tiny, deterministic chair offsets avoid an unrealistically rigid array.
-            sx+=.035*math.sin(cluster*3+k); sy+=.035*math.cos(cluster+k*2)
+            sx+=P["CHAIR_POSITION_JITTER"]*math.sin(cluster*3+k)
+            sy+=P["CHAIR_POSITION_JITTER"]*math.cos(cluster+k*2)
             chair(f"PhotoChair_{cluster}_{k}",sx,sy,a+.04*math.sin(k+cluster),cluster+k)
 
 # Continuous lower tread: 21 cm + 21 cm, matching the two levels in the photos.
@@ -201,6 +202,45 @@ for x in (-4,0,4):
 # Warm panel finish on the rear stage envelope and teaching wall.
 for obj in (left_slant,right_slant,left_front_prop_wall,right_front_prop_wall):
     obj.data.materials.clear(); obj.data.materials.append(MAT["panel_wood"])
+
+# Real openings in both sloping partitions, with flush matching wooden leaves.
+# The editable leaves stay in Blender; the runtime exporter excludes them and
+# exports their hinge geometry to C++ so interaction cannot drift from the holes.
+door_specs = []
+for side, old_wall in ((-1,left_slant),(1,right_slant)):
+    bpy.data.objects.remove(old_wall, do_unlink=True)
+    start = Vector((side*long_half, stage_y0))
+    finish = Vector((side*short_half, L))
+    tangent = (finish-start).normalized()
+    normal = Vector((-side*tangent.y,side*tangent.x))  # toward the stage
+    length = (finish-start).length
+    offset, width = P["PROP_DOOR_START"], P["PROP_DOOR_WIDTH"]
+    height, gap = P["PROP_DOOR_HEIGHT"], P["PROP_DOOR_GAP"]
+    base, thickness = P["STAGE_HEIGHT"], P["PROP_DOOR_THICKNESS"]
+    assert offset > .10 and offset+width < length-.10 and base+height < H
+    a, b = start+tangent*offset, start+tangent*(offset+width)
+    for label,p0,p1,z0,z1 in (("Front",start,a,0,H),("Rear",b,finish,0,H),
+                             ("Header",a,b,base+height,H),("Sill",a,b,0,base)):
+        add_wall_between(f"PropDoor{side}_{label}",p0,p1,T,z1-z0,MAT["panel_wood"],COL["stage"],z0=z0)
+    pivot = a+normal*(T/2-thickness/2)+tangent*gap
+    leaf_end = pivot+tangent*(width-2*gap)
+    leaf = add_wall_between(f"PropDoor{side}_FlushLeaf",pivot,leaf_end,thickness,height-2*gap,
+                           MAT["panel_wood"],COL["stage"],z0=base+gap)
+    leaf["runtime_dynamic_prop_door"] = True
+    # A narrow shadow gap is the only front detail, as visible in the reference.
+    step_mid = (a+b)*.5-normal*(T/2+.23)
+    box(f"PropDoor{side}_InteriorStep",(width,.46,.21),(*step_mid,.105),
+        "stage_wood",.003,angle=math.atan2(tangent.y,tangent.x))
+    world_pivot = mirror_location((pivot.x,pivot.y,base+gap))
+    ue_tangent = Vector((MODEL_X_SIGN*tangent.x,-tangent.y))
+    ue_normal = Vector((MODEL_X_SIGN*normal.x,-normal.y))
+    import json
+    door_specs.append(dict(hinge=[world_pivot[0]*100,-world_pivot[1]*100,world_pivot[2]*100],
+        yaw=math.degrees(math.atan2(ue_tangent.y,ue_tangent.x)),
+        swing=side*MODEL_X_SIGN*95, width=(width-2*gap)*100,
+        height=(height-2*gap)*100, thickness=thickness*100,
+        normal=[ue_normal.x,ue_normal.y,0]))
+scene["runtime_prop_doors"] = json.dumps(door_specs)
 box("PhotoStage_BackCladding",(P["STAGE_SHORT_WIDTH"],.025,H-.42),(0,L-.014,(H+.42)/2),"panel_wood")
 for x in np.arange(-short_half+.74,short_half,.75):
     box("PhotoStage_PanelJoint",(.006,.029,H-.43),(float(x),L-.030,(H+.42)/2),"groove")

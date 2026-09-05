@@ -79,7 +79,15 @@ P = {
     # 内外轮廓均为同心、同朝向的正六边形；两者之间的每一侧就是一张等腰梯形桌。
     "TABLE_OUTER_HEX_RADIUS": 1.08,
     "TABLE_INNER_HEX_RADIUS": 0.42,
-    "CHAIR_RADIUS": 1.43,
+    "CHAIR_RADIUS": 1.19,
+    "CHAIR_POSITION_JITTER": 0.015,
+
+    # 两侧斜木墙暗门：存在已确认，尺寸、铰链位置与开启方向暂定。
+    "PROP_DOOR_START": 1.25,
+    "PROP_DOOR_WIDTH": 0.96,
+    "PROP_DOOR_HEIGHT": 2.16,
+    "PROP_DOOR_THICKNESS": 0.04,
+    "PROP_DOOR_GAP": 0.004,
 }
 
 
@@ -982,6 +990,8 @@ for cy in P["TABLE_CLUSTER_Y"]:
 
 if P["PHOTO_DETAILS"]:
     runpy.run_path(str(OUT_DIR / "Tools" / "Blender" / "photo_details.py"), init_globals=globals())
+    runpy.run_path(str(OUT_DIR / "Tools" / "Blender" / "validate_chair_clearance.py"),
+        init_globals={"expected_chairs": 6*len(P["TABLE_CLUSTER_X"])*len(P["TABLE_CLUSTER_Y"])})
 
 for row, y in enumerate((2.0, 5.3, 8.6, 11.9, 15.8), start=1):
     for column, x in enumerate((-3.75, -1.25, 1.25, 3.75), start=1):
