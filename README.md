@@ -1,10 +1,8 @@
 # HumanityTrinityRebuild
 
+![Unreal runtime with classroom lights on](Docs/Previews/HumanityTrinityRebuild_00_LightsOn.png)
+
 An editable Blender reconstruction and Unreal Engine interactive walkthrough of the **Humanity Trinity Space** (三一人文空间), located on B1 of Duzhi Building at the High School Affiliated to Fudan University.
-
-The repository combines a parameter-driven spatial model with a native Unreal Engine first-person prototype. It is intended for iterative reconstruction: dimensions that are not yet known are isolated as editable parameters instead of being presented as measured facts.
-
-> This reconstruction uses on-site recollection, contextual material, and four user-provided interior photographs added in September 2026. The photographs guide appearance; they do not establish measured dimensions, fixture specifications, or an exact furniture count. This is not an official architectural or survey drawing.
 
 ![Unreal runtime perspective toward the stage](HumanityTrinityRebuild_PerspectiveToStage.png)
 
