@@ -62,6 +62,15 @@ To enter the walkthrough directly, run:
 Launch_HumanityTrinityRebuild_Walkthrough.cmd
 ```
 
+To create or refresh the branded desktop shortcut, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass `
+  -File '.\Tools\Windows\install_humanity_trinity_desktop_shortcut.ps1'
+```
+
+The shortcut uses the project launcher, the project folder as its working directory, and the multi-resolution icon stored under `Assets/Brand`.
+
 To open the Unreal Editor project, run:
 
 ```text
@@ -104,6 +113,9 @@ HumanityTrinityRebuild_BlenderGenerator.py
 HumanityTrinityRebuild_建模说明.md
 HumanityTrinityRebuild_Unreal交互原型_使用说明.md
 Assets/Textures/
+Assets/Brand/
+  HumanityTrinityRebuild.ico
+  HumanityTrinityRebuild_Icon.png
 Docs/
   HumanityTrinityRebuild_PhotoReferenceNotes.md
   Previews/
