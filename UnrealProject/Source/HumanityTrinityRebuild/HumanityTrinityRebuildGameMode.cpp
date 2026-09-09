@@ -7,6 +7,7 @@
 #include "HumanityTrinityRebuildPlayerCharacter.h"
 #include "HumanityTrinityRebuildRoomInteraction.h"
 #include "HumanityTrinityRebuildDoorLayout.h"
+#include "HumanityTrinityRebuildTeachingLayout.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
@@ -377,7 +378,40 @@ void AHumanityTrinityRebuildGameMode::SelfTestValidateCurtainsReopened()
     const bool bOpenAgain = SelfTestRoom->GetCurtainOpenFraction() > 0.99f && !SelfTestCurtainBlocksPassage();
     bSelfTestPassed &= bOpenAgain;
     UE_LOG(LogTemp, Display, TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] CURTAIN_REOPENED %s"), bOpenAgain ? TEXT("PASS") : TEXT("FAIL"));
-    SelfTestPrepareScreenControl();
+    SelfTestPrepareBoardView();
+}
+
+bool AHumanityTrinityRebuildGameMode::SelfTestScreenOcclusion(bool bExpectScreen) const
+{
+    // Test the centre and eight near-edge points, not just a target/state flag.
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(TeachingBoardOcclusion), true, SelfTestPlayer);
+    for (float X : {-0.45f, 0.0f, 0.45f})
+    for (float Z : {-0.45f, 0.0f, 0.45f})
+    {
+        const FVector End = HumanityTeaching::Screen + FVector(X*HumanityTeaching::ScreenSize.X, 0, Z*HumanityTeaching::ScreenSize.Z);
+        FHitResult Hit;
+        if (!GetWorld()->LineTraceSingleByChannel(Hit, End-FVector(0,180,0), End, ECC_Visibility, Params)) return false;
+        if (Hit.GetActor() != SelfTestRoom) return false;
+        if (bExpectScreen ? !SelfTestRoom->IsScreenComponent(Hit.GetComponent())
+                          : !SelfTestRoom->IsMovingBoardComponent(Hit.GetComponent())) return false;
+    }
+    return true;
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestPrepareBoardView()
+{
+    SelfTestPlayer->SetActorLocation(FVector(0,-330,96),false,nullptr,ETeleportType::TeleportPhysics);
+    SelfTestPlayer->GetController()->SetControlRotation(FRotator(4,90,0));
+    const bool bClosed = SelfTestRoom->GetBoardLocation().Equals(HumanityTeaching::Closed,.1f)
+        && SelfTestScreenOcclusion(false) && !SelfTestRoom->IsScreenIlluminating();
+    bSelfTestPassed &= bClosed;
+    UE_LOG(LogTemp,Display,TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] BOARD_INITIAL_CLOSED %s"),bClosed?TEXT("PASS"):TEXT("FAIL"));
+    FTimerHandle Timer;
+    GetWorldTimerManager().SetTimer(Timer,[this]() {
+        CaptureSelfTestScreenshot(TEXT("HumanityTrinityRebuild_14_BoardClosed.png"));
+        FTimerHandle Next;
+        GetWorldTimerManager().SetTimer(Next,this,&AHumanityTrinityRebuildGameMode::SelfTestPrepareScreenControl,.8f,false);
+    },1.2f,false);
 }
 
 void AHumanityTrinityRebuildGameMode::SelfTestPrepareScreenControl()
@@ -405,19 +439,57 @@ void AHumanityTrinityRebuildGameMode::SelfTestValidateScreenControl()
     {
         SelfTestRoom->Interact(Hit.GetComponent());
     }
-    const bool bScreenOn = SelfTestRoom->IsScreenOn() && SelfTestRoom->IsScreenIlluminating();
+    const bool bScreenOn = SelfTestRoom->IsScreenOn() && !SelfTestRoom->IsScreenIlluminating();
     bSelfTestPassed &= bControlHit && bScreenOn;
     UE_LOG(LogTemp, Display, TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] SCREEN_USE trace=%s powered=%s local_light=%s"),
         bControlHit ? TEXT("PASS") : TEXT("FAIL"), SelfTestRoom->IsScreenOn() ? TEXT("on") : TEXT("off"),
         SelfTestRoom->IsScreenIlluminating() ? TEXT("on") : TEXT("off"));
 
-    SelfTestPlayer->SetActorLocation(FVector(-485.0f, -1280.0f, 96.0f), false, nullptr, ETeleportType::TeleportPhysics);
-    if (AController* Controller = SelfTestPlayer->GetController())
-    {
-        Controller->SetControlRotation(FRotator(-1.0f, 65.0f, 0.0f));
-    }
+    SelfTestPlayer->SetActorLocation(FVector(0,-330,96),false,nullptr,ETeleportType::TeleportPhysics);
+    SelfTestPlayer->GetController()->SetControlRotation(FRotator(4,90,0));
     FTimerHandle Timer;
-    GetWorldTimerManager().SetTimer(Timer, this, &AHumanityTrinityRebuildGameMode::SelfTestCaptureTeachingView, 2.0f, false);
+    GetWorldTimerManager().SetTimer(Timer, this, &AHumanityTrinityRebuildGameMode::SelfTestReverseBoard, .65f, false);
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestReverseBoard()
+{
+    const float Before = SelfTestRoom->GetBoardOpenFraction();
+    const FVector Position = SelfTestRoom->GetBoardLocation();
+    SelfTestRoom->ToggleScreen();
+    const bool bSmooth = Before > 0 && Before < 1 && Position.Equals(SelfTestRoom->GetBoardLocation(),.001f)
+        && !SelfTestRoom->IsScreenIlluminating();
+    bSelfTestPassed &= bSmooth;
+    FTimerHandle Timer;
+    GetWorldTimerManager().SetTimer(Timer,[this,Before,bSmooth]() {
+        const bool bReversed = bSmooth && SelfTestRoom->GetBoardOpenFraction() < Before;
+        bSelfTestPassed &= bReversed;
+        UE_LOG(LogTemp,Display,TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] BOARD_MID_TRAVEL_REVERSE %s"),bReversed?TEXT("PASS"):TEXT("FAIL"));
+        SelfTestRoom->ToggleScreen();
+        FTimerHandle Next;
+        GetWorldTimerManager().SetTimer(Next,this,&AHumanityTrinityRebuildGameMode::SelfTestValidateBoardOpen,
+            HumanityTeaching::TravelSeconds+1.0f,false);
+    },.25f,false);
+}
+
+void AHumanityTrinityRebuildGameMode::SelfTestValidateBoardOpen()
+{
+    // With yaw=90, camera-right is -X: the fixed screen must be on that side,
+    // while the moving board travels +X to overlap the left panel.
+    const FVector ViewRight = FRotationMatrix(FRotator(0,90,0)).GetUnitAxis(EAxis::Y);
+    const bool bRight = FVector::DotProduct(HumanityTeaching::Screen,ViewRight)>0
+        && FVector::DotProduct(SelfTestRoom->GetBoardLocation()-HumanityTeaching::Closed,ViewRight)<0;
+    const bool bOpen = SelfTestRoom->GetBoardLocation().Equals(HumanityTeaching::Open,.1f)
+        && SelfTestRoom->IsScreenIlluminating() && SelfTestScreenOcclusion(true) && bRight;
+    bSelfTestPassed &= bOpen;
+    UE_LOG(LogTemp,Display,TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] BOARD_REVEAL_RIGHT_SCREEN %s"),bOpen?TEXT("PASS"):TEXT("FAIL"));
+    CaptureSelfTestScreenshot(TEXT("HumanityTrinityRebuild_15_BoardOpen.png"));
+    FTimerHandle Timer;
+    GetWorldTimerManager().SetTimer(Timer,[this]() {
+        SelfTestPlayer->SetActorLocation(FVector(-485,-1280,96),false,nullptr,ETeleportType::TeleportPhysics);
+        SelfTestPlayer->GetController()->SetControlRotation(FRotator(-1,65,0));
+        FTimerHandle Next;
+        GetWorldTimerManager().SetTimer(Next,this,&AHumanityTrinityRebuildGameMode::SelfTestCaptureTeachingView,1.8f,false);
+    },.8f,false);
 }
 
 void AHumanityTrinityRebuildGameMode::SelfTestCaptureTeachingView()
@@ -434,7 +506,18 @@ void AHumanityTrinityRebuildGameMode::SelfTestValidateScreenOff()
     const bool bScreenOff = !SelfTestRoom->IsScreenOn() && !SelfTestRoom->IsScreenIlluminating();
     bSelfTestPassed &= bScreenOff;
     UE_LOG(LogTemp, Display, TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] SCREEN_OFF %s"), bScreenOff ? TEXT("PASS") : TEXT("FAIL"));
-    SelfTestPrepareCeilingView();
+    SelfTestPlayer->SetActorLocation(FVector(0,-330,96),false,nullptr,ETeleportType::TeleportPhysics);
+    SelfTestPlayer->GetController()->SetControlRotation(FRotator(4,90,0));
+    FTimerHandle Timer;
+    GetWorldTimerManager().SetTimer(Timer,[this]() {
+        const bool bClosed = SelfTestRoom->GetBoardLocation().Equals(HumanityTeaching::Closed,.1f)
+            && SelfTestScreenOcclusion(false) && !SelfTestRoom->IsScreenIlluminating();
+        bSelfTestPassed &= bClosed;
+        UE_LOG(LogTemp,Display,TEXT("[HUMANITY_TRINITY_REBUILD_SELFTEST] BOARD_RETURN_AND_OCCLUDE %s"),bClosed?TEXT("PASS"):TEXT("FAIL"));
+        CaptureSelfTestScreenshot(TEXT("HumanityTrinityRebuild_16_BoardReturned.png"));
+        FTimerHandle Next;
+        GetWorldTimerManager().SetTimer(Next,this,&AHumanityTrinityRebuildGameMode::SelfTestPrepareCeilingView,.8f,false);
+    },HumanityTeaching::TravelSeconds+.6f,false);
 }
 
 void AHumanityTrinityRebuildGameMode::SelfTestPrepareCeilingView()

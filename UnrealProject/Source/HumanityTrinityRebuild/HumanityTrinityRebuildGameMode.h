@@ -48,6 +48,10 @@ private:
     void SelfTestValidateCurtainsClosed();
     void SelfTestValidateCurtainsReopened();
     void SelfTestPrepareScreenControl();
+    void SelfTestPrepareBoardView();
+    void SelfTestReverseBoard();
+    void SelfTestValidateBoardOpen();
+    bool SelfTestScreenOcclusion(bool bExpectScreen) const;
     void SelfTestValidateScreenControl();
     void SelfTestCaptureTeachingView();
     void SelfTestValidateScreenOff();

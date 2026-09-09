@@ -255,7 +255,7 @@ void AHumanityTrinityRebuildPlayerCharacter::UpdateEyeAdaptation(const float Del
     AHumanityTrinityRebuildLightingController* LightController = FindLightingController();
     const bool bLightsOn = !LightController || LightController->AreMainLightsOn();
     AHumanityTrinityRebuildRoomInteraction* Interaction = FindRoomInteraction();
-    const bool bScreenOn = Interaction && Interaction->IsScreenOn();
+    const bool bScreenOn = Interaction && Interaction->IsScreenIlluminating();
     const float TargetExposure = bLightsOn ? LightAdaptedExposure : (bScreenOn ? -1.4f : DarkAdaptedExposure);
     const float AdaptationSpeed = bLightsOn || bScreenOn ? BrightAdaptationSpeed : DarkAdaptationSpeed;
 

@@ -332,13 +332,8 @@ for k,(cy,rx,ry,mat) in enumerate(((6.7,5.3,3.9,"line_yellow"),(10.7,4.95,4.25,"
     mesh=bpy.data.meshes.new("FloorArcMesh");mesh.from_pydata(verts,[],faces);mesh.update()
     obj=bpy.data.objects.new(f"PhotoFloorArc{k}",mesh);DETAIL.objects.link(obj);mesh.materials.append(MAT[mat])
 
-# Teaching wall: two green sliding boards in a single aluminium frame.
-delete_where(lambda o:o.name.startswith(("Chalkboard_","Display_")))
-box("PhotoTeaching_WarmBacking",(8.2,.035,H),(0,.021,H/2),"panel_wood")
-for x in (-1.33,1.33):box("PhotoTeaching_SlidingChalkboard",(2.64,.07,1.42),(x,.17,1.85),"board",.012)
-for x in (-2.70,0,2.70):box("PhotoTeaching_VerticalFrame",(.035,.10,1.49),(x,.215,1.85),"metal",.004)
-for z in (1.10,2.60):box("PhotoTeaching_Track",(5.46,.12,.045),(0,.205,z),"metal",.004)
-box("PhotoTeaching_ChalkTray",(5.43,.16,.03),(0,.235,1.07),"metal",.004)
+# Confirmed sliding-board mechanism, shared with the runtime exporter.
+runpy.run_path(str(OUT_DIR / "Tools" / "Blender" / "teaching_wall.py"), init_globals=globals())
 
 # Narrow ceiling panel joints and cassette AC. Hidden only in cutaway Blender
 # previews, included in runtime export; no natural light is added to the room.

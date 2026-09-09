@@ -1,5 +1,6 @@
 #include "HumanityTrinityRebuildRoomInteraction.h"
 #include "HumanityTrinityRebuildDoorLayout.h"
+#include "HumanityTrinityRebuildTeachingLayout.h"
 #include "Engine/World.h"
 
 #include "Components/BoxComponent.h"
@@ -66,17 +67,37 @@ AHumanityTrinityRebuildRoomInteraction::AHumanityTrinityRebuildRoomInteraction()
 
     }
 
+    TeachingBoardPivot = CreateDefaultSubobject<USceneComponent>(TEXT("TeachingBoardPivot"));
+    TeachingBoardPivot->SetupAttachment(SceneRoot);
+    TeachingBoardPivot->SetRelativeLocation(HumanityTeaching::Closed);
+    for (int32 Index = 0; Index < UE_ARRAY_COUNT(HumanityTeaching::Parts); ++Index)
+    {
+        const auto& Spec = HumanityTeaching::Parts[Index];
+        auto* Part = CreateDefaultSubobject<UStaticMeshComponent>(*FString::Printf(TEXT("TeachingBoardPart%d"), Index));
+        Part->SetupAttachment(TeachingBoardPivot);
+        Part->SetMobility(EComponentMobility::Movable);
+        Part->SetStaticMesh(Cube);
+        Part->SetMaterial(0, BasicMaterial);
+        Part->SetRelativeLocation(Spec.Offset);
+        Part->SetRelativeScale3D(Spec.Size / 100.0f);
+        // Opaque, shadow-casting board; visibility traces cannot reach the covered screen.
+        Part->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        Part->SetCollisionResponseToAllChannels(ECR_Block);
+        Part->CanCharacterStepUpOn = ECB_No;
+        TeachingBoardParts.Add(Part);
+    }
+
     ScreenFace = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TeachingDisplay"));
     ScreenFace->SetupAttachment(SceneRoot);
     ScreenFace->SetStaticMesh(Cube);
     ScreenFace->SetMaterial(0, BasicMaterial);
-    ScreenFace->SetRelativeLocation(FVector(0.0f, -24.0f, 185.0f));
-    ScreenFace->SetRelativeScale3D(FVector(2.50f, 0.01f, 1.38f));
-    ScreenFace->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    ScreenFace->SetRelativeLocation(HumanityTeaching::Screen);
+    ScreenFace->SetRelativeScale3D(HumanityTeaching::ScreenSize / 100.0f);
+    ScreenFace->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     ScreenFace->SetCollisionResponseToAllChannels(ECR_Ignore);
     ScreenFace->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
     ScreenFace->SetCastShadow(false);
-    ScreenFace->SetVisibility(false);
+    ScreenFace->SetVisibility(true);
 
     // A small controller on the lectern is reachable without having to touch
     // the teaching display. This position follows the mirrored Blender podium.
@@ -96,7 +117,7 @@ AHumanityTrinityRebuildRoomInteraction::AHumanityTrinityRebuildRoomInteraction()
 
     ScreenHeading = CreateDefaultSubobject<UTextRenderComponent>(TEXT("DisplayHeading"));
     ScreenHeading->SetupAttachment(SceneRoot);
-    ScreenHeading->SetRelativeLocation(FVector(0.0f, -25.0f, 204.0f));
+    ScreenHeading->SetRelativeLocation(HumanityTeaching::Screen + FVector(0.0f, -1.0f, 19.0f));
     ScreenHeading->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
     ScreenHeading->SetHorizontalAlignment(EHTA_Center);
     ScreenHeading->SetWorldSize(9.5f);
@@ -106,7 +127,7 @@ AHumanityTrinityRebuildRoomInteraction::AHumanityTrinityRebuildRoomInteraction()
 
     ScreenCaption = CreateDefaultSubobject<UTextRenderComponent>(TEXT("DisplayCaption"));
     ScreenCaption->SetupAttachment(SceneRoot);
-    ScreenCaption->SetRelativeLocation(FVector(0.0f, -25.0f, 176.0f));
+    ScreenCaption->SetRelativeLocation(HumanityTeaching::Screen + FVector(0.0f, -1.0f, -9.0f));
     ScreenCaption->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
     ScreenCaption->SetHorizontalAlignment(EHTA_Center);
     ScreenCaption->SetWorldSize(5.0f);
@@ -116,7 +137,7 @@ AHumanityTrinityRebuildRoomInteraction::AHumanityTrinityRebuildRoomInteraction()
 
     ScreenLight = CreateDefaultSubobject<URectLightComponent>(TEXT("DisplayLocalLight"));
     ScreenLight->SetupAttachment(SceneRoot);
-    ScreenLight->SetRelativeLocation(FVector(0.0f, -30.0f, 185.0f));
+    ScreenLight->SetRelativeLocation(HumanityTeaching::Screen + FVector(0.0f, -2.0f, 0.0f));
     ScreenLight->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
     ScreenLight->SetMobility(EComponentMobility::Movable);
     ScreenLight->SetIntensityUnits(ELightUnits::Lumens);
@@ -154,6 +175,14 @@ void AHumanityTrinityRebuildRoomInteraction::BeginPlay()
     }
     ScreenMaterial = ScreenFace->CreateAndSetMaterialInstanceDynamic(0);
     ControlMaterial = ScreenControl->CreateAndSetMaterialInstanceDynamic(0);
+    UMaterialInterface* Board = LoadObject<UMaterialInterface>(nullptr,
+        TEXT("/Game/HumanityTrinityRebuild/Materials/Surfaces/M_Surface_Chalkboard_Green.M_Surface_Chalkboard_Green"));
+    UMaterialInterface* Metal = LoadObject<UMaterialInterface>(nullptr,
+        TEXT("/Game/HumanityTrinityRebuild/Materials/Surfaces/M_Surface_Metal.M_Surface_Metal"));
+    for (int32 Index = 0; Index < TeachingBoardParts.Num(); ++Index)
+    {
+        TeachingBoardParts[Index]->SetMaterial(0, HumanityTeaching::Parts[Index].bMetal ? Metal : Board);
+    }
     UMaterialInterface* Wood = LoadObject<UMaterialInterface>(nullptr,
         TEXT("/Game/HumanityTrinityRebuild/Materials/Surfaces/M_Surface_Acoustic_WarmOak.M_Surface_Acoustic_WarmOak"));
     for (UStaticMeshComponent* Leaf : PropDoorLeaves)
@@ -167,6 +196,23 @@ void AHumanityTrinityRebuildRoomInteraction::BeginPlay()
 void AHumanityTrinityRebuildRoomInteraction::Tick(const float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    const float NextBoard = FMath::FInterpConstantTo(BoardOpenFraction, bScreenOn ? 1.0f : 0.0f,
+        DeltaSeconds, 1.0f / FMath::Max(HumanityTeaching::TravelSeconds, 0.2f));
+    if (NextBoard != BoardOpenFraction)
+    {
+        const FVector Centre = FMath::Lerp(HumanityTeaching::Closed, HumanityTeaching::Open,
+            FMath::SmoothStep(0.0f, 1.0f, NextBoard));
+        FCollisionObjectQueryParams Objects;
+        Objects.AddObjectTypesToQuery(ECC_Pawn);
+        FCollisionQueryParams Query(SCENE_QUERY_STAT(TeachingBoardVisitor), false, this);
+        // Pause if a visitor is in the next leaf position instead of pushing them.
+        if (!GetWorld()->OverlapAnyTestByObjectType(Centre, FQuat::Identity, Objects,
+            FCollisionShape::MakeBox(HumanityTeaching::Parts[0].Size/2 + FVector(1,2,1)), Query))
+        {
+            BoardOpenFraction = NextBoard;
+        }
+        UpdateTeachingGeometry();
+    }
     for (int32 Index = 0; Index < PropDoorLeaves.Num(); ++Index)
     {
         const FHumanityPropDoorSpec& Spec = HumanityPropDoors[Index];
@@ -230,21 +276,41 @@ void AHumanityTrinityRebuildRoomInteraction::ToggleScreen()
 void AHumanityTrinityRebuildRoomInteraction::SetScreenOn(const bool bOn)
 {
     bScreenOn = bOn;
-    ScreenFace->SetVisibility(bOn);
-    ScreenFace->SetCollisionEnabled(bOn ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
-    ScreenHeading->SetVisibility(bOn);
-    ScreenCaption->SetVisibility(bOn);
-    ScreenLight->SetVisibility(bOn);
-    if (ScreenMaterial)
-    {
-        ScreenMaterial->SetScalarParameterValue(TEXT("Emission"), bOn ? 1.0f : 0.0f);
-        ScreenMaterial->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.055f, 0.14f, 0.24f));
-    }
+    UpdateTeachingGeometry();
     if (ControlMaterial)
     {
         ControlMaterial->SetVectorParameterValue(TEXT("Color"), bOn
             ? FLinearColor(0.10f, 0.20f, 0.24f) : FLinearColor(0.04f, 0.045f, 0.05f));
     }
+}
+
+void AHumanityTrinityRebuildRoomInteraction::UpdateTeachingGeometry()
+{
+    TeachingBoardPivot->SetRelativeLocation(FMath::Lerp(HumanityTeaching::Closed, HumanityTeaching::Open,
+        FMath::SmoothStep(0.0f, 1.0f, BoardOpenFraction)));
+    // Keep the physical glass in place even when off. No light/text leaks through
+    // the board while it travels; power-down is immediate, then the leaf closes.
+    const bool bRevealed = bScreenOn && BoardOpenFraction >= 1.0f;
+    ScreenHeading->SetVisibility(bRevealed);
+    ScreenCaption->SetVisibility(bRevealed);
+    ScreenLight->SetVisibility(bRevealed);
+    if (ScreenMaterial)
+    {
+        ScreenMaterial->SetScalarParameterValue(TEXT("Emission"), bRevealed ? 1.0f : 0.0f);
+        ScreenMaterial->SetVectorParameterValue(TEXT("Color"), bRevealed
+            ? FLinearColor(0.055f, 0.14f, 0.24f) : FLinearColor(0.004f, 0.006f, 0.008f));
+    }
+}
+
+FVector AHumanityTrinityRebuildRoomInteraction::GetBoardLocation() const
+{
+    return TeachingBoardPivot->GetRelativeLocation();
+}
+
+bool AHumanityTrinityRebuildRoomInteraction::IsMovingBoardComponent(const UPrimitiveComponent* Component) const
+{
+    for (const auto& Part : TeachingBoardParts) if (Part == Component) return true;
+    return false;
 }
 
 bool AHumanityTrinityRebuildRoomInteraction::IsScreenIlluminating() const

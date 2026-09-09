@@ -38,6 +38,9 @@ public:
     float GetCurtainOpenFraction() const { return CurtainOpenFraction; }
     bool HasCurtainMesh() const { return bHasCurtainMesh; }
     bool IsScreenIlluminating() const;
+    float GetBoardOpenFraction() const { return BoardOpenFraction; }
+    FVector GetBoardLocation() const;
+    bool IsMovingBoardComponent(const UPrimitiveComponent* Component) const;
     bool IsCurtainComponent(const UPrimitiveComponent* Component) const;
     bool IsScreenComponent(const UPrimitiveComponent* Component) const;
     FString GetInteractionPrompt(const UPrimitiveComponent* Component) const;
@@ -56,6 +59,8 @@ private:
     UPROPERTY() TObjectPtr<UBoxComponent> LeftCurtainBounds;
     UPROPERTY() TObjectPtr<UBoxComponent> RightCurtainBounds;
     UPROPERTY() TObjectPtr<UStaticMeshComponent> ScreenFace;
+    UPROPERTY() TObjectPtr<USceneComponent> TeachingBoardPivot;
+    UPROPERTY() TArray<TObjectPtr<UStaticMeshComponent>> TeachingBoardParts;
     UPROPERTY() TObjectPtr<UBoxComponent> ScreenControlBounds;
     UPROPERTY() TObjectPtr<UStaticMeshComponent> ScreenControl;
     UPROPERTY() TObjectPtr<UTextRenderComponent> ScreenHeading;
@@ -72,5 +77,7 @@ private:
     bool bScreenOn = false;
     bool bHasCurtainMesh = false;
     float CurtainOpenFraction = 1.0f;
+    float BoardOpenFraction = 0.0f;
     void UpdateCurtainGeometry();
+    void UpdateTeachingGeometry();
 };

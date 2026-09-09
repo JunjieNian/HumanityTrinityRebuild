@@ -1,4 +1,5 @@
 #include "HumanityTrinityRebuildLightingController.h"
+#include "HumanityTrinityRebuildTeachingLayout.h"
 
 #include "Components/RectLightComponent.h"
 #include "Components/SceneComponent.h"
@@ -157,7 +158,7 @@ AHumanityTrinityRebuildLightingController::AHumanityTrinityRebuildLightingContro
     // blackboard. Its low output leaves the closed basement almost black.
     URectLightComponent* ScreenStandby = CreateDefaultSubobject<URectLightComponent>(TEXT("ScreenStandbyResidualLight"));
     ScreenStandby->SetupAttachment(SceneRoot);
-    ScreenStandby->SetRelativeLocation(FVector(215.0, -45.0, 110.0));
+    ScreenStandby->SetRelativeLocation(HumanityTeaching::Screen + FVector(0,-2,-HumanityTeaching::ScreenSize.Z/2+3));
     ScreenStandby->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
     ScreenStandby->SetMobility(EComponentMobility::Movable);
     ScreenStandby->SetIntensityUnits(ELightUnits::Lumens);
@@ -166,7 +167,7 @@ AHumanityTrinityRebuildLightingController::AHumanityTrinityRebuildLightingContro
     ScreenStandby->SetSourceHeight(3.0f);
     ScreenStandby->SetAttenuationRadius(340.0f);
     ScreenStandby->SetLightColor(FLinearColor(0.56f, 0.72f, 1.0f));
-    ScreenStandby->SetCastShadows(false);
+    ScreenStandby->SetCastShadows(true);
     ResidualLights.Add(ScreenStandby);
 }
 

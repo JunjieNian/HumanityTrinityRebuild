@@ -28,7 +28,13 @@ An editable Blender reconstruction and Unreal Engine interactive walkthrough of 
 
 The stage now has a broad lower tread and a higher main platform, pale oak-colored wood grain, warm wall panels and vertical slats, and burgundy folded curtains. The table area uses pale sage flooring with yellow/lime curved markings, saturated blue/yellow/off-white trapezoid tops, rounded white caster chairs with orange/blue seats, and tall white cupboards mixed with open shelves. Bar niches, outlets, framed decorative panels, a charging cabinet, ceiling joints, and cassette-style air-conditioning units add the details visible in the supplied photographs.
 
-The two visible dark-green sliding boards are represented at the teaching wall. The display starts off; when enabled, it temporarily covers the central board area. Its real concealed or sliding mechanism has not been established by the photographs. Curtains start open. Their animated controls are prototype interactions, not evidence of a motorized installation on site.
+Facing the teaching wall, the display is fixed behind the right dark-green board. Turning it on slides that board left on a separate front track until it overlaps the stationary left board, then lights the exposed right-hand display. Turning it off extinguishes the display immediately and returns the board to cover it. This arrangement follows the user's on-site clarification; dimensions, travel time, and automated operation remain prototype assumptions. Curtains start open, and their animated controls do not establish a motorized installation on site.
+
+![Right board moved left, exposing the fixed display on the right](Docs/Previews/HumanityTrinityRebuild_15_BoardOpen.png)
+
+Compare the same viewpoint with the boards [closed](Docs/Previews/HumanityTrinityRebuild_14_BoardClosed.png) and [returned after power-off](Docs/Previews/HumanityTrinityRebuild_16_BoardReturned.png).
+
+The [sliding-display validation record](Docs/HumanityTrinityRebuild_TeachingDisplayValidation.md) describes the shared model parameters and runtime checks.
 
 See [the photo-reference notes](Docs/HumanityTrinityRebuild_PhotoReferenceNotes.md) for the evidence/assumption boundary. In particular, the current nine table clusters and the two 21 cm stage rises remain editable approximations.
 
@@ -121,6 +127,7 @@ Docs/
   Previews/
 Tools/
   Blender/photo_details.py
+  Blender/teaching_wall.py
   Blender/export_humanity_trinity_rebuild.py
   Unreal/build_and_setup_humanity_trinity_rebuild.ps1
   Unreal/setup_humanity_trinity_rebuild_unreal.py
@@ -194,7 +201,7 @@ Lamp count, color temperature, brightness, circuit assignment, residual light, a
 
 ## Validation and comparison
 
-The runtime self-test exercises the main-light state, extinction of the visible panels, four-zone shutdown, dark/bright adaptation, the actual player-view light-switch trace, and curtain/display interaction. Generated test logs and captures are stored locally under `UnrealProject/Saved`; selected comparison images are kept in `Docs/Previews` for review. A successful result applies to the build and assets used in that run; after geometry or C++ changes, rebuild, reimport, and rerun the checks.
+The runtime self-test exercises the main-light state, extinction of the visible panels, four-zone shutdown, dark/bright adaptation, the actual player-view light-switch trace, and curtain/display interaction. Display checks include visitor-facing left/right orientation, nine-point screen occlusion, final board overlap/return, and smooth mid-travel reversal without premature screen lighting. Generated test logs and captures are stored locally under `UnrealProject/Saved`; selected comparison images are kept in `Docs/Previews` for review. A successful result applies to the build and assets used in that run; after geometry or C++ changes, rebuild, reimport, and rerun the checks.
 
 ## Additional views
 

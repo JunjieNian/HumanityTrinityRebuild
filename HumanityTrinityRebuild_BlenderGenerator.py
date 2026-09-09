@@ -88,6 +88,20 @@ P = {
     "PROP_DOOR_HEIGHT": 2.16,
     "PROP_DOOR_THICKNESS": 0.04,
     "PROP_DOOR_GAP": 0.004,
+
+    # 面向教学墙：右板左移，叠于左板前方，露出固定屏幕。尺寸/用时暂定。
+    "TEACHING_BOARD_WIDTH": 2.64,
+    "TEACHING_BOARD_HEIGHT": 1.42,
+    "TEACHING_BOARD_THICKNESS": 0.07,
+    "TEACHING_BOARD_CENTER_X": 1.33,
+    "TEACHING_BOARD_CENTER_Z": 1.85,
+    "TEACHING_BOARD_FIXED_Y": 0.17,
+    "TEACHING_BOARD_MOVING_Y": 0.28,
+    "TEACHING_BOARD_FRAME": 0.025,
+    "TEACHING_SCREEN_WIDTH": 2.50,
+    "TEACHING_SCREEN_HEIGHT": 1.34,
+    "TEACHING_SCREEN_Y": 0.12,
+    "TEACHING_BOARD_TRAVEL_SECONDS": 2.0,
 }
 
 
@@ -1270,7 +1284,8 @@ notes.write(
     "Y=0为教学墙，Y=ROOM_LENGTH为后墙；三门已镜像到X负侧。\n"
     "每组为六张等形梯形桌围成中空正六边形；九组总数仍是假设。\n"
     "照片确认：浅木色两级舞台、吧台、高白柜、灰绿地板色带、白色脚轮椅和吊顶空调。\n"
-    "幕布默认打开，Unreal可缓动开合；屏幕与黑板真实机械关系仍待确认。\n"
+    "幕布默认打开，Unreal可缓动开合；面向教学墙，右板左移叠于左板，露出右侧固定屏幕。\n"
+    "场景属性teaching_board_open可从0调到1预览右板滑动；尺寸与动画用时仍为暂定。\n"
     "木纹、地坪与织物贴图为代码生成的近似材质，原始照片未嵌入。\n"
 )
 
