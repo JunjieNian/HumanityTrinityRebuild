@@ -17,5 +17,5 @@ if not exist "%UE_EDITOR%" (
     exit /b 1
 )
 
-start "" "%UE_EDITOR%" "%PROJECT_FILE%" /Game/HumanityTrinityRebuild/Maps/L_HumanityTrinityRebuildHideAndSeek -game -windowed -ResX=1600 -ResY=900
+start "" "%UE_EDITOR%" "%PROJECT_FILE%" /Game/HumanityTrinityRebuild/Maps/L_HumanityTrinityRebuildHideAndSeek -game -windowed -ResX=1600 -ResY=900 %*
 endlocal

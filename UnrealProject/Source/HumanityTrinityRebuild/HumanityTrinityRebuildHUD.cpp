@@ -21,7 +21,7 @@ void AHumanityTrinityRebuildHUD::DrawHUD()
     {
         const AHumanityTrinityRebuildHideAndSeekGameMode* Game =
             GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildHideAndSeekGameMode>();
-        if (Game && Game->IsRoundRunning())
+        if (Game && Game->IsRoundRunning() && !Game->IsPracticeMode())
         {
             // The room's baked/indirect light can survive switching dynamic
             // fixtures off. This rule makes the played round truly sightless.
@@ -41,7 +41,12 @@ void AHumanityTrinityRebuildHUD::DrawHUD()
             DrawText(Touch, FLinearColor::White, CenterX - Width * 0.5f,
                 CenterY + 48.0f, GEngine->GetMediumFont(), 1.0f, false);
         }
-        DrawText(TEXT("WASD Move   Mouse Turn   Shift Slow   Hold F Feel Ahead   E Door   R Restart   Esc Exit"),
+        DrawRect(FLinearColor(0,0,0,.6f),16,68,245,Game && Game->IsPracticeMode()?53:28);
+        DrawText(Player->GetMovementHint(), FLinearColor(.75f,.9f,.88f),24,74,GEngine->GetSmallFont());
+        if (Game && !Game->GetPracticeHint().IsEmpty())
+            DrawText(Game->GetPracticeHint(),FLinearColor(.9f,.82f,.64f),24,96,GEngine->GetSmallFont());
+        DrawRect(FLinearColor(0,0,0,.65f),0,Canvas->ClipY-44,Canvas->ClipX,44);
+        DrawText(TEXT("WASD Move | Shift Quiet | Ctrl Crouch | Hold F Feel (aim with mouse) | E Door | Tab Practice | R Restart"),
             FLinearColor(0.85f, 0.85f, 0.85f, 0.9f), 24.0f,
             Canvas->ClipY - 34.0f, GEngine->GetSmallFont(), 1.0f, false);
         return;

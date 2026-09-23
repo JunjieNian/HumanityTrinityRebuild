@@ -59,40 +59,58 @@ The complete scene is mirrored across the longitudinal centerline through the ge
 The complete editable reconstruction before game development is preserved at
 [v1.0.0-reconstruction](https://github.com/JunjieNian/HumanityTrinityRebuild/releases/tag/v1.0.0-reconstruction).
 
-### Hide-and-seek prototype / 黑暗捉迷藏雏形
+### Hide-and-seek / 黑暗捉迷藏
 
-Run `Launch_HumanityTrinityRebuild_HideAndSeek.cmd` to enter the separate game map.
-You play the seeker against one computer-controlled hider. The first 12 seconds
-are lit so you can memorize the room. Then the main and residual lights go out,
-the teaching display stays off, and a three-minute search begins. The hider can
-remain still or move through a narrow passage when it decides to evade you;
-movement produces positional footsteps. Reach out with **F**: only something
-within about one arm's length produces a touch description, and only physical
-contact with the hider wins the round. Holding **F** keeps probing and slows
-your movement until you release it. Use headphones for the direction of the
-footsteps. **R** restarts a round; **Esc** exits.
+Run `Launch_HumanityTrinityRebuild_HideAndSeek.cmd`. You have 12 seconds to
+memorize the lit room, followed by a three-minute search in complete darkness.
+Use headphones: the hider's steps are spatialized and muffled by obstacles.
+Press **Tab** to restart in bright practice mode and inspect the character,
+learn the room, and observe the hider's current behavior.
 
-This is a single-player gameplay prototype. The hider currently uses a small
-scripted route, touch descriptions are coarse because the room is one combined
-runtime mesh, and the room has no hand animation or controller vibration yet.
-The hider is not a second human player. The original walkthrough remains
-available through `Launch_HumanityTrinityRebuild_Walkthrough.cmd`.
+- **WASD / mouse**: move and aim your hand, including looking down.
+- **Shift**: careful, quieter steps. **Hold Ctrl**: crouch and move very quietly.
+- **Hold F**: feel within one arm's reach while slowing down. Contact describes
+  the material, height and distance; touching the actual posed body wins.
+- **E**: operate a nearby prop door. **R**: restart. **Esc**: exit.
 
-After changing the model, rebuild the walkthrough as described below, then
-regenerate the original footstep and game map:
+The original civilian character has a shaped hoodie with seams and drawstrings,
+face and hair, hands with fingers, trousers and sneakers. Nine editable mesh
+parts form fifteen animated body segments, with breathing, listening, walking
+and a grounded crouch. The source is `Assets/Hider/Trinity_Hider.blend`.
+
+The hider selects separated cover positions on a collision-checked classroom
+navigation graph. It stays quiet until an audible footstep causes it to listen
+and possibly relocate. Hearing uses distance, loudness and obstruction; the AI
+only remembers the latest audible event. Its route avoids the remembered threat
+and recent hiding places. Walking produces actual distance-based footstep events.
+Practice mode exposes behavior text; dark rounds never expose AI state or location.
+
+Current scope: one computer-controlled hider, classroom floor routes and crouching
+beside furniture. This version has no multiplayer, crawling under tables, climbing,
+skinned motion-capture animation, visible first-person hands, or haptic hardware.
+Material touch descriptions are a sensory substitute; unrecognized materials use
+a generic firm-surface description. The original walkthrough is available through
+`Launch_HumanityTrinityRebuild_Walkthrough.cmd`.
+
+To regenerate only the character, run the Blender generator, then the Unreal import
+script after building the C++ module:
 
 ```powershell
-python .\Tools\Audio\generate_footstep.py
+& 'D:\Blender\blender-4.5.13-windows-x64\blender.exe' --background `
+  --python '.\Tools\Blender\build_hider.py'
 & 'D:\EpicGames\UE_5.7\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' `
   '.\UnrealProject\HumanityTrinityRebuild.uproject' `
-  '-ExecutePythonScript=D:\HumanityTrinityRebuild\Tools\Unreal\setup_hide_and_seek_unreal.py' `
+  '-ExecutePythonScript=D:\HumanityTrinityRebuild\Tools\Unreal\import_hider.py' `
   -unattended -nop4 -nosplash -nullrhi
 ```
 
-The game self-test uses `-HideAndSeekSelfTest -HideAndSeekCapture` on the game
-map. It checks blackout, residual lights, hider movement and footstep events,
-and a real near-hand catch. Captures are written to
-`UnrealProject/Saved/Screenshots/HideAndSeek`.
+The separate game map and original footstep can be regenerated with
+`Tools/Audio/generate_footstep.py` and `Tools/Unreal/setup_hide_and_seek_unreal.py`.
+The game self-test uses `-HideAndSeekSelfTest -HideAndSeekCapture`. It checks loaded
+character parts, dark lighting, multiple reachable covers, silent proximity,
+crouching, hearing range, route traversal, footsteps, touch occlusion and a real
+catch, then captures three character poses. Logs and captures go to
+`UnrealProject/Saved`; selected evidence is preserved under `Docs/Previews`.
 
 Requirements:
 

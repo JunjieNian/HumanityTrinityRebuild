@@ -10,6 +10,7 @@ class AHumanityTrinityRebuildLightingController;
 class AHumanityTrinityRebuildRoomInteraction;
 class UCameraComponent;
 class UPrimitiveComponent;
+class USoundWave;
 
 UCLASS()
 class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildPlayerCharacter : public ACharacter
@@ -35,6 +36,8 @@ public:
     FString GetCurrentTouchMessage() const;
     void EnableHideAndSeekMode();
     void PerformTouch();
+    FString GetMovementHint() const;
+    float GetFootstepLoudness() const;
 
 private:
     UPROPERTY(VisibleAnywhere, Category = "Camera")
@@ -74,6 +77,9 @@ private:
     float TouchPulseSeconds = 0.0f;
     FString TouchMessage;
     float TouchMessageUntil = 0.0f;
+    FVector PreviousFootPosition = FVector::ZeroVector;
+    float FootDistance = 0.0f;
+    UPROPERTY() TObjectPtr<USoundWave> PlayerFootstep;
 
     void MoveForward(float Value);
     void MoveRight(float Value);
@@ -96,6 +102,10 @@ private:
     void StartTouch();
     void StopTouch();
     void UpdateWalkSpeed();
+    void StartCrouch();
+    void StopCrouch();
+    void TogglePractice();
+    void UpdateFootsteps(float DeltaSeconds);
 
     void UpdateFocusedInteractable();
     void UpdateEyeAdaptation(float DeltaSeconds);

@@ -13,6 +13,8 @@
 #include "Misc/Paths.h"
 #include "TimerManager.h"
 #include "UnrealClient.h"
+#include "Components/BoxComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AHumanityTrinityRebuildHideAndSeekGameMode::AHumanityTrinityRebuildHideAndSeekGameMode()
 {
@@ -24,8 +26,10 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPlay()
     Super::BeginPlay();
     bSelfTest = FParse::Param(FCommandLine::Get(), TEXT("HideAndSeekSelfTest"));
     bCaptureGame = FParse::Param(FCommandLine::Get(), TEXT("HideAndSeekCapture"));
-    GetWorldTimerManager().SetTimerForNextTick(this,
-        &AHumanityTrinityRebuildHideAndSeekGameMode::BeginPreparation);
+    bPracticeMode = FParse::Param(FCommandLine::Get(), TEXT("HideAndSeekPractice"));
+    if (bSelfTest)
+        FMath::RandInit(20260923);
+    GetWorldTimerManager().SetTimerForNextTick(this, &AHumanityTrinityRebuildHideAndSeekGameMode::BeginPreparation);
 }
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPreparation()
@@ -37,6 +41,9 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPreparation()
         return;
     }
     Seeker->EnableHideAndSeekMode();
+    Seeker->GetCharacterMovement()->StopMovementImmediately();
+    Seeker->SetActorLocation(FVector(0, -220, 96));
+    Seeker->GetController()->SetControlRotation(FRotator(0, -90, 0));
     bRoundRunning = false;
     bRoundFinished = false;
     bSeekerWon = false;
@@ -60,19 +67,19 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPreparation()
     }
     PreparationEndsAt = GetWorld()->GetTimeSeconds() + (bSelfTest ? 1.0f : 12.0f);
     UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK] PREPARATION seconds=%.0f"),
-        PreparationEndsAt - GetWorld()->GetTimeSeconds());
+           PreparationEndsAt - GetWorld()->GetTimeSeconds());
     if (bSelfTest)
     {
         FTimerHandle CaptureTimer;
         GetWorldTimerManager().SetTimer(CaptureTimer, this,
-            &AHumanityTrinityRebuildHideAndSeekGameMode::CaptureMemorize, 0.55f, false);
-        GetWorldTimerManager().SetTimer(PreparationTimer, this,
-            &AHumanityTrinityRebuildHideAndSeekGameMode::StartRound, 1.0f, false);
+                                        &AHumanityTrinityRebuildHideAndSeekGameMode::CaptureMemorize, 0.55f, false);
+        GetWorldTimerManager().SetTimer(PreparationTimer, this, &AHumanityTrinityRebuildHideAndSeekGameMode::StartRound,
+                                        1.0f, false);
     }
     else
     {
-        GetWorldTimerManager().SetTimer(PreparationTimer, this,
-            &AHumanityTrinityRebuildHideAndSeekGameMode::StartRound, 12.0f, false);
+        GetWorldTimerManager().SetTimer(PreparationTimer, this, &AHumanityTrinityRebuildHideAndSeekGameMode::StartRound,
+                                        12.0f, false);
     }
 }
 
@@ -85,15 +92,15 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::StartRound()
     for (TActorIterator<AHumanityTrinityRebuildLightingController> It(GetWorld()); It; ++It)
     {
         It->bResidualLightsEnabled = false;
-        It->SetMasterLights(false);
+        It->SetMasterLights(bPracticeMode);
         break;
     }
     const float Side = bSelfTest ? 1.0f : (FMath::RandBool() ? 1.0f : -1.0f);
     const FVector HideLocation(Side * 165.0f, -900.0f, 91.0f);
     FActorSpawnParameters Spawn;
     Spawn.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-    Hider = GetWorld()->SpawnActor<AHumanityTrinityRebuildHider>(
-        AHumanityTrinityRebuildHider::StaticClass(), HideLocation, FRotator::ZeroRotator, Spawn);
+    Hider = GetWorld()->SpawnActor<AHumanityTrinityRebuildHider>(AHumanityTrinityRebuildHider::StaticClass(),
+                                                                 HideLocation, FRotator::ZeroRotator, Spawn);
     if (!Hider)
     {
         UE_LOG(LogTemp, Error, TEXT("[HIDE_AND_SEEK] SETUP_FAIL hider spawn"));
@@ -103,21 +110,23 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::StartRound()
     bRoundRunning = true;
     SecondsRemaining = 180.0f;
     UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK] ROUND_STARTED residual_lights=OFF hider=%s"),
-        *HideLocation.ToString());
+           *Hider->GetActorLocation().ToString());
     if (bSelfTest)
     {
         FTimerHandle CaptureTimer;
         GetWorldTimerManager().SetTimer(CaptureTimer, this,
-            &AHumanityTrinityRebuildHideAndSeekGameMode::CaptureBlackout, 0.30f, false);
+                                        &AHumanityTrinityRebuildHideAndSeekGameMode::CaptureBlackout, 0.30f, false);
         FTimerHandle TestTimer;
-        GetWorldTimerManager().SetTimer(TestTimer, this,
-            &AHumanityTrinityRebuildHideAndSeekGameMode::RunSelfTest, 0.65f, false);
+        GetWorldTimerManager().SetTimer(TestTimer, this, &AHumanityTrinityRebuildHideAndSeekGameMode::RunSelfTest,
+                                        0.65f, false);
     }
 }
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::Tick(const float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    if (SelfTestMoveUntil > GetWorld()->GetTimeSeconds() && Seeker)
+        Seeker->AddMovementInput(FVector(1, 0, 0), 1.f);
     if (bRoundRunning)
     {
         SecondsRemaining = FMath::Max(0.0f, SecondsRemaining - DeltaSeconds);
@@ -151,7 +160,7 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::FinishRound(const bool bCaught)
         Hider->SetSeeker(nullptr);
     }
     UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK] ROUND_FINISHED winner=%s remaining=%.1f"),
-        bCaught ? TEXT("SEEKER") : TEXT("HIDER"), SecondsRemaining);
+           bCaught ? TEXT("SEEKER") : TEXT("HIDER"), SecondsRemaining);
 }
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::RestartRound()
@@ -170,109 +179,72 @@ FString AHumanityTrinityRebuildHideAndSeekGameMode::GetStatusLine() const
     if (!bRoundRunning)
     {
         const int32 Count = FMath::Max(0, FMath::CeilToInt(PreparationEndsAt - GetWorld()->GetTimeSeconds()));
-        return FString::Printf(TEXT("MEMORIZE THE ROOM  |  Lights out in %d"), Count);
+        return bPracticeMode
+                   ? FString::Printf(TEXT("PRACTICE  |  Round starts in %d  |  Tab: switch to darkness"), Count)
+                   : FString::Printf(TEXT("MEMORIZE THE ROOM  |  Lights out in %d  |  Tab: bright practice"), Count);
     }
-    return FString::Printf(TEXT("FIND THE HIDER  |  %d seconds left"),
-        FMath::CeilToInt(SecondsRemaining));
+    return FString::Printf(TEXT("%s  |  %d seconds left"),
+                           bPracticeMode ? TEXT("BRIGHT PRACTICE") : TEXT("FIND THE HIDER"),
+                           FMath::CeilToInt(SecondsRemaining));
+}
+
+void AHumanityTrinityRebuildHideAndSeekGameMode::TogglePracticeMode()
+{
+    if (bSelfTest)
+        return;
+    bPracticeMode = !bPracticeMode;
+    RestartRound();
+}
+void AHumanityTrinityRebuildHideAndSeekGameMode::ReportSeekerNoise(const FVector& Location, float Loudness)
+{
+    if (bRoundRunning && Hider)
+        Hider->HearNoise(Location, Loudness);
+}
+FString AHumanityTrinityRebuildHideAndSeekGameMode::GetPracticeHint() const
+{
+    return bPracticeMode && bRoundRunning && Hider ? Hider->GetBehaviorLabel() : FString();
 }
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::RunSelfTest()
 {
-    bSelfTestCorePassed = Seeker && Hider && Hider->HasFootstepAudio()
-        && SecondsRemaining < 179.9f;
+    bSelfTestCorePassed = Seeker && Hider && Hider->HasFootstepAudio() && Hider->GetLoadedPartCount() == 15 &&
+                          Hider->GetCoverCount() >= 4 && SecondsRemaining < 179.9f;
     for (TActorIterator<AHumanityTrinityRebuildLightingController> It(GetWorld()); It; ++It)
     {
-        bSelfTestCorePassed &= It->GetActiveMainLightCount() == 0;
-        bSelfTestCorePassed &= It->GetActiveResidualLightCount() == 0;
+        bSelfTestCorePassed &= It->GetActiveMainLightCount() == 0 && It->GetActiveResidualLightCount() == 0;
         break;
     }
-    if (Seeker && Hider)
-    {
-        FCollisionQueryParams RouteQuery(SCENE_QUERY_STAT(HideAndSeekAccessRoute), false);
-        RouteQuery.AddIgnoredActor(Seeker);
-        RouteQuery.AddIgnoredActor(Hider);
-        for (const float RouteX : {165.0f, 470.0f, 500.0f, -470.0f, -500.0f})
-        {
-            const FVector First(0.0f, -220.0f, 96.0f);
-            const FVector Bend(RouteX, -220.0f, 96.0f);
-            const FVector Last(RouteX, -900.0f, 96.0f);
-            FHitResult Hit;
-            const FCollisionShape Shape = FCollisionShape::MakeCapsule(34.0f, 92.0f);
-            const bool bAcrossBlocked = GetWorld()->SweepSingleByChannel(Hit, First, Bend,
-                FQuat::Identity, ECC_Pawn, Shape, RouteQuery);
-            const bool bAlongBlocked = !bAcrossBlocked && GetWorld()->SweepSingleByChannel(Hit, Bend, Last,
-                FQuat::Identity, ECC_Pawn, Shape, RouteQuery);
-            UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] route_x=%.0f across=%s along=%s hit=%s at=%s"),
-                RouteX, bAcrossBlocked ? TEXT("BLOCKED") : TEXT("CLEAR"),
-                bAlongBlocked ? TEXT("BLOCKED") : TEXT("CLEAR"),
-                Hit.GetActor() ? *Hit.GetActor()->GetName() : TEXT("none"),
-                *Hit.Location.ToString());
-        }
-        for (const float TargetX : {165.0f, -165.0f})
-        for (const float Radius : {34.0f, 24.0f})
-        {
-            constexpr int32 CellsX = 27;
-            constexpr int32 CellsY = 29;
-            constexpr float CellSize = 40.0f;
-            auto GridPosition = [](const int32 Index)
-            {
-                return FVector(-520.0f + (Index % CellsX) * CellSize,
-                    -220.0f - (Index / CellsX) * CellSize, 96.0f);
-            };
-            TArray<int32> Parent;
-            Parent.Init(-2, CellsX * CellsY);
-            TArray<int32> Queue;
-            const int32 Start = 13;
-            Parent[Start] = -1;
-            Queue.Add(Start);
-            int32 Found = -1;
-            for (int32 Cursor = 0; Cursor < Queue.Num() && Found < 0; ++Cursor)
-            {
-                const int32 Current = Queue[Cursor];
-                const FVector From = GridPosition(Current);
-                if (FVector::Dist2D(From, FVector(TargetX, -900.0f, 96.0f)) < 100.0f)
-                {
-                    Found = Current;
-                    break;
-                }
-                const int32 Column = Current % CellsX;
-                const int32 Row = Current / CellsX;
-                for (const FIntPoint Offset : {FIntPoint(1,0), FIntPoint(-1,0),
-                    FIntPoint(0,1), FIntPoint(0,-1)})
-                {
-                    const int32 X = Column + Offset.X;
-                    const int32 Y = Row + Offset.Y;
-                    if (X < 0 || X >= CellsX || Y < 0 || Y >= CellsY) continue;
-                    const int32 Next = Y * CellsX + X;
-                    if (Parent[Next] != -2) continue;
-                    FHitResult RouteHit;
-                    const bool bBlocked = GetWorld()->SweepSingleByChannel(RouteHit,
-                        From, GridPosition(Next), FQuat::Identity, ECC_Pawn,
-                        FCollisionShape::MakeCapsule(Radius, 92.0f), RouteQuery);
-                    if (bBlocked) continue;
-                    Parent[Next] = Current;
-                    Queue.Add(Next);
-                }
-            }
-            if (FMath::IsNearlyEqual(Radius, 24.0f))
-            {
-                bSelfTestCorePassed &= Found >= 0;
-            }
-            UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] grid_target_x=%.0f radius=%.0f reachable=%s explored=%d end=%s"),
-                TargetX, Radius, Found >= 0 ? TEXT("YES") : TEXT("NO"), Queue.Num(),
-                Found >= 0 ? *GridPosition(Found).ToString() : TEXT("none"));
-        }
-        SelfTestHiderStart = Hider->GetActorLocation();
-        Seeker->SetActorLocation(SelfTestHiderStart + FVector(0.0f, 230.0f, 0.0f),
-            false, nullptr, ETeleportType::TeleportPhysics);
-        FTimerHandle FinishTimer;
-        GetWorldTimerManager().SetTimer(FinishTimer, this,
-            &AHumanityTrinityRebuildHideAndSeekGameMode::FinishSelfTest, 3.0f, false);
-    }
-    else
+    if (!Hider || !Seeker)
     {
         FinishSelfTest();
+        return;
     }
+    SelfTestHiderStart = Hider->GetActorLocation();
+    // Physical proximity alone must not reveal the seeker to the hider.
+    Seeker->SetActorLocation(SelfTestHiderStart + FVector(0, 100, 26));
+    Seeker->Crouch();
+    FTimerHandle QuietTimer;
+    GetWorldTimerManager().SetTimer(
+        QuietTimer,
+        [this]() {
+            const bool Quiet = Hider->GetHeardCount() == 0 && Hider->GetStepsEmitted() == 0 &&
+                               FVector::Dist2D(SelfTestHiderStart, Hider->GetActorLocation()) < 1;
+            const bool Crouch = Seeker->bIsCrouched && Seeker->GetFootstepLoudness() < .1f && Hider->IsCrouching();
+            Hider->HearNoise(Hider->GetActorLocation() + FVector(220, 0, 0), .09f);
+            const bool QuietRange = Hider->GetHeardCount() == 0;
+            bSelfTestCorePassed &= Quiet && Crouch && QuietRange;
+            UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] proximity_silent=%s crouch=%s quiet_range=%s"),
+                   Quiet ? TEXT("PASS") : TEXT("FAIL"), Crouch ? TEXT("PASS") : TEXT("FAIL"),
+                   QuietRange ? TEXT("PASS") : TEXT("FAIL"));
+            Seeker->UnCrouch();
+            Seeker->SetActorLocation(FVector(0, -220, 96));
+            ReportSeekerNoise(Hider->GetActorLocation() + FVector(0, 180, 0), .85f);
+            bSelfTestCorePassed &= Hider->GetHeardCount() == 1;
+            FTimerHandle FinishTimer;
+            GetWorldTimerManager().SetTimer(FinishTimer, this,
+                                            &AHumanityTrinityRebuildHideAndSeekGameMode::FinishSelfTest, 22.f, false);
+        },
+        1.5f, false);
 }
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::FinishSelfTest()
@@ -280,28 +252,128 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::FinishSelfTest()
     bool bPass = bSelfTestCorePassed;
     if (Seeker && Hider)
     {
-        const float DistanceMoved = FVector::Dist2D(Hider->GetActorLocation(), SelfTestHiderStart);
-        const int32 Footsteps = Hider->GetStepsEmitted();
-        bPass &= DistanceMoved > 90.0f && Footsteps >= 2;
-        UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] movement_cm=%.1f footsteps=%d"),
-            DistanceMoved, Footsteps);
-        // Exercise the player's real near-hand touch and the win transition.
-        Seeker->SetActorLocation(Hider->GetActorLocation() + FVector(0.0f, 94.0f, 0.0f),
-            false, nullptr, ETeleportType::TeleportPhysics);
-        Seeker->GetController()->SetControlRotation(FRotator(0.0f, -90.0f, 0.0f));
+        const float Distance = FVector::Dist2D(Hider->GetActorLocation(), SelfTestHiderStart);
+        bPass &= Distance > 220 && Hider->GetStepsEmitted() >= 5 && Hider->GetRouteLength() > 3;
+        UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] movement_cm=%.1f footsteps=%d route=%d settled=%s"),
+               Distance, Hider->GetStepsEmitted(), Hider->GetRouteLength(),
+               Hider->GetHideState() == EHiderState::Hidden ? TEXT("YES") : TEXT("NO"));
+        // Use a clear area to validate a real articulated touch, including occlusion.
+        Hider->SetShowcasePose(0);
+        Hider->SetActorLocation(FVector(0, -300, 90));
+        Hider->SetActorRotation(FRotator::ZeroRotator);
+        Seeker->SetActorLocation(FVector(95, -300, 96));
+        Seeker->GetController()->SetControlRotation(FRotator(-10, 180, 0));
+        AActor* Barrier = GetWorld()->SpawnActor<AActor>();
+        UBoxComponent* Box = NewObject<UBoxComponent>(Barrier);
+        Barrier->SetRootComponent(Box);
+        Box->SetBoxExtent(FVector(4, 60, 90));
+        Box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+        Box->SetCollisionResponseToAllChannels(ECR_Ignore);
+        Box->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+        Box->RegisterComponent();
+        Barrier->SetActorLocation(FVector(48, -300, 90));
         Seeker->PerformTouch();
-        bPass &= bRoundFinished && bSeekerWon;
+        const bool Blocked = !bRoundFinished && Seeker->GetCurrentTouchMessage().Contains(TEXT("A firm surface"));
+        Box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Barrier->Destroy();
+        Seeker->PerformTouch();
+        bPass &= Blocked && bRoundFinished && bSeekerWon;
+        UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] touch_occlusion=%s catch=%s"),
+               Blocked ? TEXT("PASS") : TEXT("FAIL"), bSeekerWon ? TEXT("PASS") : TEXT("FAIL"));
     }
-    UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] %s audio=%s catch=%s timer=%.1f"),
-        bPass ? TEXT("PASS") : TEXT("FAIL"),
-        Hider && Hider->HasFootstepAudio() ? TEXT("YES") : TEXT("NO"),
-        bSeekerWon ? TEXT("YES") : TEXT("NO"), SecondsRemaining);
+    bSelfTestCorePassed = bPass;
+    UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] core=%s"), bPass ? TEXT("PASS") : TEXT("FAIL"));
     FTimerHandle CaptureTimer;
-    GetWorldTimerManager().SetTimer(CaptureTimer, this,
-        &AHumanityTrinityRebuildHideAndSeekGameMode::CaptureFound, 0.55f, false);
-    FTimerHandle ExitTimer;
-    GetWorldTimerManager().SetTimer(ExitTimer, this,
-        &AHumanityTrinityRebuildHideAndSeekGameMode::ExitSelfTest, 1.0f, false);
+    GetWorldTimerManager().SetTimer(CaptureTimer, this, &AHumanityTrinityRebuildHideAndSeekGameMode::CaptureFound, .7f,
+                                    false);
+    FTimerHandle ShowcaseTimer;
+    GetWorldTimerManager().SetTimer(ShowcaseTimer, this,
+                                    &AHumanityTrinityRebuildHideAndSeekGameMode::CaptureCharacterShowcase, 1.2f, false);
+}
+
+void AHumanityTrinityRebuildHideAndSeekGameMode::CaptureCharacterShowcase()
+{
+    if (!Hider || !Seeker)
+    {
+        ExitSelfTest();
+        return;
+    }
+    if (ShowcaseStep == 0)
+    {
+        Seeker->SetActorLocation(FVector(255, -125, 96));
+        Seeker->GetController()->SetControlRotation((FVector(0, -300, 88) - FVector(255, -125, 162)).Rotation());
+    }
+    if (ShowcaseStep > 0)
+        CaptureGameScreenshot(FString::Printf(
+            TEXT("0%d_Character_%s.png"), ShowcaseStep + 3,
+            ShowcaseStep == 1 ? TEXT("Standing") : (ShowcaseStep == 2 ? TEXT("Crouching") : TEXT("Walking"))));
+    if (ShowcaseStep >= 3)
+    {
+        FTimerHandle End;
+        GetWorldTimerManager().SetTimer(End, this, &AHumanityTrinityRebuildHideAndSeekGameMode::TestRoundControls, .7f,
+                                        false);
+        return;
+    }
+    Hider->SetShowcasePose(ShowcaseStep);
+    ++ShowcaseStep;
+    FTimerHandle Next;
+    GetWorldTimerManager().SetTimer(Next, this, &AHumanityTrinityRebuildHideAndSeekGameMode::CaptureCharacterShowcase,
+                                    1.5f, false);
+}
+
+void AHumanityTrinityRebuildHideAndSeekGameMode::TestRoundControls()
+{
+    // Exercise production round controls without scheduling the self-test recursively.
+    bSelfTest = false;
+    TogglePracticeMode();
+    const bool Restarted = bPracticeMode && !bRoundRunning && !bRoundFinished && !Hider;
+    GetWorldTimerManager().ClearTimer(PreparationTimer);
+    StartRound();
+    bool Lit = false;
+    for (TActorIterator<AHumanityTrinityRebuildLightingController> It(GetWorld()); It; ++It)
+    {
+        Lit = It->GetActiveMainLightCount() > 0;
+        break;
+    }
+    bSelfTestCorePassed &= Restarted && Lit && bRoundRunning && Hider;
+    UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] practice_restart=%s practice_lit=%s"),
+           Restarted ? TEXT("PASS") : TEXT("FAIL"), Lit ? TEXT("PASS") : TEXT("FAIL"));
+    if (!Hider)
+    {
+        ExitSelfTest();
+        return;
+    }
+    Hider->SetActorLocation(FVector(150, -220, 90));
+    SelfTestMoveUntil = GetWorld()->GetTimeSeconds() + .45f;
+    FTimerHandle Movement;
+    GetWorldTimerManager().SetTimer(
+        Movement,
+        [this]() {
+            SelfTestMoveUntil = 0;
+            Seeker->GetCharacterMovement()->StopMovementImmediately();
+            const bool StepsHeard = Hider->GetHeardCount() > 0;
+            bSelfTestCorePassed &= StepsHeard;
+            UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] actual_player_footsteps=%s heard=%d"),
+                   StepsHeard ? TEXT("PASS") : TEXT("FAIL"), Hider->GetHeardCount());
+            CaptureGameScreenshot(TEXT("07_BrightPractice.png"));
+            SecondsRemaining = .05f;
+            FTimerHandle Timeout;
+            GetWorldTimerManager().SetTimer(
+                Timeout,
+                [this]() {
+                    const bool TimedOut = bRoundFinished && !bRoundRunning && !bSeekerWon;
+                    TogglePracticeMode();
+                    const bool BackToDark = !bPracticeMode && !bRoundRunning && !bRoundFinished && !Hider;
+                    bSelfTestCorePassed &= TimedOut && BackToDark;
+                    UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] timeout=%s dark_restart=%s"),
+                           TimedOut ? TEXT("PASS") : TEXT("FAIL"), BackToDark ? TEXT("PASS") : TEXT("FAIL"));
+                    UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] %s"),
+                           bSelfTestCorePassed ? TEXT("PASS") : TEXT("FAIL"));
+                    ExitSelfTest();
+                },
+                .3f, false);
+        },
+        .6f, false);
 }
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::CaptureMemorize()
@@ -326,7 +398,8 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::ExitSelfTest()
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::CaptureGameScreenshot(const FString& FileName)
 {
-    if (!bCaptureGame) return;
+    if (!bCaptureGame)
+        return;
     const FString Directory = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("Screenshots"), TEXT("HideAndSeek"));
     IFileManager::Get().MakeDirectory(*Directory, true);
     const FString FullPath = FPaths::Combine(Directory, FileName);

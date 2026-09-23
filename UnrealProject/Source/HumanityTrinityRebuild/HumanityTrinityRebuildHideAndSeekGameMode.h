@@ -12,7 +12,7 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildHideAndSeekGameMode : pu
 {
     GENERATED_BODY()
 
-public:
+  public:
     AHumanityTrinityRebuildHideAndSeekGameMode();
     virtual void Tick(float DeltaSeconds) override;
     bool IsRoundRunning() const { return bRoundRunning; }
@@ -21,11 +21,15 @@ public:
     FString GetStatusLine() const;
     void TryCatchHider(AActor* TouchedActor);
     void RestartRound();
+    void TogglePracticeMode();
+    bool IsPracticeMode() const { return bPracticeMode; }
+    void ReportSeekerNoise(const FVector& Location, float Loudness);
+    FString GetPracticeHint() const;
 
-protected:
+  protected:
     virtual void BeginPlay() override;
 
-private:
+  private:
     UPROPERTY() TObjectPtr<AHumanityTrinityRebuildHider> Hider;
     UPROPERTY() TObjectPtr<AHumanityTrinityRebuildPlayerCharacter> Seeker;
     FTimerHandle PreparationTimer;
@@ -37,6 +41,9 @@ private:
     bool bSelfTest = false;
     bool bCaptureGame = false;
     bool bSelfTestCorePassed = false;
+    bool bPracticeMode = false;
+    int32 ShowcaseStep = 0;
+    float SelfTestMoveUntil = 0;
     FVector SelfTestHiderStart = FVector::ZeroVector;
 
     void BeginPreparation();
@@ -49,4 +56,6 @@ private:
     void CaptureBlackout();
     void CaptureFound();
     void CaptureGameScreenshot(const FString& FileName);
+    void CaptureCharacterShowcase();
+    void TestRoundControls();
 };

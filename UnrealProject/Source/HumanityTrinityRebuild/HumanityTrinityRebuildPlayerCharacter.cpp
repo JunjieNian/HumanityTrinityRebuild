@@ -12,6 +12,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundWave.h"
+#include "Materials/MaterialInterface.h"
 
 AHumanityTrinityRebuildPlayerCharacter::AHumanityTrinityRebuildPlayerCharacter()
 {
@@ -71,6 +74,7 @@ void AHumanityTrinityRebuildPlayerCharacter::Tick(const float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     UpdateFocusedInteractable();
     UpdateEyeAdaptation(DeltaSeconds);
+    if (bHideAndSeekMode) UpdateFootsteps(DeltaSeconds);
     if (bHideAndSeekMode && bTouchHeld)
     {
         TouchPulseSeconds -= DeltaSeconds;
@@ -107,6 +111,9 @@ void AHumanityTrinityRebuildPlayerCharacter::SetupPlayerInputComponent(UInputCom
     PlayerInputComponent->BindAction(TEXT("TouchNearby"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::StartTouch);
     PlayerInputComponent->BindAction(TEXT("TouchNearby"), IE_Released, this, &AHumanityTrinityRebuildPlayerCharacter::StopTouch);
     PlayerInputComponent->BindAction(TEXT("RestartHideAndSeek"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::RestartHideAndSeek);
+    PlayerInputComponent->BindAction(TEXT("GameCrouch"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::StartCrouch);
+    PlayerInputComponent->BindAction(TEXT("GameCrouch"), IE_Released, this, &AHumanityTrinityRebuildPlayerCharacter::StopCrouch);
+    PlayerInputComponent->BindAction(TEXT("PracticeMode"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::TogglePractice);
 }
 
 void AHumanityTrinityRebuildPlayerCharacter::MoveForward(const float Value)
@@ -201,6 +208,48 @@ void AHumanityTrinityRebuildPlayerCharacter::UpdateWalkSpeed()
 {
     GetCharacterMovement()->MaxWalkSpeed = bHideAndSeekMode && bTouchHeld
         ? 80.0f : (bSlowWalkHeld ? 120.0f : 240.0f);
+    GetCharacterMovement()->MaxWalkSpeedCrouched = bTouchHeld ? 55.0f : 65.0f;
+}
+
+void AHumanityTrinityRebuildPlayerCharacter::StartCrouch()
+{
+    if (bHideAndSeekMode) Crouch();
+}
+void AHumanityTrinityRebuildPlayerCharacter::StopCrouch() { UnCrouch(); }
+void AHumanityTrinityRebuildPlayerCharacter::TogglePractice()
+{
+    if (auto* Game = GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildHideAndSeekGameMode>()) Game->TogglePracticeMode();
+}
+float AHumanityTrinityRebuildPlayerCharacter::GetFootstepLoudness() const
+{
+    return bIsCrouched ? .09f : (bSlowWalkHeld || bTouchHeld ? .18f : .85f);
+}
+FString AHumanityTrinityRebuildPlayerCharacter::GetMovementHint() const
+{
+    if (GetVelocity().Size2D() < 3) return TEXT("Still / silent");
+    return bIsCrouched ? TEXT("Crouching / very quiet") :
+        (bSlowWalkHeld || bTouchHeld ? TEXT("Careful steps / quiet") : TEXT("Walking / audible"));
+}
+void AHumanityTrinityRebuildPlayerCharacter::UpdateFootsteps(float Dt)
+{
+    FVector Camera = FirstPersonCamera->GetRelativeLocation();
+    Camera.Z = FMath::FInterpTo(Camera.Z, bIsCrouched ? 35.f : 66.f, Dt, 10);
+    FirstPersonCamera->SetRelativeLocation(Camera);
+    const float Distance = FVector::Dist2D(GetActorLocation(), PreviousFootPosition);
+    PreviousFootPosition = GetActorLocation();
+    auto* Game = GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildHideAndSeekGameMode>();
+    // Teleports/restarts and airborne movement do not manufacture footsteps.
+    if (!Game || !Game->IsRoundRunning() || Distance > 80 || !GetCharacterMovement()->IsMovingOnGround())
+    { FootDistance=0; return; }
+    FootDistance += Distance;
+    const float Stride = bIsCrouched ? 32.f : 52.f;
+    if (FootDistance >= Stride)
+    {
+        FootDistance = FMath::Fmod(FootDistance, Stride);
+        const float Loudness = GetFootstepLoudness();
+        Game->ReportSeekerNoise(GetActorLocation(), Loudness);
+        if (PlayerFootstep) UGameplayStatics::PlaySound2D(this, PlayerFootstep, Loudness*.22f, .78f);
+    }
 }
 
 void AHumanityTrinityRebuildPlayerCharacter::ToggleCurtains()
@@ -295,6 +344,13 @@ void AHumanityTrinityRebuildPlayerCharacter::EnableHideAndSeekMode()
     // The chair rows have passages narrower than the walkthrough capsule.
     // A 48 cm body width represents moving sideways between furniture.
     GetCapsuleComponent()->SetCapsuleSize(24.0f, 92.0f, true);
+    GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
+    GetCharacterMovement()->SetCrouchedHalfHeight(60.0f);
+    UnCrouch();
+    PreviousFootPosition = GetActorLocation();
+    FootDistance = 0;
+    PlayerFootstep = LoadObject<USoundWave>(nullptr,
+        TEXT("/Game/HumanityTrinityRebuild/Audio/SW_HiderFootstep.SW_HiderFootstep"));
     InteractionDistanceCm = 95.0f;
     TouchMessage.Empty();
     TouchMessageUntil = 0.0f;
@@ -313,15 +369,15 @@ void AHumanityTrinityRebuildPlayerCharacter::PerformTouch()
         GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildHideAndSeekGameMode>();
     if (!Game || !Game->IsRoundRunning()) return;
 
-    const FVector Start = FirstPersonCamera->GetComponentLocation() - FVector(0.0f, 0.0f, 65.0f);
-    FVector Forward = FirstPersonCamera->GetForwardVector();
-    Forward.Z = 0.0f;
+    const FVector Start = FirstPersonCamera->GetComponentLocation() - FVector(0.0f, 0.0f, 45.0f);
+    FVector Forward = GetControlRotation().Vector();
     Forward.Normalize();
     const FVector End = Start + Forward * 105.0f;
     FHitResult Hit;
     FCollisionQueryParams Params(SCENE_QUERY_STAT(HideAndSeekHandTouch), true, this);
+    Params.bReturnFaceIndex = true;
     const bool bHit = GetWorld()->SweepSingleByChannel(Hit, Start, End, FQuat::Identity,
-        ECC_Visibility, FCollisionShape::MakeSphere(15.0f), Params);
+        ECC_Visibility, FCollisionShape::MakeSphere(12.0f), Params);
     if (!bHit)
     {
         TouchMessage = TEXT("Your hand finds only air");
@@ -331,21 +387,22 @@ void AHumanityTrinityRebuildPlayerCharacter::PerformTouch()
         TouchMessage = TEXT("You touched a person!");
         Game->TryCatchHider(Hit.GetActor());
     }
-    else if (FMath::Abs(Hit.ImpactPoint.X) > 545.0f)
-    {
-        TouchMessage = TEXT("Your hand reaches the side wall or shelving");
-    }
-    else if (Hit.ImpactPoint.Y < -1360.0f)
-    {
-        TouchMessage = TEXT("Your hand meets the stage or curtain");
-    }
-    else if (Hit.ImpactPoint.Y < -330.0f && Hit.ImpactPoint.Y > -1300.0f)
-    {
-        TouchMessage = TEXT("Your hand brushes furniture");
-    }
     else
     {
-        TouchMessage = TEXT("Your hand meets a solid surface");
+        int32 Section = 0;
+        UMaterialInterface* Material = Hit.GetComponent()
+            ? Hit.GetComponent()->GetMaterialFromCollisionFaceIndex(Hit.FaceIndex, Section) : nullptr;
+        const FString Name = Material ? Material->GetName().ToLower() : FString();
+        FString Surface = TEXT("A firm surface");
+        if (Name.Contains(TEXT("wood")) || Name.Contains(TEXT("oak")) || Name.Contains(TEXT("slat"))) Surface = TEXT("Hard wood / a smooth grain");
+        else if (Name.Contains(TEXT("metal")) || Name.Contains(TEXT("steel")) || Name.Contains(TEXT("brass"))) Surface = TEXT("Cool metal / a rigid edge");
+        else if (Name.Contains(TEXT("fabric")) || Name.Contains(TEXT("curtain"))) Surface = TEXT("Soft fabric / folds under your hand");
+        else if (Name.Contains(TEXT("plastic")) || Name.Contains(TEXT("shell"))) Surface = TEXT("Smooth plastic / a curved surface");
+        else if (Name.Contains(TEXT("floor"))) Surface = TEXT("A firm floor / fine surface texture");
+        else if (Name.Contains(TEXT("table"))) Surface = TEXT("Smooth tabletop / a firm edge");
+        else if (Name.Contains(TEXT("wall")) || Name.Contains(TEXT("plaster"))) Surface = TEXT("A flat wall / slightly rough");
+        const TCHAR* Height = Hit.ImpactPoint.Z < 45 ? TEXT("low") : (Hit.ImpactPoint.Z < 95 ? TEXT("waist height") : TEXT("high"));
+        TouchMessage = FString::Printf(TEXT("%s | %s | %.0f cm from your hand"), *Surface, Height, Hit.Distance);
     }
     TouchMessageUntil = GetWorld()->GetTimeSeconds() + 2.4f;
     UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK] TOUCH result=%s hit=%s distance=%.1f"),
