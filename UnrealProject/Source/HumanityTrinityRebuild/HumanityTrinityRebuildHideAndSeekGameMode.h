@@ -13,6 +13,7 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildHideAndSeekGameMode : pu
     GENERATED_BODY()
 
 public:
+    AHumanityTrinityRebuildHideAndSeekGameMode();
     virtual void Tick(float DeltaSeconds) override;
     bool IsRoundRunning() const { return bRoundRunning; }
     bool IsRoundFinished() const { return bRoundFinished; }

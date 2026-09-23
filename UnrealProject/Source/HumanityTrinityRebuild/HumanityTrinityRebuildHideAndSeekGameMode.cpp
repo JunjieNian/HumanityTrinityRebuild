@@ -14,6 +14,11 @@
 #include "TimerManager.h"
 #include "UnrealClient.h"
 
+AHumanityTrinityRebuildHideAndSeekGameMode::AHumanityTrinityRebuildHideAndSeekGameMode()
+{
+    PrimaryActorTick.bCanEverTick = true;
+}
+
 void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPlay()
 {
     Super::BeginPlay();
@@ -173,7 +178,8 @@ FString AHumanityTrinityRebuildHideAndSeekGameMode::GetStatusLine() const
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::RunSelfTest()
 {
-    bSelfTestCorePassed = Seeker && Hider && Hider->HasFootstepAudio();
+    bSelfTestCorePassed = Seeker && Hider && Hider->HasFootstepAudio()
+        && SecondsRemaining < 179.9f;
     for (TActorIterator<AHumanityTrinityRebuildLightingController> It(GetWorld()); It; ++It)
     {
         bSelfTestCorePassed &= It->GetActiveMainLightCount() == 0;
@@ -286,10 +292,10 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::FinishSelfTest()
         Seeker->PerformTouch();
         bPass &= bRoundFinished && bSeekerWon;
     }
-    UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] %s audio=%s catch=%s"),
+    UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK_SELFTEST] %s audio=%s catch=%s timer=%.1f"),
         bPass ? TEXT("PASS") : TEXT("FAIL"),
         Hider && Hider->HasFootstepAudio() ? TEXT("YES") : TEXT("NO"),
-        bSeekerWon ? TEXT("YES") : TEXT("NO"));
+        bSeekerWon ? TEXT("YES") : TEXT("NO"), SecondsRemaining);
     FTimerHandle CaptureTimer;
     GetWorldTimerManager().SetTimer(CaptureTimer, this,
         &AHumanityTrinityRebuildHideAndSeekGameMode::CaptureFound, 0.55f, false);
