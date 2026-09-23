@@ -1,6 +1,7 @@
 #include "HumanityTrinityRebuildHUD.h"
 
 #include "HumanityTrinityRebuildPlayerCharacter.h"
+#include "HumanityTrinityRebuildHideAndSeekGameMode.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 
@@ -15,9 +16,38 @@ void AHumanityTrinityRebuildHUD::DrawHUD()
 
     const float CenterX = Canvas->ClipX * 0.5f;
     const float CenterY = Canvas->ClipY * 0.5f;
+    const AHumanityTrinityRebuildPlayerCharacter* Player = Cast<AHumanityTrinityRebuildPlayerCharacter>(GetOwningPawn());
+    if (Player && Player->IsHideAndSeekMode())
+    {
+        const AHumanityTrinityRebuildHideAndSeekGameMode* Game =
+            GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildHideAndSeekGameMode>();
+        if (Game && Game->IsRoundRunning())
+        {
+            // The room's baked/indirect light can survive switching dynamic
+            // fixtures off. This rule makes the played round truly sightless.
+            DrawRect(FLinearColor::Black, 0.0f, 0.0f, Canvas->ClipX, Canvas->ClipY);
+        }
+        DrawRect(FLinearColor(0.0f, 0.0f, 0.0f, 0.60f), 0.0f, 0.0f, Canvas->ClipX, 56.0f);
+        DrawText(Game ? Game->GetStatusLine() : TEXT("HIDE AND SEEK"),
+            FLinearColor(1.0f, 0.91f, 0.70f), 24.0f, 17.0f,
+            GEngine->GetMediumFont(), 1.0f, false);
+        const FString Touch = Player->GetCurrentTouchMessage();
+        if (!Touch.IsEmpty())
+        {
+            float Width = 0.0f, Height = 0.0f;
+            GetTextSize(Touch, Width, Height, GEngine->GetMediumFont(), 1.0f);
+            DrawRect(FLinearColor(0.0f, 0.0f, 0.0f, 0.75f),
+                CenterX - Width * 0.5f - 14.0f, CenterY + 40.0f, Width + 28.0f, Height + 16.0f);
+            DrawText(Touch, FLinearColor::White, CenterX - Width * 0.5f,
+                CenterY + 48.0f, GEngine->GetMediumFont(), 1.0f, false);
+        }
+        DrawText(TEXT("WASD Move   Mouse Turn   Shift Slow   Hold F Feel Ahead   E Door   R Restart   Esc Exit"),
+            FLinearColor(0.85f, 0.85f, 0.85f, 0.9f), 24.0f,
+            Canvas->ClipY - 34.0f, GEngine->GetSmallFont(), 1.0f, false);
+        return;
+    }
     DrawRect(FLinearColor(0.92f, 0.95f, 1.0f, 0.7f), CenterX - 1.0f, CenterY - 1.0f, 2.0f, 2.0f);
 
-    const AHumanityTrinityRebuildPlayerCharacter* Player = Cast<AHumanityTrinityRebuildPlayerCharacter>(GetOwningPawn());
     if (Player)
     {
         const FString Prompt = Player->GetCurrentInteractionPrompt();

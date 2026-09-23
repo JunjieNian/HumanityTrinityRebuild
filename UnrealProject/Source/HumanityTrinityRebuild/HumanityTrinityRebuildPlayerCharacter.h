@@ -31,6 +31,10 @@ public:
 
     UFUNCTION(BlueprintPure, Category = "HumanityTrinityRebuild|Interaction")
     FString GetCurrentInteractionPrompt() const;
+    bool IsHideAndSeekMode() const { return bHideAndSeekMode; }
+    FString GetCurrentTouchMessage() const;
+    void EnableHideAndSeekMode();
+    void PerformTouch();
 
 private:
     UPROPERTY(VisibleAnywhere, Category = "Camera")
@@ -64,6 +68,12 @@ private:
     float BrightAdaptationSpeed = 2.7f;
 
     float CurrentExposure = 0.0f;
+    bool bHideAndSeekMode = false;
+    bool bTouchHeld = false;
+    bool bSlowWalkHeld = false;
+    float TouchPulseSeconds = 0.0f;
+    FString TouchMessage;
+    float TouchMessageUntil = 0.0f;
 
     void MoveForward(float Value);
     void MoveRight(float Value);
@@ -82,6 +92,10 @@ private:
     void ToggleRearZone();
     void ToggleStageZone();
     void QuitPrototype();
+    void RestartHideAndSeek();
+    void StartTouch();
+    void StopTouch();
+    void UpdateWalkSpeed();
 
     void UpdateFocusedInteractable();
     void UpdateEyeAdaptation(float DeltaSeconds);

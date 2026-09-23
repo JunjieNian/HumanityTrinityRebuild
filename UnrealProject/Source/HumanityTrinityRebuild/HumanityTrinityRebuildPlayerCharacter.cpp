@@ -1,6 +1,8 @@
 #include "HumanityTrinityRebuildPlayerCharacter.h"
 
 #include "HumanityTrinityRebuildLightSwitch.h"
+#include "HumanityTrinityRebuildHideAndSeekGameMode.h"
+#include "HumanityTrinityRebuildHider.h"
 #include "HumanityTrinityRebuildRoomInteraction.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -69,6 +71,15 @@ void AHumanityTrinityRebuildPlayerCharacter::Tick(const float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     UpdateFocusedInteractable();
     UpdateEyeAdaptation(DeltaSeconds);
+    if (bHideAndSeekMode && bTouchHeld)
+    {
+        TouchPulseSeconds -= DeltaSeconds;
+        if (TouchPulseSeconds <= 0.0f)
+        {
+            TouchPulseSeconds = 0.45f;
+            PerformTouch();
+        }
+    }
 }
 
 void AHumanityTrinityRebuildPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -93,6 +104,9 @@ void AHumanityTrinityRebuildPlayerCharacter::SetupPlayerInputComponent(UInputCom
     PlayerInputComponent->BindAction(TEXT("ToggleRearZone"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::ToggleRearZone);
     PlayerInputComponent->BindAction(TEXT("ToggleStageZone"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::ToggleStageZone);
     PlayerInputComponent->BindAction(TEXT("QuitPrototype"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::QuitPrototype);
+    PlayerInputComponent->BindAction(TEXT("TouchNearby"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::StartTouch);
+    PlayerInputComponent->BindAction(TEXT("TouchNearby"), IE_Released, this, &AHumanityTrinityRebuildPlayerCharacter::StopTouch);
+    PlayerInputComponent->BindAction(TEXT("RestartHideAndSeek"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::RestartHideAndSeek);
 }
 
 void AHumanityTrinityRebuildPlayerCharacter::MoveForward(const float Value)
@@ -123,6 +137,7 @@ void AHumanityTrinityRebuildPlayerCharacter::LookUp(const float Value)
 
 void AHumanityTrinityRebuildPlayerCharacter::StartJump()
 {
+    if (bHideAndSeekMode) return;
     Jump();
 }
 
@@ -134,6 +149,17 @@ void AHumanityTrinityRebuildPlayerCharacter::StopJump()
 void AHumanityTrinityRebuildPlayerCharacter::Interact()
 {
     UpdateFocusedInteractable();
+    if (bHideAndSeekMode)
+    {
+        // In darkness the distant line-of-sight prompts are not a sense.
+        // Only a door already within arm's reach can be operated.
+        if (RoomInteraction && FocusedRoomComponent &&
+            RoomInteraction->GetPropDoorIndex(FocusedRoomComponent) >= 0)
+        {
+            RoomInteraction->Interact(FocusedRoomComponent);
+        }
+        return;
+    }
     if (FocusedSwitch)
     {
         FocusedSwitch->Interact(this);
@@ -146,16 +172,40 @@ void AHumanityTrinityRebuildPlayerCharacter::Interact()
 
 void AHumanityTrinityRebuildPlayerCharacter::StartSlowWalk()
 {
-    GetCharacterMovement()->MaxWalkSpeed = 120.0f;
+    bSlowWalkHeld = true;
+    UpdateWalkSpeed();
 }
 
 void AHumanityTrinityRebuildPlayerCharacter::StopSlowWalk()
 {
-    GetCharacterMovement()->MaxWalkSpeed = 240.0f;
+    bSlowWalkHeld = false;
+    UpdateWalkSpeed();
+}
+
+void AHumanityTrinityRebuildPlayerCharacter::StartTouch()
+{
+    if (!bHideAndSeekMode) return;
+    bTouchHeld = true;
+    TouchPulseSeconds = 0.45f;
+    UpdateWalkSpeed();
+    PerformTouch();
+}
+
+void AHumanityTrinityRebuildPlayerCharacter::StopTouch()
+{
+    bTouchHeld = false;
+    UpdateWalkSpeed();
+}
+
+void AHumanityTrinityRebuildPlayerCharacter::UpdateWalkSpeed()
+{
+    GetCharacterMovement()->MaxWalkSpeed = bHideAndSeekMode && bTouchHeld
+        ? 80.0f : (bSlowWalkHeld ? 120.0f : 240.0f);
 }
 
 void AHumanityTrinityRebuildPlayerCharacter::ToggleCurtains()
 {
+    if (bHideAndSeekMode) return;
     if (AHumanityTrinityRebuildRoomInteraction* Interaction = FindRoomInteraction())
     {
         Interaction->ToggleCurtains();
@@ -164,6 +214,7 @@ void AHumanityTrinityRebuildPlayerCharacter::ToggleCurtains()
 
 void AHumanityTrinityRebuildPlayerCharacter::ToggleScreen()
 {
+    if (bHideAndSeekMode) return;
     if (AHumanityTrinityRebuildRoomInteraction* Interaction = FindRoomInteraction())
     {
         Interaction->ToggleScreen();
@@ -172,6 +223,7 @@ void AHumanityTrinityRebuildPlayerCharacter::ToggleScreen()
 
 void AHumanityTrinityRebuildPlayerCharacter::ToggleMasterLights()
 {
+    if (bHideAndSeekMode) return;
     if (AHumanityTrinityRebuildLightingController* LightController = FindLightingController())
     {
         LightController->ToggleMaster();
@@ -180,6 +232,7 @@ void AHumanityTrinityRebuildPlayerCharacter::ToggleMasterLights()
 
 void AHumanityTrinityRebuildPlayerCharacter::ToggleFrontZone()
 {
+    if (bHideAndSeekMode) return;
     if (AHumanityTrinityRebuildLightingController* LightController = FindLightingController())
     {
         LightController->ToggleZone(EHumanityTrinityRebuildLightZone::Front);
@@ -188,6 +241,7 @@ void AHumanityTrinityRebuildPlayerCharacter::ToggleFrontZone()
 
 void AHumanityTrinityRebuildPlayerCharacter::ToggleMiddleZone()
 {
+    if (bHideAndSeekMode) return;
     if (AHumanityTrinityRebuildLightingController* LightController = FindLightingController())
     {
         LightController->ToggleZone(EHumanityTrinityRebuildLightZone::Middle);
@@ -196,6 +250,7 @@ void AHumanityTrinityRebuildPlayerCharacter::ToggleMiddleZone()
 
 void AHumanityTrinityRebuildPlayerCharacter::ToggleRearZone()
 {
+    if (bHideAndSeekMode) return;
     if (AHumanityTrinityRebuildLightingController* LightController = FindLightingController())
     {
         LightController->ToggleZone(EHumanityTrinityRebuildLightZone::Rear);
@@ -204,6 +259,7 @@ void AHumanityTrinityRebuildPlayerCharacter::ToggleRearZone()
 
 void AHumanityTrinityRebuildPlayerCharacter::ToggleStageZone()
 {
+    if (bHideAndSeekMode) return;
     if (AHumanityTrinityRebuildLightingController* LightController = FindLightingController())
     {
         LightController->ToggleZone(EHumanityTrinityRebuildLightZone::Stage);
@@ -221,12 +277,90 @@ void AHumanityTrinityRebuildPlayerCharacter::QuitPrototype()
 
 FString AHumanityTrinityRebuildPlayerCharacter::GetCurrentInteractionPrompt() const
 {
+    if (bHideAndSeekMode) return FString();
     if (FocusedSwitch)
     {
         return FocusedSwitch->GetInteractionPrompt();
     }
     return RoomInteraction && FocusedRoomComponent
         ? RoomInteraction->GetInteractionPrompt(FocusedRoomComponent) : FString();
+}
+
+void AHumanityTrinityRebuildPlayerCharacter::EnableHideAndSeekMode()
+{
+    bHideAndSeekMode = true;
+    bTouchHeld = false;
+    TouchPulseSeconds = 0.0f;
+    UpdateWalkSpeed();
+    // The chair rows have passages narrower than the walkthrough capsule.
+    // A 48 cm body width represents moving sideways between furniture.
+    GetCapsuleComponent()->SetCapsuleSize(24.0f, 92.0f, true);
+    InteractionDistanceCm = 95.0f;
+    TouchMessage.Empty();
+    TouchMessageUntil = 0.0f;
+}
+
+FString AHumanityTrinityRebuildPlayerCharacter::GetCurrentTouchMessage() const
+{
+    return bHideAndSeekMode && GetWorld() && GetWorld()->GetTimeSeconds() < TouchMessageUntil
+        ? TouchMessage : FString();
+}
+
+void AHumanityTrinityRebuildPlayerCharacter::PerformTouch()
+{
+    if (!bHideAndSeekMode) return;
+    AHumanityTrinityRebuildHideAndSeekGameMode* Game =
+        GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildHideAndSeekGameMode>();
+    if (!Game || !Game->IsRoundRunning()) return;
+
+    const FVector Start = FirstPersonCamera->GetComponentLocation() - FVector(0.0f, 0.0f, 65.0f);
+    FVector Forward = FirstPersonCamera->GetForwardVector();
+    Forward.Z = 0.0f;
+    Forward.Normalize();
+    const FVector End = Start + Forward * 105.0f;
+    FHitResult Hit;
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(HideAndSeekHandTouch), true, this);
+    const bool bHit = GetWorld()->SweepSingleByChannel(Hit, Start, End, FQuat::Identity,
+        ECC_Visibility, FCollisionShape::MakeSphere(15.0f), Params);
+    if (!bHit)
+    {
+        TouchMessage = TEXT("Your hand finds only air");
+    }
+    else if (Cast<AHumanityTrinityRebuildHider>(Hit.GetActor()))
+    {
+        TouchMessage = TEXT("You touched a person!");
+        Game->TryCatchHider(Hit.GetActor());
+    }
+    else if (FMath::Abs(Hit.ImpactPoint.X) > 545.0f)
+    {
+        TouchMessage = TEXT("Your hand reaches the side wall or shelving");
+    }
+    else if (Hit.ImpactPoint.Y < -1360.0f)
+    {
+        TouchMessage = TEXT("Your hand meets the stage or curtain");
+    }
+    else if (Hit.ImpactPoint.Y < -330.0f && Hit.ImpactPoint.Y > -1300.0f)
+    {
+        TouchMessage = TEXT("Your hand brushes furniture");
+    }
+    else
+    {
+        TouchMessage = TEXT("Your hand meets a solid surface");
+    }
+    TouchMessageUntil = GetWorld()->GetTimeSeconds() + 2.4f;
+    UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK] TOUCH result=%s hit=%s distance=%.1f"),
+        *TouchMessage, bHit && Hit.GetActor() ? *Hit.GetActor()->GetName() : TEXT("none"),
+        bHit ? Hit.Distance : -1.0f);
+}
+
+void AHumanityTrinityRebuildPlayerCharacter::RestartHideAndSeek()
+{
+    if (!bHideAndSeekMode) return;
+    if (AHumanityTrinityRebuildHideAndSeekGameMode* Game =
+        GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildHideAndSeekGameMode>())
+    {
+        Game->RestartRound();
+    }
 }
 
 void AHumanityTrinityRebuildPlayerCharacter::UpdateFocusedInteractable()

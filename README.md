@@ -56,6 +56,44 @@ The complete scene is mirrored across the longitudinal centerline through the ge
 
 ## Quick start on Windows / 快速开始
 
+The complete editable reconstruction before game development is preserved at
+[v1.0.0-reconstruction](https://github.com/JunjieNian/HumanityTrinityRebuild/releases/tag/v1.0.0-reconstruction).
+
+### Hide-and-seek prototype / 黑暗捉迷藏雏形
+
+Run `Launch_HumanityTrinityRebuild_HideAndSeek.cmd` to enter the separate game map.
+You play the seeker against one computer-controlled hider. The first 12 seconds
+are lit so you can memorize the room. Then the main and residual lights go out,
+the teaching display stays off, and a three-minute search begins. The hider can
+remain still or move through a narrow passage when it decides to evade you;
+movement produces positional footsteps. Reach out with **F**: only something
+within about one arm's length produces a touch description, and only physical
+contact with the hider wins the round. Holding **F** keeps probing and slows
+your movement until you release it. Use headphones for the direction of the
+footsteps. **R** restarts a round; **Esc** exits.
+
+This is a single-player gameplay prototype. The hider currently uses a small
+scripted route, touch descriptions are coarse because the room is one combined
+runtime mesh, and the room has no hand animation or controller vibration yet.
+The hider is not a second human player. The original walkthrough remains
+available through `Launch_HumanityTrinityRebuild_Walkthrough.cmd`.
+
+After changing the model, rebuild the walkthrough as described below, then
+regenerate the original footstep and game map:
+
+```powershell
+python .\Tools\Audio\generate_footstep.py
+& 'D:\EpicGames\UE_5.7\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' `
+  '.\UnrealProject\HumanityTrinityRebuild.uproject' `
+  '-ExecutePythonScript=D:\HumanityTrinityRebuild\Tools\Unreal\setup_hide_and_seek_unreal.py' `
+  -unattended -nop4 -nosplash -nullrhi
+```
+
+The game self-test uses `-HideAndSeekSelfTest -HideAndSeekCapture` on the game
+map. It checks blackout, residual lights, hider movement and footstep events,
+and a real near-hand catch. Captures are written to
+`UnrealProject/Saved/Screenshots/HideAndSeek`.
+
 Requirements:
 
 - Unreal Engine 5.7.
