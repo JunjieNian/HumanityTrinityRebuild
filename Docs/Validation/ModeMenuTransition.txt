@@ -1,0 +1,10 @@
+[2026.09.23-16.48.16:585][  0]LogTemp: Display: [MODE_MENU] READY map=L_HumanityTrinityRebuildModeMenu
+[2026.09.23-16.48.17:593][ 49]LogTemp: Display: [MODE_MENU_SELFTEST] MENU_VISIBLE requested=../../../../../HumanityTrinityRebuild/UnrealProject/Saved/Screenshots/ModeMenu.png
+[2026.09.23-16.48.18:295][ 70]LogTemp: Display: [MODE_MENU] SELECT hide_and_seek same_window=YES
+[2026.09.23-16.48.18:413][ 71]LogTemp: Display: [HIDE_AND_SEEK] PREPARATION seconds=1
+[2026.09.23-16.48.19:424][122]LogTemp: Display: [HIDE_AND_SEEK] ROUND_STARTED residual_lights=OFF hider=X=520.000 Y=-500.000 Z=90.000
+[2026.09.23-16.48.43:480][972]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] core=PASS
+[2026.09.23-16.48.49:917][511]LogTemp: Display: [HIDE_AND_SEEK] PREPARATION seconds=12
+[2026.09.23-16.48.49:939][511]LogTemp: Display: [HIDE_AND_SEEK] ROUND_STARTED residual_lights=OFF hider=X=-520.000 Y=-500.000 Z=90.000
+[2026.09.23-16.48.50:824][582]LogTemp: Display: [HIDE_AND_SEEK] PREPARATION seconds=12
+[2026.09.23-16.48.50:824][582]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] PASS

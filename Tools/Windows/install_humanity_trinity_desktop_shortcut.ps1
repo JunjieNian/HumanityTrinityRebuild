@@ -7,14 +7,14 @@ $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 
 $brandDirectory = Join-Path $ProjectRoot 'Assets\Brand'
-$launcherPath = Join-Path $ProjectRoot 'Launch_HumanityTrinityRebuild_Walkthrough.cmd'
+$launcherPath = Join-Path $ProjectRoot 'Launch_HumanityTrinityRebuild.cmd'
 $iconPath = Join-Path $brandDirectory 'HumanityTrinityRebuild.ico'
 $previewPath = Join-Path $brandDirectory 'HumanityTrinityRebuild_Icon.png'
 $desktopPath = [Environment]::GetFolderPath('Desktop')
 $shortcutPath = Join-Path $desktopPath ($ShortcutName + '.lnk')
 
 if (-not (Test-Path -LiteralPath $launcherPath)) {
-    throw "Walkthrough launcher not found: $launcherPath"
+    throw "Main menu launcher not found: $launcherPath"
 }
 [System.IO.Directory]::CreateDirectory($brandDirectory) | Out-Null
 
@@ -176,7 +176,7 @@ $shortcut = $shell.CreateShortcut($shortcutPath)
 $shortcut.TargetPath = $launcherPath
 $shortcut.WorkingDirectory = $ProjectRoot
 $shortcut.IconLocation = "$iconPath,0"
-$shortcut.Description = 'Walk through the Humanity Trinity Space reconstruction'
+$shortcut.Description = 'Choose walkthrough or hide-and-seek in the Humanity Trinity Space reconstruction'
 $shortcut.WindowStyle = 7
 $shortcut.Save()
 

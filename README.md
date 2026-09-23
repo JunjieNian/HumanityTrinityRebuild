@@ -2,6 +2,16 @@
 
 An editable Blender reconstruction and Unreal Engine interactive walkthrough of the **Humanity Trinity Space** (三一人文空间), located on B1 of Duzhi Building at the High School Affiliated to Fudan University.
 
+## Start playing
+
+Double-click the existing **Humanity Trinity Space** desktop shortcut. The 3D
+classroom opens with two choices in the same window: click **Walk through the
+space** or **Play hide and seek**, or press **1** or **2**. Press **M** while
+playing to return to the choice screen. Hide-and-seek begins with 12 lit seconds
+to memorize the room, then a three-minute dark round. **Esc** exits.
+
+![Mode selection inside the room](Docs/Previews/HumanityTrinityRebuild_ModeMenu.png)
+
 ![Unreal runtime with classroom lights on](Docs/Previews/HumanityTrinityRebuild_00_LightsOn.png)
 
 ![Unreal runtime perspective toward the stage](HumanityTrinityRebuild_PerspectiveToStage.png)
@@ -63,6 +73,9 @@ The complete editable reconstruction before game development is preserved at
 
 Run `Launch_HumanityTrinityRebuild_HideAndSeek.cmd`. You have 12 seconds to
 memorize the lit room, followed by a three-minute search in complete darkness.
+The existing **Humanity Trinity Space** desktop shortcut opens the 3D room with
+two choices: walkthrough or hide-and-seek. The selection stays in one window;
+press **M** during either mode to return to the menu.
 Use headphones: the hider's steps are spatialized and muffled by obstacles.
 Press **Tab** to restart in bright practice mode and inspect the character,
 learn the room, and observe the hider's current behavior.
@@ -131,7 +144,10 @@ powershell -ExecutionPolicy Bypass `
   -File '.\Tools\Windows\install_humanity_trinity_desktop_shortcut.ps1'
 ```
 
-The shortcut uses the project launcher, the project folder as its working directory, and the multi-resolution icon stored under `Assets/Brand`.
+The shortcut launches `Launch_HumanityTrinityRebuild.cmd` with the project folder as its working directory and the multi-resolution icon stored under `Assets/Brand`. This opens the 3D mode menu. The two direct launchers remain available for testing or bypassing the menu.
+After rebuilding the walkthrough map from Blender, run
+`Tools/Unreal/setup_mode_menu_unreal.py` through Unreal Editor to refresh the
+menu's copy of the room.
 
 To open the Unreal Editor project, run:
 

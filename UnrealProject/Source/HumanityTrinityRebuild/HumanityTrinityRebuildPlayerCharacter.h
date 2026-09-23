@@ -99,6 +99,7 @@ private:
     void ToggleStageZone();
     void QuitPrototype();
     void RestartHideAndSeek();
+    void ReturnToModeMenu();
     void StartTouch();
     void StopTouch();
     void UpdateWalkSpeed();

@@ -2,6 +2,7 @@
 
 #include "HumanityTrinityRebuildPlayerCharacter.h"
 #include "HumanityTrinityRebuildHideAndSeekGameMode.h"
+#include "HumanityTrinityRebuildModeMenuGameMode.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 
@@ -46,7 +47,7 @@ void AHumanityTrinityRebuildHUD::DrawHUD()
         if (Game && !Game->GetPracticeHint().IsEmpty())
             DrawText(Game->GetPracticeHint(),FLinearColor(.9f,.82f,.64f),24,96,GEngine->GetSmallFont());
         DrawRect(FLinearColor(0,0,0,.65f),0,Canvas->ClipY-44,Canvas->ClipX,44);
-        DrawText(TEXT("WASD Move | Shift Quiet | Ctrl Crouch | Hold F Feel (aim with mouse) | E Door | Tab Practice | R Restart"),
+        DrawText(TEXT("WASD Move | Shift Quiet | Ctrl Crouch | Hold F Feel | E Door | Tab Practice | R Restart | M Menu"),
             FLinearColor(0.85f, 0.85f, 0.85f, 0.9f), 24.0f,
             Canvas->ClipY - 34.0f, GEngine->GetSmallFont(), 1.0f, false);
         return;
@@ -68,8 +69,10 @@ void AHumanityTrinityRebuildHUD::DrawHUD()
         }
     }
 
+    const bool bFromMenu = GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildModeMenuGameMode>() != nullptr;
     DrawText(
-        TEXT("WASD Move   Shift Slow   E Use   L Lights   1-4 Zones   C Curtains   P Display   Esc Exit"),
+        bFromMenu ? TEXT("WASD Move   Shift Slow   E Use   L Lights   1-4 Zones   C Curtains   P Display   M Menu   Esc Exit")
+                  : TEXT("WASD Move   Shift Slow   E Use   L Lights   1-4 Zones   C Curtains   P Display   Esc Exit"),
         FLinearColor(0.78f, 0.82f, 0.88f, 0.9f),
         24.0f,
         Canvas->ClipY - 34.0f,

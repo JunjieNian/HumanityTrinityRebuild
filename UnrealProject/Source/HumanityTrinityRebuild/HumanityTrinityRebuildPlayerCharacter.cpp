@@ -111,6 +111,7 @@ void AHumanityTrinityRebuildPlayerCharacter::SetupPlayerInputComponent(UInputCom
     PlayerInputComponent->BindAction(TEXT("TouchNearby"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::StartTouch);
     PlayerInputComponent->BindAction(TEXT("TouchNearby"), IE_Released, this, &AHumanityTrinityRebuildPlayerCharacter::StopTouch);
     PlayerInputComponent->BindAction(TEXT("RestartHideAndSeek"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::RestartHideAndSeek);
+    PlayerInputComponent->BindAction(TEXT("ReturnToModeMenu"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::ReturnToModeMenu);
     PlayerInputComponent->BindAction(TEXT("GameCrouch"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::StartCrouch);
     PlayerInputComponent->BindAction(TEXT("GameCrouch"), IE_Released, this, &AHumanityTrinityRebuildPlayerCharacter::StopCrouch);
     PlayerInputComponent->BindAction(TEXT("PracticeMode"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::TogglePractice);
@@ -417,6 +418,14 @@ void AHumanityTrinityRebuildPlayerCharacter::RestartHideAndSeek()
         GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildHideAndSeekGameMode>())
     {
         Game->RestartRound();
+    }
+}
+
+void AHumanityTrinityRebuildPlayerCharacter::ReturnToModeMenu()
+{
+    if (bHideAndSeekMode)
+    {
+        UGameplayStatics::OpenLevel(this, TEXT("/Game/HumanityTrinityRebuild/Maps/L_HumanityTrinityRebuildModeMenu"));
     }
 }
 
