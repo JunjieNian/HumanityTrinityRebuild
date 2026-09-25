@@ -1,0 +1,63 @@
+[2026.09.25-14.04.38:225][  0]LogTemp: Display: [MODE_MENU] READY map=L_HumanityTrinityRebuildModeMenu
+[2026.09.25-14.04.39:230][ 40]LogTemp: Display: [MODE_MENU_SELFTEST] MENU_VISIBLE requested=../../../../../HumanityTrinityRebuild/UnrealProject/Saved/Screenshots/ModeMenu.png
+[2026.09.25-14.04.39:947][ 59]LogTemp: Display: [MODE_MENU] SELECT player_hides same_window=YES
+[2026.09.25-14.04.40:185][ 60]LogTemp: Display: [HIDE_AND_SEEK] HIDER_READY parts=15/15 audio=YES
+[2026.09.25-14.04.40:186][ 60]LogTemp: Display: [NPC_SEEKER] WAITING parts=15
+[2026.09.25-14.04.40:186][ 60]LogTemp: Display: [HIDE_AND_SEEK] PREPARATION role=PLAYER_HIDES seconds=20
+[2026.09.25-14.04.40:761][ 78]LogTemp: Display: [PLAYER_HIDING_SELFTEST] role_and_preparation=PASS
+[2026.09.25-14.04.40:761][ 78]LogTemp: Display: [PLAYER_HIDING_SELFTEST] model_and_audio=PASS
+[2026.09.25-14.04.40:761][ 78]LogTemp: Display: [PLAYER_HIDING_SELFTEST] counting_does_not_hear=PASS
+[2026.09.25-14.04.40:763][ 78]LogTemp: Display: [PLAYER_HIDING_SELFTEST] stage_boundary=PASS
+[2026.09.25-14.04.40:763][ 78]LogTemp: Display: [HIDE_AND_SEEK] SCREENSHOT_REQUESTED ../../../../../HumanityTrinityRebuild/UnrealProject/Saved/Screenshots/HideAndSeek/08_PlayerHiding_Preparation.png
+[2026.09.25-14.04.41:790][143]LogTemp: Display: [HIDE_AND_SEEK] NAVIGATION nodes=309 covers=8
+[2026.09.25-14.04.41:791][143]LogTemp: Display: [NPC_SEEKER] ROUTE nodes=16 goal=X=520.000 Y=-480.000 Z=90.000
+[2026.09.25-14.04.41:791][143]LogTemp: Display: [NPC_SEEKER] STATE 0 -> 1
+[2026.09.25-14.04.41:791][143]LogTemp: Display: [HIDE_AND_SEEK] ROUND_STARTED role=PLAYER_HIDES npc=X=150.000 Y=-220.000 Z=90.000
+[2026.09.25-14.04.41:791][143]LogTemp: Display: [PLAYER_HIDING_SELFTEST] navigation_uses_loaded_furniture=PASS
+[2026.09.25-14.04.41:791][143]LogTemp: Display: [PLAYER_HIDING_SELFTEST] ready_starts_search=PASS
+[2026.09.25-14.04.41:791][143]LogTemp: Display: [PLAYER_HIDING_SELFTEST] dark_round=PASS
+[2026.09.25-14.04.43:174][289]LogTemp: Display: [PLAYER_HIDING_SELFTEST] silent_player_not_tracked=PASS
+[2026.09.25-14.04.43:174][289]LogTemp: Display: [PLAYER_HIDING_SELFTEST] player_crouch=PASS
+[2026.09.25-14.04.43:174][289]LogTemp: Display: [HIDE_AND_SEEK] SCREENSHOT_REQUESTED ../../../../../HumanityTrinityRebuild/UnrealProject/Saved/Screenshots/HideAndSeek/09_PlayerHiding_Dark.png
+[2026.09.25-14.04.43:174][289]LogTemp: Display: [PLAYER_HIDING_SELFTEST] quiet_steps_have_short_range=PASS
+[2026.09.25-14.04.43:178][289]LogTemp: Display: [PLAYER_HIDING_SELFTEST] sound_obstruction=PASS
+[2026.09.25-14.04.43:178][289]LogTemp: Display: [NPC_SEEKER] STATE 1 -> 2
+[2026.09.25-14.04.43:178][289]LogTemp: Display: [NPC_SEEKER] HEARD distance=260 loudness=0.85 remembered=X=-29.400 Y=-570.444 Z=90.000
+[2026.09.25-14.04.43:178][289]LogTemp: Display: [PLAYER_HIDING_SELFTEST] audible_event_causes_listening=PASS
+[2026.09.25-14.04.43:825][350]LogTemp: Display: [NPC_SEEKER] ROUTE nodes=37 goal=X=0.000 Y=-600.000 Z=90.000
+[2026.09.25-14.04.43:825][350]LogTemp: Display: [NPC_SEEKER] STATE 2 -> 3
+[2026.09.25-14.04.44:478][417]LogTemp: Display: [PLAYER_HIDING_SELFTEST] investigates_snapshot_not_player=PASS
+[2026.09.25-14.04.57:111][697]LogTemp: Display: [NPC_SEEKER] CHECK_AREA position=X=0.585 Y=-604.920 Z=90.000
+[2026.09.25-14.04.57:112][697]LogTemp: Display: [NPC_SEEKER] STATE 3 -> 4
+[2026.09.25-14.04.58:942][886]LogTemp: Display: [PLAYER_HIDING_SELFTEST] observed_travel=1538.9 steps=36 position=X=0.585 Y=-604.920 Z=85.838 sound=X=-29.400 Y=-570.444 Z=90.000
+[2026.09.25-14.04.58:942][886]LogTemp: Display: [PLAYER_HIDING_SELFTEST] npc_moves_and_emits_footsteps=PASS
+[2026.09.25-14.04.58:942][886]LogTemp: Display: [PLAYER_HIDING_SELFTEST] searches_after_arrival=PASS
+[2026.09.25-14.04.58:942][886]LogTemp: Display: [PLAYER_HIDING_SELFTEST] reaches_sound_area=PASS
+[2026.09.25-14.04.58:947][886]LogTemp: Display: [PLAYER_HIDING_SELFTEST] cannot_catch_through_wall=PASS
+[2026.09.25-14.04.58:947][886]LogTemp: Display: [NPC_SEEKER] STATE 4 -> 5
+[2026.09.25-14.04.58:947][886]LogTemp: Display: [HIDE_AND_SEEK] ROUND_FINISHED winner=SEEKER remaining=162.8
+[2026.09.25-14.04.58:947][886]LogTemp: Display: [PLAYER_HIDING_SELFTEST] physical_crouched_contact_loses=PASS
+[2026.09.25-14.04.59:645][939]LogTemp: Display: [HIDE_AND_SEEK] SCREENSHOT_REQUESTED ../../../../../HumanityTrinityRebuild/UnrealProject/Saved/Screenshots/HideAndSeek/10_PlayerHiding_Found.png
+[2026.09.25-14.05.00:255][976]LogTemp: Display: [HIDE_AND_SEEK] HIDER_READY parts=15/15 audio=YES
+[2026.09.25-14.05.00:255][976]LogTemp: Display: [NPC_SEEKER] WAITING parts=15
+[2026.09.25-14.05.00:255][976]LogTemp: Display: [HIDE_AND_SEEK] PREPARATION role=PLAYER_HIDES seconds=20
+[2026.09.25-14.05.00:255][976]LogTemp: Display: [PLAYER_HIDING_SELFTEST] practice_restart_keeps_role=PASS
+[2026.09.25-14.05.00:272][976]LogTemp: Display: [HIDE_AND_SEEK] NAVIGATION nodes=309 covers=8
+[2026.09.25-14.05.00:273][976]LogTemp: Display: [NPC_SEEKER] ROUTE nodes=17 goal=X=520.000 Y=-520.000 Z=90.000
+[2026.09.25-14.05.00:273][976]LogTemp: Display: [NPC_SEEKER] STATE 0 -> 1
+[2026.09.25-14.05.00:273][976]LogTemp: Display: [HIDE_AND_SEEK] ROUND_STARTED role=PLAYER_HIDES npc=X=150.000 Y=-220.000 Z=90.000
+[2026.09.25-14.05.00:273][976]LogTemp: Display: [PLAYER_HIDING_SELFTEST] practice_round_is_lit=PASS
+[2026.09.25-14.05.00:556][998]LogTemp: Display: [NPC_SEEKER] STATE 1 -> 2
+[2026.09.25-14.05.00:556][998]LogTemp: Display: [NPC_SEEKER] HEARD distance=95 loudness=0.85 remembered=X=66.028 Y=-224.678 Z=94.150
+[2026.09.25-14.05.00:908][ 22]LogTemp: Display: [PLAYER_HIDING_SELFTEST] actual_player_steps_are_heard=PASS
+[2026.09.25-14.05.00:909][ 22]LogTemp: Display: [HIDE_AND_SEEK] SCREENSHOT_REQUESTED ../../../../../HumanityTrinityRebuild/UnrealProject/Saved/Screenshots/HideAndSeek/11_PlayerHiding_Practice.png
+[2026.09.25-14.05.01:566][ 65]LogTemp: Display: [NPC_SEEKER] STATE 2 -> 5
+[2026.09.25-14.05.01:566][ 65]LogTemp: Display: [HIDE_AND_SEEK] ROUND_FINISHED winner=HIDER remaining=0.0
+[2026.09.25-14.05.01:818][ 85]LogTemp: Display: [PLAYER_HIDING_SELFTEST] surviving_timer_wins=PASS
+[2026.09.25-14.05.01:818][ 85]LogTemp: Display: [HIDE_AND_SEEK] SCREENSHOT_REQUESTED ../../../../../HumanityTrinityRebuild/UnrealProject/Saved/Screenshots/HideAndSeek/12_PlayerHiding_Win.png
+[2026.09.25-14.05.02:326][116]LogTemp: Display: [HIDE_AND_SEEK] HIDER_READY parts=15/15 audio=YES
+[2026.09.25-14.05.02:326][116]LogTemp: Display: [NPC_SEEKER] WAITING parts=15
+[2026.09.25-14.05.02:326][116]LogTemp: Display: [HIDE_AND_SEEK] PREPARATION role=PLAYER_HIDES seconds=20
+[2026.09.25-14.05.02:326][116]LogTemp: Display: [PLAYER_HIDING_SELFTEST] dark_restart_resets_round=PASS
+[2026.09.25-14.05.02:326][116]LogTemp: Display: [PLAYER_HIDING_SELFTEST] restart_has_one_npc=PASS
+[2026.09.25-14.05.02:326][116]LogTemp: Display: [PLAYER_HIDING_SELFTEST] PASS

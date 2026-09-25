@@ -232,7 +232,7 @@ void AHumanityTrinityRebuildLightingController::SetMasterLights(const bool bEnab
     }
     ApplyLightingState();
 
-    if (GEngine)
+    if (GEngine && bShowStateFeedback)
     {
         const FString Message = bMasterLightsOn
             ? TEXT("MAIN LIGHTS: ON  |  Eye adaptation returning to normal")

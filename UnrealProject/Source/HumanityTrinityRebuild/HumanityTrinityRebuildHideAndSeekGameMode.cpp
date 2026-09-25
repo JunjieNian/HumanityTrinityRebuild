@@ -1,6 +1,7 @@
 #include "HumanityTrinityRebuildHideAndSeekGameMode.h"
 
 #include "HumanityTrinityRebuildHider.h"
+#include "HumanityTrinityRebuildSeeker.h"
 #include "HumanityTrinityRebuildLightingController.h"
 #include "HumanityTrinityRebuildPlayerCharacter.h"
 #include "HumanityTrinityRebuildRoomInteraction.h"
@@ -14,6 +15,10 @@
 #include "TimerManager.h"
 #include "UnrealClient.h"
 #include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/TextRenderComponent.h"
+#include "Engine/StaticMesh.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 AHumanityTrinityRebuildHideAndSeekGameMode::AHumanityTrinityRebuildHideAndSeekGameMode()
@@ -24,22 +29,33 @@ AHumanityTrinityRebuildHideAndSeekGameMode::AHumanityTrinityRebuildHideAndSeekGa
 void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPlay()
 {
     Super::BeginPlay();
-    bSelfTest = FParse::Param(FCommandLine::Get(), TEXT("HideAndSeekSelfTest"));
+    bPlayerHidingSelfTest = FParse::Param(FCommandLine::Get(), TEXT("PlayerHidingSelfTest"));
+    bPlayerHiding = FParse::Param(FCommandLine::Get(), TEXT("PlayerHides")) ||
+        UGameplayStatics::ParseOption(OptionsString, TEXT("Role")).Equals(TEXT("Hider"), ESearchCase::IgnoreCase);
+    bSelfTest = !bPlayerHiding && FParse::Param(FCommandLine::Get(), TEXT("HideAndSeekSelfTest"));
     bCaptureGame = FParse::Param(FCommandLine::Get(), TEXT("HideAndSeekCapture"));
     bPracticeMode = FParse::Param(FCommandLine::Get(), TEXT("HideAndSeekPractice"));
-    if (bSelfTest)
+    if (bSelfTest || bPlayerHidingSelfTest)
         FMath::RandInit(20260923);
     GetWorldTimerManager().SetTimerForNextTick(this, &AHumanityTrinityRebuildHideAndSeekGameMode::BeginPreparation);
 }
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPreparation()
 {
-    Seeker = Cast<AHumanityTrinityRebuildPlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+    APlayerController* Controller = GetWorld()->GetFirstPlayerController();
+    Seeker = Controller ? Cast<AHumanityTrinityRebuildPlayerCharacter>(Controller->GetPawn()) : nullptr;
     if (!Seeker)
     {
         UE_LOG(LogTemp, Error, TEXT("[HIDE_AND_SEEK] SETUP_FAIL no seeker pawn"));
         return;
     }
+    // The viewport survives map travel from the menu. Restore captured mouse
+    // look as well as the new controller's movement and cursor state.
+    Controller->ResetIgnoreMoveInput();
+    Controller->ResetIgnoreLookInput();
+    Controller->bShowMouseCursor = false;
+    Controller->SetInputMode(FInputModeGameOnly());
+    Seeker->EnableInput(Controller);
     Seeker->EnableHideAndSeekMode();
     Seeker->GetCharacterMovement()->StopMovementImmediately();
     Seeker->SetActorLocation(FVector(0, -220, 96));
@@ -53,6 +69,25 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPreparation()
         Hider->Destroy();
         Hider = nullptr;
     }
+    if (SearchingNPC)
+    {
+        SearchingNPC->Destroy();
+        SearchingNPC = nullptr;
+    }
+    if (bPlayerHiding)
+    {
+        CreateHidingBoundary();
+        FActorSpawnParameters Spawn;
+        Spawn.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        SearchingNPC = GetWorld()->SpawnActor<AHumanityTrinityRebuildSeeker>(
+            FVector(150, -220, 90), FRotator(0, 90, 0), Spawn);
+        if (!SearchingNPC)
+        {
+            UE_LOG(LogTemp, Error, TEXT("[HIDE_AND_SEEK] SETUP_FAIL seeker spawn"));
+            return;
+        }
+        SearchingNPC->PrepareToSeek(Seeker);
+    }
     for (TActorIterator<AHumanityTrinityRebuildRoomInteraction> It(GetWorld()); It; ++It)
     {
         It->SetScreenOn(false);
@@ -62,12 +97,14 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPreparation()
     for (TActorIterator<AHumanityTrinityRebuildLightingController> It(GetWorld()); It; ++It)
     {
         It->bResidualLightsEnabled = false;
+        It->bShowStateFeedback = false;
         It->SetMasterLights(true);
         break;
     }
-    PreparationEndsAt = GetWorld()->GetTimeSeconds() + (bSelfTest ? 1.0f : 12.0f);
-    UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK] PREPARATION seconds=%.0f"),
-           PreparationEndsAt - GetWorld()->GetTimeSeconds());
+    const float PreparationSeconds = bSelfTest ? 1.f : (bPlayerHiding ? 20.f : 12.f);
+    PreparationEndsAt = GetWorld()->GetTimeSeconds() + PreparationSeconds;
+    UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK] PREPARATION role=%s seconds=%.0f"),
+           bPlayerHiding ? TEXT("PLAYER_HIDES") : TEXT("PLAYER_SEEKS"), PreparationSeconds);
     if (bSelfTest)
     {
         FTimerHandle CaptureTimer;
@@ -79,7 +116,13 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPreparation()
     else
     {
         GetWorldTimerManager().SetTimer(PreparationTimer, this, &AHumanityTrinityRebuildHideAndSeekGameMode::StartRound,
-                                        12.0f, false);
+                                        PreparationSeconds, false);
+    }
+    if (bPlayerHidingSelfTest)
+    {
+        FTimerHandle Test;
+        GetWorldTimerManager().SetTimer(Test, this,
+            &AHumanityTrinityRebuildHideAndSeekGameMode::RunPlayerHidingSelfTest, .8f, false);
     }
 }
 
@@ -94,6 +137,17 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::StartRound()
         It->bResidualLightsEnabled = false;
         It->SetMasterLights(bPracticeMode);
         break;
+    }
+    if (bPlayerHiding)
+    {
+        if (!SearchingNPC)
+            return;
+        bRoundRunning = true;
+        SecondsRemaining = 180.f;
+        SearchingNPC->StartSearching();
+        UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK] ROUND_STARTED role=PLAYER_HIDES npc=%s"),
+               *SearchingNPC->GetActorLocation().ToString());
+        return;
     }
     const float Side = bSelfTest ? 1.0f : (FMath::RandBool() ? 1.0f : -1.0f);
     const FVector HideLocation(Side * 165.0f, -900.0f, 91.0f);
@@ -139,6 +193,12 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::Tick(const float DeltaSeconds)
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::TryCatchHider(AActor* TouchedActor)
 {
+    if (bPlayerHiding)
+    {
+        // Reaching into the searcher's hands is also physical contact.
+        NotifyPlayerCaught(TouchedActor);
+        return;
+    }
     if (bRoundRunning && Hider && TouchedActor == Hider)
     {
         FinishRound(true);
@@ -159,6 +219,8 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::FinishRound(const bool bCaught)
     {
         Hider->SetSeeker(nullptr);
     }
+    if (SearchingNPC)
+        SearchingNPC->StopSearching();
     UE_LOG(LogTemp, Display, TEXT("[HIDE_AND_SEEK] ROUND_FINISHED winner=%s remaining=%.1f"),
            bCaught ? TEXT("SEEKER") : TEXT("HIDER"), SecondsRemaining);
 }
@@ -171,6 +233,18 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::RestartRound()
 
 FString AHumanityTrinityRebuildHideAndSeekGameMode::GetStatusLine() const
 {
+    if (bPlayerHiding)
+    {
+        if (bRoundFinished)
+            return bSeekerWon ? TEXT("YOU WERE FOUND  |  R: try another hiding place")
+                             : TEXT("YOU STAYED HIDDEN!  |  R: play another round");
+        if (!bRoundRunning)
+            return FString::Printf(TEXT("FIND A HIDING PLACE  |  NPC starts in %d  |  Space: ready"),
+                FMath::Max(0, FMath::CeilToInt(PreparationEndsAt - GetWorld()->GetTimeSeconds())));
+        return FString::Printf(TEXT("%s  |  Stay hidden for %d more seconds"),
+            bPracticeMode ? TEXT("HIDING / BRIGHT PRACTICE") : TEXT("THE NPC IS SEARCHING"),
+            FMath::CeilToInt(SecondsRemaining));
+    }
     if (bRoundFinished)
     {
         return bSeekerWon ? TEXT("FOUND THEM!  Press R for another round")
@@ -195,14 +269,76 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::TogglePracticeMode()
     bPracticeMode = !bPracticeMode;
     RestartRound();
 }
-void AHumanityTrinityRebuildHideAndSeekGameMode::ReportSeekerNoise(const FVector& Location, float Loudness)
+void AHumanityTrinityRebuildHideAndSeekGameMode::ReportPlayerNoise(const FVector& Location, float Loudness)
 {
     if (bRoundRunning && Hider)
         Hider->HearNoise(Location, Loudness);
+    if (bRoundRunning && SearchingNPC)
+        SearchingNPC->HearPlayerNoise(Location, Loudness);
 }
 FString AHumanityTrinityRebuildHideAndSeekGameMode::GetPracticeHint() const
 {
+    if (bPlayerHiding && SearchingNPC)
+    {
+        if (!bRoundRunning && !bRoundFinished)
+            return TEXT("Classroom hiding area / stay in front of the stage barrier");
+        return bPracticeMode ? SearchingNPC->GetSearchLabel() : FString();
+    }
     return bPracticeMode && bRoundRunning && Hider ? Hider->GetBehaviorLabel() : FString();
+}
+
+void AHumanityTrinityRebuildHideAndSeekGameMode::ReadyToHide()
+{
+    if (!bPlayerHiding || bRoundRunning || bRoundFinished)
+        return;
+    GetWorldTimerManager().ClearTimer(PreparationTimer);
+    StartRound();
+}
+
+void AHumanityTrinityRebuildHideAndSeekGameMode::NotifyPlayerCaught(AActor* SearchingActor)
+{
+    if (bPlayerHiding && bRoundRunning && SearchingNPC && SearchingActor == SearchingNPC)
+        FinishRound(true);
+}
+
+void AHumanityTrinityRebuildHideAndSeekGameMode::CreateHidingBoundary()
+{
+    if (HidingBoundary)
+        return;
+    HidingBoundary = GetWorld()->SpawnActor<AActor>();
+    HidingBoundary->Tags.Add(TEXT("HidingAreaBoundary"));
+    auto* Blocker = NewObject<UBoxComponent>(HidingBoundary, TEXT("ClassroomBoundary"));
+    HidingBoundary->SetRootComponent(Blocker);
+    Blocker->SetBoxExtent(FVector(610, 8, 180));
+    Blocker->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    Blocker->SetCollisionResponseToAllChannels(ECR_Ignore);
+    Blocker->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+    Blocker->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+    Blocker->RegisterComponent();
+    HidingBoundary->SetActorLocation(FVector(0, -1370, 180));
+    // A visible temporary rail marks the end of the accessible search floor.
+    UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
+    auto AddRail = [&](const FVector& Position, const FVector& Scale) {
+        auto* Rail = NewObject<UStaticMeshComponent>(HidingBoundary);
+        Rail->SetupAttachment(Blocker);
+        Rail->SetStaticMesh(Cube);
+        Rail->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Rail->SetRelativeLocation(Position);
+        Rail->SetRelativeScale3D(Scale);
+        Rail->RegisterComponent();
+    };
+    AddRail(FVector(0, 0, -85), FVector(12, .045f, .045f));
+    for (float X : {-560.f, -280.f, 0.f, 280.f, 560.f})
+        AddRail(FVector(X, 0, -133), FVector(.045f, .045f, .94f));
+    auto* Sign = NewObject<UTextRenderComponent>(HidingBoundary);
+    Sign->SetupAttachment(Blocker);
+    Sign->SetText(FText::FromString(TEXT("CLASSROOM PLAY AREA")));
+    Sign->SetHorizontalAlignment(EHTA_Center);
+    Sign->SetWorldSize(17.f);
+    Sign->SetTextRenderColor(FColor(245, 209, 132));
+    Sign->SetRelativeLocation(FVector(0, 12, -65));
+    Sign->SetRelativeRotation(FRotator(0, 90, 0));
+    Sign->RegisterComponent();
 }
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::RunSelfTest()
@@ -238,7 +374,7 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::RunSelfTest()
                    QuietRange ? TEXT("PASS") : TEXT("FAIL"));
             Seeker->UnCrouch();
             Seeker->SetActorLocation(FVector(0, -220, 96));
-            ReportSeekerNoise(Hider->GetActorLocation() + FVector(0, 180, 0), .85f);
+            ReportPlayerNoise(Hider->GetActorLocation() + FVector(0, 180, 0), .85f);
             bSelfTestCorePassed &= Hider->GetHeardCount() == 1;
             FTimerHandle FinishTimer;
             GetWorldTimerManager().SetTimer(FinishTimer, this,

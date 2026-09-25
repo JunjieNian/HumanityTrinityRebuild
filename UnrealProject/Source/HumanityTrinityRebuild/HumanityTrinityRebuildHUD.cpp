@@ -42,12 +42,17 @@ void AHumanityTrinityRebuildHUD::DrawHUD()
             DrawText(Touch, FLinearColor::White, CenterX - Width * 0.5f,
                 CenterY + 48.0f, GEngine->GetMediumFont(), 1.0f, false);
         }
-        DrawRect(FLinearColor(0,0,0,.6f),16,68,245,Game && Game->IsPracticeMode()?53:28);
+        const FString PracticeHint = Game ? Game->GetPracticeHint() : FString();
+        float HintWidth = 0, HintHeight = 0;
+        GetTextSize(PracticeHint, HintWidth, HintHeight, GEngine->GetSmallFont());
+        DrawRect(FLinearColor(0,0,0,.6f),16,68,FMath::Max(245.f, HintWidth + 16),PracticeHint.IsEmpty()?28:53);
         DrawText(Player->GetMovementHint(), FLinearColor(.75f,.9f,.88f),24,74,GEngine->GetSmallFont());
-        if (Game && !Game->GetPracticeHint().IsEmpty())
-            DrawText(Game->GetPracticeHint(),FLinearColor(.9f,.82f,.64f),24,96,GEngine->GetSmallFont());
+        if (!PracticeHint.IsEmpty())
+            DrawText(PracticeHint,FLinearColor(.9f,.82f,.64f),24,96,GEngine->GetSmallFont());
         DrawRect(FLinearColor(0,0,0,.65f),0,Canvas->ClipY-44,Canvas->ClipX,44);
-        DrawText(TEXT("WASD Move | Shift Quiet | Ctrl Crouch | Hold F Feel | E Door | Tab Practice | R Restart | M Menu"),
+        DrawText(Game && Game->IsPlayerHiding()
+            ? TEXT("WASD Move | Shift Quiet | Ctrl Crouch | Hold F Feel | Space Ready | Tab Practice | R Restart | M Menu")
+            : TEXT("WASD Move | Shift Quiet | Ctrl Crouch | Hold F Feel | E Door | Tab Practice | R Restart | M Menu"),
             FLinearColor(0.85f, 0.85f, 0.85f, 0.9f), 24.0f,
             Canvas->ClipY - 34.0f, GEngine->GetSmallFont(), 1.0f, false);
         return;

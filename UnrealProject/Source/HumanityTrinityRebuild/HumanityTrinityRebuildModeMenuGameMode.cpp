@@ -88,6 +88,16 @@ void AHumanityTrinityRebuildModeMenuGameMode::EnterHideAndSeek()
     UGameplayStatics::OpenLevel(this, TEXT("/Game/HumanityTrinityRebuild/Maps/L_HumanityTrinityRebuildHideAndSeek"));
 }
 
+void AHumanityTrinityRebuildModeMenuGameMode::EnterPlayerHiding()
+{
+    if (!bChoosingMode)
+        return;
+    bChoosingMode = false;
+    UE_LOG(LogTemp, Display, TEXT("[MODE_MENU] SELECT player_hides same_window=YES"));
+    UGameplayStatics::OpenLevel(this, TEXT("/Game/HumanityTrinityRebuild/Maps/L_HumanityTrinityRebuildHideAndSeek"),
+                               true, TEXT("Role=Hider"));
+}
+
 void AHumanityTrinityRebuildModeMenuGameMode::RunMenuSelfTest()
 {
     FString Choice;
@@ -111,9 +121,10 @@ void AHumanityTrinityRebuildModeMenuGameMode::RunMenuSelfTest()
         ChoiceTimer,
         [this, MenuHUD, Choice]() {
             const bool bHide = Choice.Equals(TEXT("hide"), ESearchCase::IgnoreCase);
-            const FVector2D Center = MenuHUD->GetChoiceCenter(bHide ? 1 : 0);
+            const bool bPlayerHide = Choice.Equals(TEXT("playerhide"), ESearchCase::IgnoreCase);
+            const FVector2D Center = MenuHUD->GetChoiceCenter(bPlayerHide ? 2 : (bHide ? 1 : 0));
             MenuHUD->SelectAt(Center.X, Center.Y);
-            if (!bHide)
+            if (!bHide && !bPlayerHide)
             {
                 auto* Controller = GetWorld()->GetFirstPlayerController();
                 const bool bPass = !bChoosingMode && Controller && !Controller->bShowMouseCursor;

@@ -1,0 +1,33 @@
+[2026.09.25-06.53.53:118][  0]LogTemp: Display: [MODE_MENU] READY map=L_HumanityTrinityRebuildModeMenu
+[2026.09.25-06.53.54:123][ 47]LogTemp: Display: [MODE_MENU_SELFTEST] MENU_VISIBLE requested=../../../../../HumanityTrinityRebuild/UnrealProject/Saved/Screenshots/ModeMenu.png
+[2026.09.25-06.53.54:939][ 68]LogTemp: Display: [MODE_MENU] SELECT hide_and_seek same_window=YES
+[2026.09.25-06.53.55:050][ 69]LogTemp: Display: [HIDE_AND_SEEK] PREPARATION role=PLAYER_SEEKS seconds=1
+[2026.09.25-06.53.56:008][131]LogTemp: Display: [HIDE_AND_SEEK] HIDER_READY parts=15/15 audio=YES
+[2026.09.25-06.53.56:021][131]LogTemp: Display: [HIDE_AND_SEEK] NAVIGATION nodes=243 covers=9
+[2026.09.25-06.53.56:021][131]LogTemp: Display: [HIDE_AND_SEEK] ROUND_STARTED residual_lights=OFF hider=X=520.000 Y=-500.000 Z=90.000
+[2026.09.25-06.53.58:114][402]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] proximity_silent=PASS crouch=PASS quiet_range=PASS
+[2026.09.25-06.53.58:114][402]LogTemp: Display: [HIDE_AND_SEEK] BEHAVIOR 0 -> 1
+[2026.09.25-06.53.58:114][402]LogTemp: Display: [HIDE_AND_SEEK] HEARD distance=180 loudness=0.85 state=Listening
+[2026.09.25-06.53.59:099][546]LogTemp: Display: [HIDE_AND_SEEK] BEHAVIOR 1 -> 2
+[2026.09.25-06.53.59:099][546]LogTemp: Display: [HIDE_AND_SEEK] ESCAPE route_nodes=35 goal=X=-320.000 Y=-1020.000 Z=90.000
+[2026.09.25-06.54.13:497][530]LogTemp: Display: [HIDE_AND_SEEK] BEHAVIOR 2 -> 0
+[2026.09.25-06.54.20:119][467]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] movement_cm=983.9 footsteps=31 route=35 settled=YES
+[2026.09.25-06.54.20:120][467]LogTemp: Display: [HIDE_AND_SEEK] TOUCH result=A firm surface | high | 31 cm from your hand hit=Actor_0 distance=31.5
+[2026.09.25-06.54.20:121][467]LogTemp: Display: [HIDE_AND_SEEK] BEHAVIOR 0 -> 3
+[2026.09.25-06.54.20:122][467]LogTemp: Display: [HIDE_AND_SEEK] ROUND_FINISHED winner=SEEKER remaining=155.8
+[2026.09.25-06.54.20:122][467]LogTemp: Display: [HIDE_AND_SEEK] TOUCH result=You touched a person! hit=HumanityTrinityRebuildHider_0 distance=64.3
+[2026.09.25-06.54.20:122][467]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] touch_occlusion=PASS catch=PASS
+[2026.09.25-06.54.20:122][467]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] core=PASS
+[2026.09.25-06.54.26:548][ 21]LogTemp: Display: [HIDE_AND_SEEK] PREPARATION role=PLAYER_SEEKS seconds=12
+[2026.09.25-06.54.26:549][ 21]LogTemp: Display: [HIDE_AND_SEEK] HIDER_READY parts=15/15 audio=YES
+[2026.09.25-06.54.26:562][ 21]LogTemp: Display: [HIDE_AND_SEEK] NAVIGATION nodes=243 covers=9
+[2026.09.25-06.54.26:562][ 21]LogTemp: Display: [HIDE_AND_SEEK] ROUND_STARTED residual_lights=OFF hider=X=-520.000 Y=-500.000 Z=90.000
+[2026.09.25-06.54.26:562][ 21]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] practice_restart=PASS practice_lit=PASS
+[2026.09.25-06.54.26:844][ 45]LogTemp: Display: [HIDE_AND_SEEK] BEHAVIOR 0 -> 1
+[2026.09.25-06.54.26:844][ 45]LogTemp: Display: [HIDE_AND_SEEK] HEARD distance=95 loudness=0.85 state=Listening
+[2026.09.25-06.54.27:150][ 70]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] actual_player_footsteps=PASS heard=1
+[2026.09.25-06.54.27:210][ 75]LogTemp: Display: [HIDE_AND_SEEK] BEHAVIOR 1 -> 3
+[2026.09.25-06.54.27:210][ 75]LogTemp: Display: [HIDE_AND_SEEK] ROUND_FINISHED winner=HIDER remaining=0.0
+[2026.09.25-06.54.27:457][ 95]LogTemp: Display: [HIDE_AND_SEEK] PREPARATION role=PLAYER_SEEKS seconds=12
+[2026.09.25-06.54.27:457][ 95]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] timeout=PASS dark_restart=PASS
+[2026.09.25-06.54.27:457][ 95]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] PASS

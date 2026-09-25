@@ -16,6 +16,7 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildModeMenuGameMode : publi
     bool IsChoosingMode() const { return bChoosingMode; }
     void EnterWalkthrough();
     void EnterHideAndSeek();
+    void EnterPlayerHiding();
     void ReturnToMenu();
 
   protected:

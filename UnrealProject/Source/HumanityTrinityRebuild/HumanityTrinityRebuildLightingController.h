@@ -54,6 +54,7 @@ public:
 
     int32 GetEmittingPanelCount() const;
     int32 GetActiveCeilingBounceCount() const;
+    bool bShowStateFeedback = true;
     UPROPERTY(EditAnywhere, Category = "HumanityTrinityRebuild|Lighting", meta = (ClampMin = "0.0"))
     float CeilingBounceFraction = 0.12f;
 

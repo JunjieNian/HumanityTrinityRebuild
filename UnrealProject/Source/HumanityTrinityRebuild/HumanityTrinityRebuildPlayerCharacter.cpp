@@ -145,7 +145,12 @@ void AHumanityTrinityRebuildPlayerCharacter::LookUp(const float Value)
 
 void AHumanityTrinityRebuildPlayerCharacter::StartJump()
 {
-    if (bHideAndSeekMode) return;
+    if (bHideAndSeekMode)
+    {
+        if (auto* Game = GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildHideAndSeekGameMode>())
+            Game->ReadyToHide();
+        return;
+    }
     Jump();
 }
 
@@ -248,7 +253,7 @@ void AHumanityTrinityRebuildPlayerCharacter::UpdateFootsteps(float Dt)
     {
         FootDistance = FMath::Fmod(FootDistance, Stride);
         const float Loudness = GetFootstepLoudness();
-        Game->ReportSeekerNoise(GetActorLocation(), Loudness);
+        Game->ReportPlayerNoise(GetActorLocation(), Loudness);
         if (PlayerFootstep) UGameplayStatics::PlaySound2D(this, PlayerFootstep, Loudness*.22f, .78f);
     }
 }
@@ -345,6 +350,8 @@ void AHumanityTrinityRebuildPlayerCharacter::EnableHideAndSeekMode()
     // The chair rows have passages narrower than the walkthrough capsule.
     // A 48 cm body width represents moving sideways between furniture.
     GetCapsuleComponent()->SetCapsuleSize(24.0f, 92.0f, true);
+    // The NPC must touch the player's physical standing/crouched body to catch them.
+    GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
     GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
     GetCharacterMovement()->SetCrouchedHalfHeight(60.0f);
     UnCrouch();
@@ -368,7 +375,7 @@ void AHumanityTrinityRebuildPlayerCharacter::PerformTouch()
     if (!bHideAndSeekMode) return;
     AHumanityTrinityRebuildHideAndSeekGameMode* Game =
         GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildHideAndSeekGameMode>();
-    if (!Game || !Game->IsRoundRunning()) return;
+    if (!Game || (!Game->IsRoundRunning() && (!Game->IsPlayerHiding() || Game->IsRoundFinished()))) return;
 
     const FVector Start = FirstPersonCamera->GetComponentLocation() - FVector(0.0f, 0.0f, 45.0f);
     FVector Forward = GetControlRotation().Vector();
@@ -387,6 +394,10 @@ void AHumanityTrinityRebuildPlayerCharacter::PerformTouch()
     {
         TouchMessage = TEXT("You touched a person!");
         Game->TryCatchHider(Hit.GetActor());
+    }
+    else if (Hit.GetActor() && Hit.GetActor()->ActorHasTag(TEXT("HidingAreaBoundary")))
+    {
+        TouchMessage = TEXT("The play-area rail / hide on the classroom side");
     }
     else
     {

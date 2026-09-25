@@ -5,6 +5,7 @@
 #include "HumanityTrinityRebuildHideAndSeekGameMode.generated.h"
 
 class AHumanityTrinityRebuildHider;
+class AHumanityTrinityRebuildSeeker;
 class AHumanityTrinityRebuildPlayerCharacter;
 
 UCLASS()
@@ -23,8 +24,11 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildHideAndSeekGameMode : pu
     void RestartRound();
     void TogglePracticeMode();
     bool IsPracticeMode() const { return bPracticeMode; }
-    void ReportSeekerNoise(const FVector& Location, float Loudness);
+    void ReportPlayerNoise(const FVector& Location, float Loudness);
     FString GetPracticeHint() const;
+    bool IsPlayerHiding() const { return bPlayerHiding; }
+    void ReadyToHide();
+    void NotifyPlayerCaught(AActor* SearchingActor);
 
   protected:
     virtual void BeginPlay() override;
@@ -32,6 +36,8 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildHideAndSeekGameMode : pu
   private:
     UPROPERTY() TObjectPtr<AHumanityTrinityRebuildHider> Hider;
     UPROPERTY() TObjectPtr<AHumanityTrinityRebuildPlayerCharacter> Seeker;
+    UPROPERTY() TObjectPtr<AHumanityTrinityRebuildSeeker> SearchingNPC;
+    UPROPERTY() TObjectPtr<AActor> HidingBoundary;
     FTimerHandle PreparationTimer;
     float SecondsRemaining = 180.0f;
     float PreparationEndsAt = 0.0f;
@@ -42,6 +48,9 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildHideAndSeekGameMode : pu
     bool bCaptureGame = false;
     bool bSelfTestCorePassed = false;
     bool bPracticeMode = false;
+    bool bPlayerHiding = false;
+    bool bPlayerHidingSelfTest = false;
+    bool bPlayerHidingTestPassed = true;
     int32 ShowcaseStep = 0;
     float SelfTestMoveUntil = 0;
     FVector SelfTestHiderStart = FVector::ZeroVector;
@@ -58,4 +67,10 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildHideAndSeekGameMode : pu
     void CaptureGameScreenshot(const FString& FileName);
     void CaptureCharacterShowcase();
     void TestRoundControls();
+    void CreateHidingBoundary();
+    void RunPlayerHidingSelfTest();
+    void TestPlayerHidingSound();
+    void TestPlayerHidingContact();
+    void TestPlayerHidingRoundControls();
+    void RecordPlayerHidingCheck(const TCHAR* Name, bool bPassed);
 };

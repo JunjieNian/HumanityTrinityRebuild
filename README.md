@@ -5,10 +5,12 @@ An editable Blender reconstruction and Unreal Engine interactive walkthrough of 
 ## Start playing
 
 Double-click the existing **Humanity Trinity Space** desktop shortcut. The 3D
-classroom opens with two choices in the same window: click **Walk through the
-space** or **Play hide and seek**, or press **1** or **2**. Press **M** while
-playing to return to the choice screen. Hide-and-seek begins with 12 lit seconds
-to memorize the room, then a three-minute dark round. **Esc** exits.
+classroom opens with three choices in the same window: **1 — Walk through the
+space**, **2 — You seek / NPC hides**, or **3 — You hide / NPC seeks**. Click a
+card or press its number. Press **M** while playing to return to this menu.
+When seeking, you have 12 lit seconds to memorize the room. When hiding, you have
+20 seconds to choose a spot, or press **Space** when ready. Both roles then play
+a three-minute dark round. **Esc** exits.
 
 ![Mode selection inside the room](Docs/Previews/HumanityTrinityRebuild_ModeMenu.png)
 
@@ -74,8 +76,8 @@ The complete editable reconstruction before game development is preserved at
 Run `Launch_HumanityTrinityRebuild_HideAndSeek.cmd`. You have 12 seconds to
 memorize the lit room, followed by a three-minute search in complete darkness.
 The existing **Humanity Trinity Space** desktop shortcut opens the 3D room with
-two choices: walkthrough or hide-and-seek. The selection stays in one window;
-press **M** during either mode to return to the menu.
+three choices: walkthrough, seeking, or hiding. The selection stays in one window;
+press **M** during any mode to return to the menu.
 Use headphones: the hider's steps are spatialized and muffled by obstacles.
 Press **Tab** to restart in bright practice mode and inspect the character,
 learn the room, and observe the hider's current behavior.
@@ -98,7 +100,34 @@ only remembers the latest audible event. Its route avoids the remembered threat
 and recent hiding places. Walking produces actual distance-based footstep events.
 Practice mode exposes behavior text; dark rounds never expose AI state or location.
 
-Current scope: one computer-controlled hider, classroom floor routes and crouching
+### You hide, the NPC seeks / 你躲藏，NPC 寻找
+
+Choose **3 — You hide / NPC seeks** from the desktop launcher's menu. Use the
+20-second lit preparation to hide among the classroom furniture. The NPC waits
+at the teaching end and does not hear or follow you during this countdown.
+Press **Space** to start early. Once the lights go out, stay hidden for three
+minutes to win; you may keep moving, but your steps can draw the searcher closer.
+
+The searcher uses the same articulated civilian model with walking, reaching,
+turning and crouched inspection. It patrols unvisited hiding areas, pauses to
+listen after an audible step, and investigates an approximate sound location.
+It then checks nearby furniture before resuming its patrol. Silent movement
+does not update its memory. Walls and furniture reduce hearing range, and short
+hand sweeps must physically reach your standing or crouched capsule to catch
+you. Touching the NPC with **F** also reveals you. **Shift** and **Ctrl** reduce
+your footstep range; staying still produces no footstep event.
+
+**Tab** restarts the same role in bright practice, where you can observe the NPC
+and read its behavior. **R** starts another round in the current role. Winning
+or being found restores the lights. A temporary visible rail marks the stage
+boundary: this mode uses the classroom floor, keeping every hiding area within
+the NPC's supported search space. The stage and prop rooms remain available in
+walkthrough mode.
+
+The [player-hiding validation record](Docs/Validation/PlayerHiding.md) includes
+the runtime checks and reproduction command.
+
+Current scope: one computer-controlled opponent, classroom floor routes and crouching
 beside furniture. This version has no multiplayer, crawling under tables, climbing,
 skinned motion-capture animation, visible first-person hands, or haptic hardware.
 Material touch descriptions are a sensory substitute; unrecognized materials use

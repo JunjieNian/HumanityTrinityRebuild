@@ -34,7 +34,7 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildHider : public AActor
     FString GetBehaviorLabel() const;
     void SetShowcasePose(int32 Pose);
 
-  private:
+  protected:
     UPROPERTY(VisibleAnywhere) TObjectPtr<UCapsuleComponent> Body;
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<UStaticMeshComponent>> Parts;
     UPROPERTY() TObjectPtr<USoundWave> FootstepSound;
@@ -55,10 +55,13 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildHider : public AActor
     int32 RouteCursor = 0, StepsEmitted = 0, HeardCount = 0, ShowcasePose = -1;
     bool bHasNoiseMemory = false;
     int32 PlannedNoiseCount = 0;
-    void BuildRoutes();
+    void BuildRoutes(bool bWholeClassroom = false);
     int32 NearestNode(const FVector& Position) const;
     bool IsPassageClear(const FVector& A, const FVector& B) const;
     bool ChooseEscape();
     void SetState(EHiderState NewState);
     void Animate(float DeltaSeconds, float Distance);
+    void UpdateBodyAndFootsteps(float DeltaSeconds, const FVector& PreviousLocation);
+    virtual bool WantsCrouch() const;
+    virtual float GetReachPose() const { return 0.f; }
 };

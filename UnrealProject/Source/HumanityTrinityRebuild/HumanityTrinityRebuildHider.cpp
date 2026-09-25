@@ -92,7 +92,7 @@ bool AHumanityTrinityRebuildHider::IsPassageClear(const FVector& A, const FVecto
     return !GetWorld()->SweepSingleByChannel(Hit, A, B, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeCapsule(24, 88),
                                              Q);
 }
-void AHumanityTrinityRebuildHider::BuildRoutes()
+void AHumanityTrinityRebuildHider::BuildRoutes(bool bWholeClassroom)
 {
     // Flood only the classroom floor reachable by a standing person. Stage steps,
     // tables and prop-room doors are excluded from hiding destinations in this version.
@@ -100,14 +100,18 @@ void AHumanityTrinityRebuildHider::BuildRoutes()
     Covers.Empty();
     Route.Empty();
     RecentCovers.Empty();
-    constexpr int32 W = 27, H = 29;
-    auto Pos = [](int32 I) { return FVector(-520 + (I % W) * 40, -220 - (I / W) * 40, 90); };
+    const int32 W = bWholeClassroom ? 29 : 27, H = bWholeClassroom ? 33 : 29;
+    auto Pos = [W, bWholeClassroom](int32 I) {
+        return FVector((bWholeClassroom ? -560 : -520) + (I % W) * 40,
+                       (bWholeClassroom ? -80 : -220) - (I / W) * 40, 90);
+    };
     TArray<int32> Map;
     Map.Init(INDEX_NONE, W * H);
     TArray<int32> Queue;
-    Queue.Add(13);
-    Map[13] = 0;
-    Nodes.Add({Pos(13), {}, 0});
+    const int32 Seed = W / 2 + (bWholeClassroom ? 4 * W : 0);
+    Queue.Add(Seed);
+    Map[Seed] = 0;
+    Nodes.Add({Pos(Seed), {}, 0});
     for (int32 Cursor = 0; Cursor < Queue.Num(); ++Cursor)
     {
         int32 Cell = Queue[Cursor], Current = Map[Cell];
@@ -356,6 +360,10 @@ void AHumanityTrinityRebuildHider::Tick(float Dt)
             }
         }
     }
+    UpdateBodyAndFootsteps(Dt, Before);
+}
+void AHumanityTrinityRebuildHider::UpdateBodyAndFootsteps(float Dt, const FVector& Before)
+{
     const float Distance = FVector::Dist2D(Before, GetActorLocation());
     Animate(Dt, Distance);
     if (Distance > 0.01f)
@@ -371,10 +379,13 @@ void AHumanityTrinityRebuildHider::Tick(float Dt)
         }
     }
 }
+bool AHumanityTrinityRebuildHider::WantsCrouch() const
+{
+    return ShowcasePose >= 0 ? ShowcasePose == 1 : State == EHiderState::Hidden || State == EHiderState::Listening;
+}
 void AHumanityTrinityRebuildHider::Animate(float Dt, float Distance)
 {
-    const bool bCrouch =
-        ShowcasePose >= 0 ? ShowcasePose == 1 : State == EHiderState::Hidden || State == EHiderState::Listening;
+    const bool bCrouch = WantsCrouch();
     CrouchAlpha = FMath::FInterpTo(CrouchAlpha, bCrouch ? 1.f : 0.f, Dt, 7.f);
     const float Half = 88 - CrouchAlpha * 20;
     Body->SetCapsuleHalfHeight(Half, false);
@@ -413,8 +424,9 @@ void AHumanityTrinityRebuildHider::Animate(float Dt, float Distance)
         Pose(10 + Side * 3, Knee, FQuat::FindBetweenNormals(FVector(0, 0, -1), (Ankle - Knee).GetSafeNormal()));
         Pose(11 + Side * 3, Ankle);
         const FVector Shoulder = FVector(0, 0, Hips) + Lean.RotateVector(FVector(0, Sign * 21.9f, 41.5f));
-        const FQuat Arm = FRotator(Swing * 19 + CrouchAlpha * 32, 0, Sign * 3).Quaternion();
-        const FQuat Fore = FRotator(Swing * 12 + CrouchAlpha * 72 + 8, 0, 0).Quaternion();
+        const float Reach = GetReachPose();
+        const FQuat Arm = FRotator(FMath::Lerp(Swing * 19 + CrouchAlpha * 32, 72.f, Reach), 0, Sign * 3).Quaternion();
+        const FQuat Fore = FRotator(FMath::Lerp(Swing * 12 + CrouchAlpha * 72 + 8, 88.f, Reach), 0, 0).Quaternion();
         const FVector Elbow = Shoulder + Arm.RotateVector(FVector(0, 0, -28));
         Pose(3 + Side * 3, Shoulder, Arm);
         Pose(4 + Side * 3, Elbow, Fore);

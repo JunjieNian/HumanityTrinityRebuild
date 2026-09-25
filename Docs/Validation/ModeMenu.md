@@ -1,6 +1,7 @@
 # One-window mode selection
 
-Validated on Windows with Unreal Engine 5.7 on 2026-09-23.
+Originally validated on Windows with Unreal Engine 5.7 on 2026-09-23;
+the third mode and its desktop transitions were validated on 2026-09-25.
 
 The existing `Humanity Trinity Space.lnk` desktop shortcut was installed with
 `Tools/Windows/install_humanity_trinity_desktop_shortcut.ps1`. Its saved target
@@ -8,7 +9,9 @@ is `D:\HumanityTrinityRebuild\Launch_HumanityTrinityRebuild.cmd`, which launches
 `L_HumanityTrinityRebuildModeMenu` in game mode.
 
 The mode menu is drawn over the classroom, so the room is visible before a mode
-is selected. The two buttons accept a mouse click or keys `1` and `2`.
+is selected. The three buttons accept a mouse click or keys `1`, `2` and `3`:
+walkthrough, player seeking, and player hiding. The third option and its
+role-specific runtime checks are recorded in [PlayerHiding.md](PlayerHiding.md).
 
 ![Runtime selection screen](../Previews/HumanityTrinityRebuild_ModeMenu.png)
 

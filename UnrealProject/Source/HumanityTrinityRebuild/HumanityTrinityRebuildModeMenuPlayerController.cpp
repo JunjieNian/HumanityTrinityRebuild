@@ -8,9 +8,11 @@ void AHumanityTrinityRebuildModeMenuPlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
     InputComponent->BindKey(EKeys::One, IE_Pressed, this,
-                            &AHumanityTrinityRebuildModeMenuPlayerController::ChooseWalkthrough);
+                            &AHumanityTrinityRebuildModeMenuPlayerController::ChooseWalkthrough).bConsumeInput = false;
     InputComponent->BindKey(EKeys::Two, IE_Pressed, this,
-                            &AHumanityTrinityRebuildModeMenuPlayerController::ChooseHideAndSeek);
+                            &AHumanityTrinityRebuildModeMenuPlayerController::ChooseHideAndSeek).bConsumeInput = false;
+    InputComponent->BindKey(EKeys::Three, IE_Pressed, this,
+                            &AHumanityTrinityRebuildModeMenuPlayerController::ChoosePlayerHiding).bConsumeInput = false;
     InputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this,
                             &AHumanityTrinityRebuildModeMenuPlayerController::ClickMenu);
     InputComponent->BindKey(EKeys::M, IE_Pressed, this,
@@ -27,6 +29,12 @@ void AHumanityTrinityRebuildModeMenuPlayerController::ChooseHideAndSeek()
 {
     if (auto* Menu = GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildModeMenuGameMode>())
         Menu->EnterHideAndSeek();
+}
+
+void AHumanityTrinityRebuildModeMenuPlayerController::ChoosePlayerHiding()
+{
+    if (auto* Menu = GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildModeMenuGameMode>())
+        Menu->EnterPlayerHiding();
 }
 
 void AHumanityTrinityRebuildModeMenuPlayerController::ClickMenu()

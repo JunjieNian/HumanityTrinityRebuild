@@ -15,6 +15,7 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildModeMenuPlayerController
   private:
     void ChooseWalkthrough();
     void ChooseHideAndSeek();
+    void ChoosePlayerHiding();
     void ClickMenu();
     void ReturnToModeMenu();
 };

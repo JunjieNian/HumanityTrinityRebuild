@@ -1,0 +1,31 @@
+Desktop verification, 2026-09-25 (Windows / Unreal Engine 5.7)
+Shortcut: Humanity Trinity Space.lnk -> Launch_HumanityTrinityRebuild.cmd
+Initial live window ID: 3082312
+Observed: key 3 enters player-hiding preparation; Space starts before 20 seconds;
+M returns to shared menu; key 1 enters walkthrough; M returns again;
+mouse click on card 3 enters player-hiding mode; Tab restarts the same role.
+
+After explicit game-input restoration was rebuilt:
+Final live window ID: 2163742
+Observed: shortcut opens three-card menu; key 3 enters preparation;
+mouse input visibly changes camera yaw and pitch; M returns to shared menu
+in the same window. Window left on menu for the user.
+
+Selected first-session gameplay log lines (UTC timestamps):
+[2026.09.25-13.55.32:178][  0]LogTemp: Display: [MODE_MENU] READY map=L_HumanityTrinityRebuildModeMenu
+[2026.09.25-13.56.38:569][278]LogTemp: Display: [MODE_MENU] SELECT player_hides same_window=YES
+[2026.09.25-13.56.38:842][279]LogTemp: Display: [HIDE_AND_SEEK] PREPARATION role=PLAYER_HIDES seconds=20
+[2026.09.25-13.56.53:934][361]LogTemp: Display: [HIDE_AND_SEEK] ROUND_STARTED role=PLAYER_HIDES npc=X=150.000 Y=-220.000 Z=90.000
+[2026.09.25-13.57.34:356][961]LogTemp: Display: [MODE_MENU] READY map=L_HumanityTrinityRebuildModeMenu
+[2026.09.25-14.01.31:586][190]LogTemp: Display: [MODE_MENU] SELECT walkthrough same_world=L_HumanityTrinityRebuildModeMenu
+[2026.09.25-14.01.58:826][277]LogTemp: Display: [MODE_MENU] SELECT player_hides same_window=YES
+[2026.09.25-14.01.59:085][278]LogTemp: Display: [HIDE_AND_SEEK] PREPARATION role=PLAYER_HIDES seconds=20
+[2026.09.25-14.02.18:866][631]LogTemp: Display: [HIDE_AND_SEEK] ROUND_STARTED role=PLAYER_HIDES npc=X=150.000 Y=-220.000 Z=90.000
+[2026.09.25-14.02.20:754][823]LogTemp: Display: [HIDE_AND_SEEK] PREPARATION role=PLAYER_HIDES seconds=20
+[2026.09.25-14.02.40:782][201]LogTemp: Display: [HIDE_AND_SEEK] ROUND_STARTED role=PLAYER_HIDES npc=X=150.000 Y=-220.000 Z=90.000
+Final-session gameplay log lines (UTC timestamps):
+[2026.09.25-14.06.05:506][  0]LogTemp: Display: [MODE_MENU] READY map=L_HumanityTrinityRebuildModeMenu
+[2026.09.25-14.07.27:218][442]LogTemp: Display: [MODE_MENU] SELECT player_hides same_window=YES
+[2026.09.25-14.07.27:486][443]LogTemp: Display: [HIDE_AND_SEEK] PREPARATION role=PLAYER_HIDES seconds=20
+[2026.09.25-14.07.47:261][822]LogTemp: Display: [HIDE_AND_SEEK] ROUND_STARTED role=PLAYER_HIDES npc=X=150.000 Y=-220.000 Z=90.000
+[2026.09.25-14.08.00:555][184]LogTemp: Display: [MODE_MENU] READY map=L_HumanityTrinityRebuildModeMenu
