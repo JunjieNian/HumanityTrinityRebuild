@@ -11,4 +11,7 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildHUD : public AHUD
 
 public:
     virtual void DrawHUD() override;
+
+private:
+    void DrawTeacherPatrolPreference();
 };

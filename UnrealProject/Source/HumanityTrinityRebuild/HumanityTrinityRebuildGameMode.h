@@ -15,9 +15,13 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildGameMode : public AGameM
 
 public:
     AHumanityTrinityRebuildGameMode();
+    virtual bool IsTeacherPatrolAllowed() const { return true; }
+    virtual void SetTeacherPatrolSuspended(bool bSuspended) { bTeacherPatrolSuspended = bSuspended; }
+    bool IsTeacherPatrolSuspended() const { return bTeacherPatrolSuspended; }
 
 protected:
     virtual void BeginPlay() override;
+    bool bTeacherPatrolSuspended = false;
 
 private:
     UPROPERTY()

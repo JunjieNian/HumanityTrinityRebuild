@@ -1,0 +1,81 @@
+[
+  {
+    "case": "walk-safe",
+    "result": "PASS",
+    "log_sha256": "c9ab9b5a663c588710bf37e29ab4246f66a889dbf427cd8a9a92931c376ed89a"
+  },
+  {
+    "case": "walk-auto",
+    "result": "PASS",
+    "log_sha256": "bb93609baafe6e930e65cc896e513d1c650934be94ad96b3075b771e8a5c9f49"
+  },
+  {
+    "case": "walk-exposed",
+    "result": "PASS",
+    "log_sha256": "5903ae010f0388b5691b32a2603f6d78d4af5495cedfb5a2fd4863c7cb2eb90d"
+  },
+  {
+    "case": "walk-lights",
+    "result": "PASS",
+    "log_sha256": "ee4a74aaea5f65de8258cc2836effd120101a1c34ff0ed7da064d84f32bdcb3e"
+  },
+  {
+    "case": "walk-screen",
+    "result": "PASS",
+    "log_sha256": "4be1725f21e7330ab805c34825d74df6132015bd34ac85205f51e60bc8fed4b5"
+  },
+  {
+    "case": "walk-late",
+    "result": "PASS",
+    "log_sha256": "66255e49664bec83ffaacb775a9b87a46bdd26d287491da610a095dbb0de1285"
+  },
+  {
+    "case": "walk-exit",
+    "result": "PASS",
+    "log_sha256": "130181f1d75f3a796ad36e177ceb0bbf8392108c688a350d60be637c12cdf65c"
+  },
+  {
+    "case": "seek-safe",
+    "result": "PASS",
+    "log_sha256": "c544940c20e7eea2900c497322d537450201e1730c10727888440ff43f0c681b"
+  },
+  {
+    "case": "hide-safe",
+    "result": "PASS",
+    "log_sha256": "7790ead00bf546eca40344d348abe5e900b4f989d731501c97c65b40987b8219"
+  },
+  {
+    "case": "practice-safe",
+    "result": "PASS",
+    "log_sha256": "91fb2518c5cc9cf46e754f4847509e95a103a58e1c2d1ce55a8116ecf8b261a1"
+  },
+  {
+    "case": "SeekRegression",
+    "result": "PASS",
+    "log_sha256": "483dfb9376876ff2ed916b3267f16fd3dbfeb9cef8ab9c4a9c45cc96ee98a131"
+  },
+  {
+    "case": "HideRegression",
+    "result": "PASS",
+    "log_sha256": "693cf01b8afdb0ef23d76fbd0b3dae8e96141e8582288f583c56aacd432661fe"
+  },
+  {
+    "case": "RoomRegression",
+    "result": "PASS",
+    "log_sha256": "ef7cde799ec3b240960d346272107302d787dbc1ea5693049b098e812c3232c0"
+  },
+  {
+    "case": "FullRoomRegression",
+    "result": "PASS",
+    "log_sha256": "4aaaea09080c6bb232e510b38da0de4b21ca424ea1fe218bd775455646c8ec5e"
+  },
+  {
+    "case": "MenuRegression",
+    "result": "PASS",
+    "log_sha256": "3a8121d9b42fd37cbe3b439851d47a590720cc0798eac3b7cdce858185c4656f"
+  },
+  {
+    "case": "asset_import",
+    "result": "PASS"
+  }
+]

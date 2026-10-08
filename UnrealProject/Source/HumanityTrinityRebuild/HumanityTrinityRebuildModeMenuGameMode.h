@@ -14,6 +14,9 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildModeMenuGameMode : publi
   public:
     AHumanityTrinityRebuildModeMenuGameMode();
     bool IsChoosingMode() const { return bChoosingMode; }
+    virtual bool IsTeacherPatrolAllowed() const override { return !bChoosingMode; }
+    void ToggleTeacherPatrol();
+    bool IsTeacherPatrolEnabled() const;
     void EnterWalkthrough();
     void EnterHideAndSeek();
     void EnterPlayerHiding();

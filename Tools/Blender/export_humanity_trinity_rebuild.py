@@ -30,6 +30,8 @@ EXCLUDED_COLLECTION_PREFIXES = (
 
 
 def object_is_excluded(obj):
+    if obj.get("runtime_dynamic_exterior_door", False) or obj.get("runtime_dynamic_corridor", False):
+        return True
     if obj.get("runtime_dynamic_teaching", False):
         return True
     if obj.get("runtime_dynamic_prop_door", False):
@@ -110,6 +112,15 @@ rows.append("};")
 header.write_text("// Generated from Blender teaching-wall parameters. Centimetres; facing wall, right is -X.\n"
     '#pragma once\n#include "CoreMinimal.h"\nnamespace HumanityTeaching {\n'+"\n".join(rows)+"\n}\n",encoding="utf-8")
 print("TEACHING_LAYOUT_EXPORTED",header)
+
+# Corridor and exterior door leaves remain editable in Blender but C++ animates
+# them independently from this combined classroom mesh.
+import runpy
+runpy.run_path(str(PROJECT_ROOT / "Tools" / "Blender" / "patrol_environment.py"))["write_layout"]()
+exterior_leaves = [o for o in bpy.context.scene.objects if o.get("runtime_dynamic_exterior_door", False)]
+if len(exterior_leaves) != 3:
+    raise RuntimeError("Run patrol_environment.py or regenerate the source: expected three dynamic exterior doors")
+print("EXTERIOR_DOORS_EXCLUDED_FROM_STATIC_EXPORT", len(exterior_leaves))
 
 bpy.ops.object.select_all(action="DESELECT")
 

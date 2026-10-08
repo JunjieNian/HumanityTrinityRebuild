@@ -1,6 +1,6 @@
 # HumanityTrinityRebuild：复旦附中“三一人文空间”三维重建
 
-D 盘主项目目录：D:\HumanityTrinityRebuild
+D 盘主项目目录：`D:\Projects\HumanityTrinityRebuild`
 
 桌面快捷方式：Blender 4.5 LTS
 

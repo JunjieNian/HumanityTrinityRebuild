@@ -8,6 +8,7 @@
 class AHumanityTrinityRebuildLightSwitch;
 class AHumanityTrinityRebuildLightingController;
 class AHumanityTrinityRebuildRoomInteraction;
+class AHumanityTrinityRebuildCorridor;
 class UCameraComponent;
 class UPrimitiveComponent;
 class USoundWave;
@@ -54,6 +55,9 @@ private:
 
     UPROPERTY()
     TObjectPtr<UPrimitiveComponent> FocusedRoomComponent;
+
+    UPROPERTY() TObjectPtr<AHumanityTrinityRebuildCorridor> FocusedCorridor;
+    int32 FocusedCorridorDoor = INDEX_NONE;
 
     UPROPERTY(EditAnywhere, Category = "HumanityTrinityRebuild|Interaction")
     float InteractionDistanceCm = 240.0f;
@@ -106,6 +110,7 @@ private:
     void StartCrouch();
     void StopCrouch();
     void TogglePractice();
+    void ToggleTeacherPatrol();
     void UpdateFootsteps(float DeltaSeconds);
 
     void UpdateFocusedInteractable();

@@ -3,6 +3,7 @@
 #include "HumanityTrinityRebuildModeMenuHUD.h"
 #include "HumanityTrinityRebuildModeMenuPlayerController.h"
 #include "HumanityTrinityRebuildPlayerCharacter.h"
+#include "HumanityTrinityRebuildTeacherPatrol.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/PlatformMisc.h"
@@ -50,6 +51,11 @@ void AHumanityTrinityRebuildModeMenuGameMode::InitializeMenu()
 
 void AHumanityTrinityRebuildModeMenuGameMode::ReturnToMenu()
 {
+    if (auto* Patrol = AHumanityTrinityRebuildTeacherPatrol::Find(GetWorld()))
+    {
+        if (Patrol->HasFailed()) return;
+        Patrol->CancelPatrol();
+    }
     APlayerController* Controller = GetWorld()->GetFirstPlayerController();
     if (!Controller || !MenuPlayer)
         return;
@@ -63,6 +69,21 @@ void AHumanityTrinityRebuildModeMenuGameMode::ReturnToMenu()
     InputMode.SetHideCursorDuringCapture(false);
     InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
     Controller->SetInputMode(InputMode);
+}
+
+void AHumanityTrinityRebuildModeMenuGameMode::ToggleTeacherPatrol()
+{
+    if (!bChoosingMode) return;
+    const bool bEnabled = !AHumanityTrinityRebuildTeacherPatrol::IsSessionEnabled();
+    AHumanityTrinityRebuildTeacherPatrol::SetSessionEnabled(bEnabled);
+    if (auto* Patrol = AHumanityTrinityRebuildTeacherPatrol::Find(GetWorld()))
+        Patrol->SetEnabled(bEnabled);
+    UE_LOG(LogTemp, Display, TEXT("[MODE_MENU] TEACHER_PATROL enabled=%s"), bEnabled ? TEXT("YES") : TEXT("NO"));
+}
+
+bool AHumanityTrinityRebuildModeMenuGameMode::IsTeacherPatrolEnabled() const
+{
+    return AHumanityTrinityRebuildTeacherPatrol::IsSessionEnabled();
 }
 
 void AHumanityTrinityRebuildModeMenuGameMode::EnterWalkthrough()
@@ -110,6 +131,23 @@ void AHumanityTrinityRebuildModeMenuGameMode::RunMenuSelfTest()
                MenuHUD ? TEXT("YES") : TEXT("NO"), MenuHUD && MenuHUD->HasLayout() ? TEXT("YES") : TEXT("NO"),
                bChoosingMode ? TEXT("YES") : TEXT("NO"),
                Controller && Controller->bShowMouseCursor ? TEXT("YES") : TEXT("NO"));
+        FPlatformMisc::RequestExit(false);
+        return;
+    }
+    // Exercise the same hit target used by a mouse, while preserving the user's
+    // session preference for the following mode-travel assertion.
+    const bool bInitialPatrol = IsTeacherPatrolEnabled();
+    const FVector2D ToggleCenter = MenuHUD->GetTeacherToggleCenter();
+    const bool bFirstClick = MenuHUD->SelectAt(ToggleCenter.X, ToggleCenter.Y);
+    const bool bToggled = IsTeacherPatrolEnabled() != bInitialPatrol;
+    const bool bSecondClick = MenuHUD->SelectAt(ToggleCenter.X, ToggleCenter.Y);
+    const bool bTogglePass = bFirstClick && bToggled && bSecondClick &&
+        IsTeacherPatrolEnabled() == bInitialPatrol && bChoosingMode;
+    UE_LOG(LogTemp, Display, TEXT("[MODE_MENU_SELFTEST] teacher_checkbox=%s preference_restored=%s"),
+        bTogglePass ? TEXT("PASS") : TEXT("FAIL"),
+        IsTeacherPatrolEnabled() == bInitialPatrol ? TEXT("YES") : TEXT("NO"));
+    if (!bTogglePass)
+    {
         FPlatformMisc::RequestExit(false);
         return;
     }

@@ -33,7 +33,7 @@ void AHumanityTrinityRebuildSeeker::StopSearching()
 
 void AHumanityTrinityRebuildSeeker::HearPlayerNoise(const FVector& Location, float Loudness)
 {
-    if (!bSearching || !Seeker)
+    if (IsEmergencyHiding() || !bSearching || !Seeker)
         return;
     float Range = FMath::Clamp(Loudness, 0.f, 1.f) * 700.f;
     const float Distance = FVector::Dist2D(Location, GetActorLocation());
@@ -221,6 +221,8 @@ bool AHumanityTrinityRebuildSeeker::FeelAhead()
 void AHumanityTrinityRebuildSeeker::Tick(float Dt)
 {
     AActor::Tick(Dt);
+    if (TickEmergency(Dt))
+        return;
     const FVector Before = GetActorLocation();
     const float Now = GetWorld()->GetTimeSeconds();
     if (bSearching)
@@ -284,12 +286,16 @@ void AHumanityTrinityRebuildSeeker::Tick(float Dt)
 
 bool AHumanityTrinityRebuildSeeker::WantsCrouch() const
 {
+    if (IsEmergencyHiding())
+        return IsEmergencyInRoom();
     return SearchState == ETrinitySearchState::Feeling &&
            GetWorld()->GetTimeSeconds() - FeelingStartedAt > 1.8f;
 }
 
 float AHumanityTrinityRebuildSeeker::GetReachPose() const
 {
+    if (IsEmergencyHiding())
+        return 0.f;
     return bSearching ? (SearchState == ETrinitySearchState::Feeling ? 1.f : .55f) : 0.f;
 }
 
@@ -311,4 +317,15 @@ void AHumanityTrinityRebuildSeeker::SetSearchState(ETrinitySearchState NewState)
     if (SearchState != NewState)
         UE_LOG(LogTemp, Display, TEXT("[NPC_SEEKER] STATE %d -> %d"), int32(SearchState), int32(NewState));
     SearchState = NewState;
+}
+
+void AHumanityTrinityRebuildSeeker::EmergencyFinished(float PausedSeconds)
+{
+    PauseUntil += PausedSeconds;
+    NextTouchAt += PausedSeconds;
+    NextReactionAt += PausedSeconds;
+    AvoidUntil += PausedSeconds;
+    FeelingStartedAt += PausedSeconds;
+    for (float& Time : LastVisited)
+        Time += PausedSeconds;
 }

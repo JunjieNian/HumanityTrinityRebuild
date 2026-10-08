@@ -16,6 +16,8 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildHideAndSeekGameMode : pu
   public:
     AHumanityTrinityRebuildHideAndSeekGameMode();
     virtual void Tick(float DeltaSeconds) override;
+    virtual bool IsTeacherPatrolAllowed() const override { return bRoundRunning && !bRoundFinished && !bTeacherPatrolSuspended; }
+    virtual void SetTeacherPatrolSuspended(bool bSuspended) override;
     bool IsRoundRunning() const { return bRoundRunning; }
     bool IsRoundFinished() const { return bRoundFinished; }
     float GetSecondsRemaining() const { return SecondsRemaining; }
@@ -41,6 +43,8 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildHideAndSeekGameMode : pu
     FTimerHandle PreparationTimer;
     float SecondsRemaining = 180.0f;
     float PreparationEndsAt = 0.0f;
+    float PreparationSuspendedAt = 0.0f;
+    bool bBoundaryRestorePending = false;
     bool bRoundRunning = false;
     bool bRoundFinished = false;
     bool bSeekerWon = false;

@@ -6,6 +6,7 @@ class UCapsuleComponent;
 class UStaticMeshComponent;
 class USoundWave;
 class USoundAttenuation;
+class AHumanityTrinityRebuildRoomInteraction;
 enum class EHiderState : uint8
 {
     Hidden,
@@ -33,6 +34,12 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildHider : public AActor
     EHiderState GetHideState() const { return State; }
     FString GetBehaviorLabel() const;
     void SetShowcasePose(int32 Pose);
+    // Uses the floor graph and swept step-up movement to reach the side rooms.
+    bool BeginEmergencyHide(AHumanityTrinityRebuildRoomInteraction* Room, int32 DoorIndex);
+    void EndEmergencyHide();
+    bool IsEmergencyHiding() const { return bEmergencyActive; }
+    bool IsEmergencyInRoom() const { return bEmergencyHolding; }
+    int32 GetEmergencyDoorIndex() const { return EmergencyDoorIndex; }
 
   protected:
     UPROPERTY(VisibleAnywhere) TObjectPtr<UCapsuleComponent> Body;
@@ -64,4 +71,13 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildHider : public AActor
     void UpdateBodyAndFootsteps(float DeltaSeconds, const FVector& PreviousLocation);
     virtual bool WantsCrouch() const;
     virtual float GetReachPose() const { return 0.f; }
+    virtual void EmergencyFinished(float PausedSeconds) {}
+    bool TickEmergency(float DeltaSeconds);
+    UPROPERTY() TObjectPtr<AHumanityTrinityRebuildRoomInteraction> EmergencyRoom;
+    bool bEmergencyActive = false, bEmergencyHolding = false, bEmergencyReturning = false;
+    float EmergencyFloorHeight = 0, EmergencyStartedAt = 0, EmergencyBlocked = 0;
+    int32 EmergencyDoorIndex = 0, EmergencyCursor = 0;
+    TArray<FVector> EmergencyPath;
+    bool BuildEmergencyPath();
+    bool MoveEmergencyStep(const FVector& Delta);
 };

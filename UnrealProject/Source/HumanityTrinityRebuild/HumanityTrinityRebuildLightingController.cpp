@@ -138,11 +138,11 @@ AHumanityTrinityRebuildLightingController::AHumanityTrinityRebuildLightingContro
         }
     }
 
-    // A low, narrow area light just inside the front door.  It reads as light
-    // leaking under/around a door instead of as an unexplained glowing point.
+    // A small corridor bounce source outside the front door. The closed opaque
+    // leaf occludes it; no artificial light source remains inside the classroom.
     URectLightComponent* DoorLeak = CreateDefaultSubobject<URectLightComponent>(TEXT("DoorLeakResidualLight"));
     DoorLeak->SetupAttachment(SceneRoot);
-    DoorLeak->SetRelativeLocation(FVector(-575.0, -230.0, 34.0));
+    DoorLeak->SetRelativeLocation(FVector(-655.0, -240.0, 34.0));
     DoorLeak->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
     DoorLeak->SetMobility(EComponentMobility::Movable);
     DoorLeak->SetIntensityUnits(ELightUnits::Lumens);

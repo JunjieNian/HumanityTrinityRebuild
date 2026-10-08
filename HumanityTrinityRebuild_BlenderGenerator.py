@@ -607,15 +607,15 @@ def build_door(name, center_y, label):
         COL["doors"],
     )
 
-    # 门扇以约 72 度打开，帮助俯视图辨认门洞和开启方向。
-    angle = math.radians(72)
+    # 教室门默认关闭；Unreal 的独立门扇会按同一组尺寸转动。
+    angle = 0.0
     hinge = (W / 2 - 0.015, center_y - door_w / 2 + 0.04)
     end = (
         hinge[0] - (door_w - 0.08) * math.sin(angle),
         hinge[1] + (door_w - 0.08) * math.cos(angle),
     )
     slab = add_wall_between(
-        name + "_DoorLeaf_Open72deg",
+        name + "_DoorLeaf_Closed",
         hinge,
         end,
         0.055,
@@ -625,6 +625,7 @@ def build_door(name, center_y, label):
         z0=0.04,
     )
     slab["label"] = mirror_side_text(label)
+    slab["runtime_dynamic_exterior_door"] = True
     slab["status"] = "门的位置和宽度暂定；三门顺序/作用来自现场信息"
     return slab
 
@@ -1277,6 +1278,9 @@ scene["confirmed_layout"] = (
 )
 scene["provisional_parameters_json"] = json.dumps(P, ensure_ascii=False)
 
+# New optional-gameplay corridor and matching closed door leaves remain editable.
+runpy.run_path(str(OUT_DIR / "Tools" / "Blender" / "patrol_environment.py"))["update_scene"]()
+
 notes = bpy.data.texts.new("README_参数与证据说明")
 notes.write(
     "本模型结合现场记忆与2026-09-05提供的四张室内照片，尺寸仍为暂定。\n"
@@ -1299,6 +1303,7 @@ try:
         export_yup=True,
         export_cameras=True,
         export_lights=True,
+        export_extras=True,
     )
     print(f"GLB exported: {GLB_PATH}")
 except Exception as exc:

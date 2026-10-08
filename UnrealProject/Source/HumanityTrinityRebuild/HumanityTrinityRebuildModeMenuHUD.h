@@ -13,9 +13,11 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildModeMenuHUD : public AHu
     virtual void DrawHUD() override;
     bool SelectAt(float X, float Y);
     FVector2D GetChoiceCenter(int32 Choice) const;
+    FVector2D GetTeacherToggleCenter() const { return GetTeacherToggleBox().GetCenter(); }
     bool HasLayout() const { return ViewSize.X > 0 && ViewSize.Y > 0; }
 
   private:
     FVector2D ViewSize = FVector2D::ZeroVector;
     FBox2D GetChoiceBox(int32 Choice) const;
+    FBox2D GetTeacherToggleBox() const;
 };

@@ -21,11 +21,23 @@ FVector2D AHumanityTrinityRebuildModeMenuHUD::GetChoiceCenter(int32 Choice) cons
     return GetChoiceBox(Choice).GetCenter();
 }
 
+FBox2D AHumanityTrinityRebuildModeMenuHUD::GetTeacherToggleBox() const
+{
+    const float X = FMath::Max(45.0f, ViewSize.X * 0.095f);
+    return FBox2D(FVector2D(X, ViewSize.Y * 0.815f),
+                  FVector2D(X + FMath::Clamp(ViewSize.X * 0.41f, 400.0f, 610.0f), ViewSize.Y * 0.815f + 36.0f));
+}
+
 bool AHumanityTrinityRebuildModeMenuHUD::SelectAt(float X, float Y)
 {
     auto* Menu = GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildModeMenuGameMode>();
     if (!Menu || !Menu->IsChoosingMode() || !HasLayout())
         return false;
+    if (GetTeacherToggleBox().IsInside(FVector2D(X, Y)))
+    {
+        Menu->ToggleTeacherPatrol();
+        return true;
+    }
     if (GetChoiceBox(0).IsInside(FVector2D(X, Y)))
     {
         Menu->EnterWalkthrough();
@@ -86,6 +98,17 @@ void AHumanityTrinityRebuildModeMenuHUD::DrawHUD()
                  FLinearColor(.79f, .87f, .84f), Box.Min.X + 24, Box.Min.Y + Box.GetSize().Y - 31,
                  GEngine->GetSmallFont(), 1.0f, false);
     }
+    const FBox2D ToggleBox = GetTeacherToggleBox();
+    const bool bEnabled = Menu->IsTeacherPatrolEnabled();
+    DrawRect(ToggleBox.IsInside(FVector2D(MouseX, MouseY)) ? FLinearColor(.15f, .29f, .29f, .98f)
+        : FLinearColor(.06f, .13f, .15f, .95f), ToggleBox.Min.X, ToggleBox.Min.Y,
+        ToggleBox.GetSize().X, ToggleBox.GetSize().Y);
+    DrawText(bEnabled ? TEXT("[X]  T  Allow surprise teacher inspections: ON")
+                      : TEXT("[ ]  T  Allow surprise teacher inspections: OFF"),
+        bEnabled ? FLinearColor(1.f, .78f, .42f) : FLinearColor(.80f, .87f, .84f),
+        Left + 10, ToggleBox.Min.Y + 10, GEngine->GetSmallFont(), 1.f, false);
+    DrawText(TEXT("If enabled: lights out, hide in a side room. Being found ends the game."),
+        FLinearColor(.83f, .78f, .67f), Left, H * .89f, GEngine->GetSmallFont(), .85f, false);
     DrawText(TEXT("Click a mode or press 1 / 2 / 3    |    M returns to this menu"), FLinearColor(.83f, .78f, .67f), Left,
-             H * .88f, GEngine->GetSmallFont(), 1.0f, false);
+             H * .94f, GEngine->GetSmallFont(), 1.0f, false);
 }

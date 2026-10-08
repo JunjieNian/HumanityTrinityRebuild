@@ -4,6 +4,9 @@
 #include "HumanityTrinityRebuildHideAndSeekGameMode.h"
 #include "HumanityTrinityRebuildHider.h"
 #include "HumanityTrinityRebuildRoomInteraction.h"
+#include "HumanityTrinityRebuildCorridor.h"
+#include "HumanityTrinityRebuildTeacherPatrol.h"
+#include "HumanityTrinityRebuildModeMenuGameMode.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/Engine.h"
@@ -15,6 +18,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundWave.h"
 #include "Materials/MaterialInterface.h"
+#include "InputCoreTypes.h"
 
 AHumanityTrinityRebuildPlayerCharacter::AHumanityTrinityRebuildPlayerCharacter()
 {
@@ -115,6 +119,7 @@ void AHumanityTrinityRebuildPlayerCharacter::SetupPlayerInputComponent(UInputCom
     PlayerInputComponent->BindAction(TEXT("GameCrouch"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::StartCrouch);
     PlayerInputComponent->BindAction(TEXT("GameCrouch"), IE_Released, this, &AHumanityTrinityRebuildPlayerCharacter::StopCrouch);
     PlayerInputComponent->BindAction(TEXT("PracticeMode"), IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::TogglePractice);
+    PlayerInputComponent->BindKey(EKeys::T, IE_Pressed, this, &AHumanityTrinityRebuildPlayerCharacter::ToggleTeacherPatrol);
 }
 
 void AHumanityTrinityRebuildPlayerCharacter::MoveForward(const float Value)
@@ -161,7 +166,14 @@ void AHumanityTrinityRebuildPlayerCharacter::StopJump()
 
 void AHumanityTrinityRebuildPlayerCharacter::Interact()
 {
+    if (auto* Patrol = AHumanityTrinityRebuildTeacherPatrol::Find(GetWorld()))
+        if (Patrol->HasFailed()) return;
     UpdateFocusedInteractable();
+    if (FocusedCorridor && FocusedCorridorDoor != INDEX_NONE)
+    {
+        FocusedCorridor->ToggleDoor(FocusedCorridorDoor);
+        return;
+    }
     if (bHideAndSeekMode)
     {
         // In darkness the distant line-of-sight prompts are not a sense.
@@ -226,6 +238,20 @@ void AHumanityTrinityRebuildPlayerCharacter::TogglePractice()
 {
     if (auto* Game = GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildHideAndSeekGameMode>()) Game->TogglePracticeMode();
 }
+
+void AHumanityTrinityRebuildPlayerCharacter::ToggleTeacherPatrol()
+{
+    if (auto* Menu = GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildModeMenuGameMode>())
+        if (Menu->IsChoosingMode()) return;
+    if (auto* Patrol = AHumanityTrinityRebuildTeacherPatrol::Find(GetWorld()))
+    {
+        // Once footsteps start, finish the encounter before changing the option.
+        if (Patrol->IsActive() || Patrol->HasFailed()) return;
+        const bool bEnabled = !Patrol->IsEnabled();
+        AHumanityTrinityRebuildTeacherPatrol::SetSessionEnabled(bEnabled);
+        Patrol->SetEnabled(bEnabled);
+    }
+}
 float AHumanityTrinityRebuildPlayerCharacter::GetFootstepLoudness() const
 {
     return bIsCrouched ? .09f : (bSlowWalkHeld || bTouchHeld ? .18f : .85f);
@@ -278,6 +304,17 @@ void AHumanityTrinityRebuildPlayerCharacter::ToggleScreen()
 
 void AHumanityTrinityRebuildPlayerCharacter::ToggleMasterLights()
 {
+    if (auto* Patrol = AHumanityTrinityRebuildTeacherPatrol::Find(GetWorld()))
+    {
+        if (Patrol->HasFailed()) return;
+        if (Patrol->IsActive())
+        {
+            // A single emergency action also removes the teaching display's light.
+            if (auto* LightController = FindLightingController()) LightController->SetMasterLights(false);
+            if (auto* Interaction = FindRoomInteraction()) Interaction->SetScreenOn(false);
+            return;
+        }
+    }
     if (bHideAndSeekMode) return;
     if (AHumanityTrinityRebuildLightingController* LightController = FindLightingController())
     {
@@ -332,7 +369,14 @@ void AHumanityTrinityRebuildPlayerCharacter::QuitPrototype()
 
 FString AHumanityTrinityRebuildPlayerCharacter::GetCurrentInteractionPrompt() const
 {
-    if (bHideAndSeekMode) return FString();
+    const auto* Patrol = AHumanityTrinityRebuildTeacherPatrol::Find(GetWorld());
+    if (Patrol && Patrol->HasFailed()) return FString();
+    if (bHideAndSeekMode && (!Patrol || !Patrol->IsActive())) return FString();
+    if (FocusedCorridor && FocusedCorridorDoor != INDEX_NONE)
+        return FocusedCorridor->GetDoorPrompt(FocusedCorridorDoor);
+    if (bHideAndSeekMode)
+        return RoomInteraction && FocusedRoomComponent && RoomInteraction->GetPropDoorIndex(FocusedRoomComponent) >= 0
+            ? RoomInteraction->GetInteractionPrompt(FocusedRoomComponent) : FString();
     if (FocusedSwitch)
     {
         return FocusedSwitch->GetInteractionPrompt();
@@ -373,6 +417,8 @@ FString AHumanityTrinityRebuildPlayerCharacter::GetCurrentTouchMessage() const
 void AHumanityTrinityRebuildPlayerCharacter::PerformTouch()
 {
     if (!bHideAndSeekMode) return;
+    if (auto* Patrol = AHumanityTrinityRebuildTeacherPatrol::Find(GetWorld()))
+        if (Patrol->IsActive()) return;
     AHumanityTrinityRebuildHideAndSeekGameMode* Game =
         GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildHideAndSeekGameMode>();
     if (!Game || (!Game->IsRoundRunning() && (!Game->IsPlayerHiding() || Game->IsRoundFinished()))) return;
@@ -434,16 +480,23 @@ void AHumanityTrinityRebuildPlayerCharacter::RestartHideAndSeek()
 
 void AHumanityTrinityRebuildPlayerCharacter::ReturnToModeMenu()
 {
-    if (bHideAndSeekMode)
+    if (auto* Patrol = AHumanityTrinityRebuildTeacherPatrol::Find(GetWorld()))
     {
-        UGameplayStatics::OpenLevel(this, TEXT("/Game/HumanityTrinityRebuild/Maps/L_HumanityTrinityRebuildModeMenu"));
+        if (Patrol->HasFailed()) return;
+        Patrol->CancelPatrol();
     }
+    if (auto* Menu = GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildModeMenuGameMode>())
+        Menu->ReturnToMenu();
+    else
+        UGameplayStatics::OpenLevel(this, TEXT("/Game/HumanityTrinityRebuild/Maps/L_HumanityTrinityRebuildModeMenu"));
 }
 
 void AHumanityTrinityRebuildPlayerCharacter::UpdateFocusedInteractable()
 {
     FocusedSwitch = nullptr;
     FocusedRoomComponent = nullptr;
+    FocusedCorridor = nullptr;
+    FocusedCorridorDoor = INDEX_NONE;
 
     const FVector Start = FirstPersonCamera->GetComponentLocation();
     const FVector End = Start + FirstPersonCamera->GetForwardVector() * InteractionDistanceCm;
@@ -453,6 +506,11 @@ void AHumanityTrinityRebuildPlayerCharacter::UpdateFocusedInteractable()
     if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, QueryParams))
     {
         FocusedSwitch = Cast<AHumanityTrinityRebuildLightSwitch>(Hit.GetActor());
+        if (auto* Corridor = Cast<AHumanityTrinityRebuildCorridor>(Hit.GetActor()))
+        {
+            FocusedCorridorDoor = Corridor->DoorIndexForComponent(Hit.GetComponent());
+            if (FocusedCorridorDoor != INDEX_NONE) FocusedCorridor = Corridor;
+        }
         if (AHumanityTrinityRebuildRoomInteraction* Interaction = Cast<AHumanityTrinityRebuildRoomInteraction>(Hit.GetActor()))
         {
             RoomInteraction = Interaction;
@@ -467,8 +525,44 @@ void AHumanityTrinityRebuildPlayerCharacter::UpdateEyeAdaptation(const float Del
     const bool bLightsOn = !LightController || LightController->AreMainLightsOn();
     AHumanityTrinityRebuildRoomInteraction* Interaction = FindRoomInteraction();
     const bool bScreenOn = Interaction && Interaction->IsScreenIlluminating();
-    const float TargetExposure = bLightsOn ? LightAdaptedExposure : (bScreenOn ? -1.4f : DarkAdaptedExposure);
-    const float AdaptationSpeed = bLightsOn || bScreenOn ? BrightAdaptationSpeed : DarkAdaptationSpeed;
+    bool bCorridorVisible = false;
+    if (!bLightsOn)
+        if (const auto* Corridor = AHumanityTrinityRebuildCorridor::Find(GetWorld()))
+        {
+            const FVector CameraLocation = FirstPersonCamera->GetComponentLocation();
+            const FTransform CorridorTransform = Corridor->GetActorTransform();
+            // Corridor fixtures stay lit when the classroom circuits are off.
+            // Use the actual camera position so standing inside this bright
+            // space cannot retain the classroom's fully dark-adapted exposure.
+            bCorridorVisible = CorridorTransform.InverseTransformPosition(CameraLocation).X < -590.f;
+            const FVector LookDirection = FirstPersonCamera->GetForwardVector();
+            const float ViewCosine = FMath::Cos(FMath::DegreesToRadians(
+                FMath::Min(85.f, FirstPersonCamera->FieldOfView * .5f + 10.f)));
+            FCollisionQueryParams Params(SCENE_QUERY_STAT(TeacherCorridorExposure), true, this);
+            for (int32 DoorIndex = 0; DoorIndex < 3 && !bCorridorVisible; ++DoorIndex)
+            {
+                if (Corridor->GetDoorOpenFraction(DoorIndex) < .15f) continue;
+                // Sample the opening at eye height, just beyond the wall. A
+                // closed prop-room door or other opaque obstacle must block all
+                // samples; merely opening an exterior door is not enough.
+                for (const float Lateral : {-30.f, 0.f, 30.f})
+                {
+                    const FVector Portal = Corridor->GetDoorwayLocation(DoorIndex) +
+                        CorridorTransform.TransformVectorNoScale(FVector(-25.f, Lateral, 140.f));
+                    if (FVector::DotProduct(LookDirection, (Portal - CameraLocation).GetSafeNormal()) < ViewCosine)
+                        continue;
+                    FHitResult Hit;
+                    if (!GetWorld()->LineTraceSingleByChannel(Hit, CameraLocation, Portal, ECC_Visibility, Params))
+                    {
+                        bCorridorVisible = true;
+                        break;
+                    }
+                }
+            }
+        }
+    const bool bBrightEnvironment = bLightsOn || bCorridorVisible;
+    const float TargetExposure = bBrightEnvironment ? LightAdaptedExposure : (bScreenOn ? -1.4f : DarkAdaptedExposure);
+    const float AdaptationSpeed = bBrightEnvironment || bScreenOn ? BrightAdaptationSpeed : DarkAdaptationSpeed;
 
     CurrentExposure = FMath::FInterpTo(CurrentExposure, TargetExposure, DeltaSeconds, AdaptationSpeed);
     FirstPersonCamera->PostProcessSettings.AutoExposureBias = CurrentExposure;

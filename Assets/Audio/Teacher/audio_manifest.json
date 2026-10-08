@@ -1,0 +1,32 @@
+[
+  {
+    "file": "SW_TeacherCaught.wav",
+    "duration_seconds": 6.967,
+    "rate": 22050,
+    "channels": 1
+  },
+  {
+    "file": "SW_TeacherClear.wav",
+    "duration_seconds": 4.568,
+    "rate": 22050,
+    "channels": 1
+  },
+  {
+    "file": "SW_TeacherFootstep.wav",
+    "duration_seconds": 0.36,
+    "rate": 22050,
+    "channels": 1
+  },
+  {
+    "file": "SW_TeacherKeys.wav",
+    "duration_seconds": 0.65,
+    "rate": 22050,
+    "channels": 1
+  },
+  {
+    "file": "SW_TeacherWarning.wav",
+    "duration_seconds": 6.209,
+    "rate": 22050,
+    "channels": 1
+  }
+]

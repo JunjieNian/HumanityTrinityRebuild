@@ -1,0 +1,9 @@
+{
+  "voice": "Microsoft Kangkang",
+  "provenance": "Offline Windows text-to-speech; fictional teacher, no real-person recording",
+  "dialogue": {
+    "SW_TeacherWarning": "这么晚了，里面还有人吗？我检查一下。",
+    "SW_TeacherClear": "嗯，没人。门关好了。",
+    "SW_TeacherCaught": "谁在里面？出来！这么晚了还不回去。"
+  }
+}

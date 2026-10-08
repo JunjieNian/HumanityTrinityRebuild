@@ -1,0 +1,533 @@
+Teacher patrol verification, 2026-10-07. Unreal Engine 5.7.
+
+
+--- walk-safe ---
+[2026.10.07-19.51.16:186][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-19.51.16:237][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-19.51.16:239][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.51.16:239][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-19.51.16:239][  0]LogTemp: Display: [TEACHER_PATROL_SELFTEST] BEGIN scenario=safe
+[2026.10.07-19.51.19:485][207]LogTemp: Display: [TEACHER_PATROL_SELFTEST] actors_ready=PASS
+[2026.10.07-19.51.19:485][207]LogTemp: Display: [TEACHER_PATROL_SELFTEST] all_five_teacher_sounds_loaded=PASS
+[2026.10.07-19.51.19:485][207]LogTemp: Display: [TEACHER_PATROL_SELFTEST] four_corridor_fixtures=PASS
+[2026.10.07-19.51.19:485][207]LogTemp: Display: [TEACHER_PATROL_SELFTEST] teacher_all_fifteen_parts_loaded=PASS
+[2026.10.07-19.51.19:485][207]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.51.19:485][207]LogTemp: Display: [TEACHER_PATROL_SELFTEST] opt_out_rejects_trigger=PASS
+[2026.10.07-19.51.19:485][207]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_default_closed=PASS
+[2026.10.07-19.51.19:485][207]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_blocks_visibility=PASS
+[2026.10.07-19.51.19:485][207]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_default_closed=PASS
+[2026.10.07-19.51.19:485][207]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_blocks_visibility=PASS
+[2026.10.07-19.51.19:485][207]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_default_closed=PASS
+[2026.10.07-19.51.19:485][207]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_blocks_visibility=PASS
+[2026.10.07-19.51.21:725][394]LogTemp: Display: [TEACHER_PATROL_SELFTEST] disabled_stays_dormant=PASS
+[2026.10.07-19.51.21:725][394]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 1
+[2026.10.07-19.51.21:725][394]LogTemp: Display: [TEACHER_PATROL] PHASE 1 duration=6.00
+[2026.10.07-19.51.21:725][394]LogTemp: Display: [TEACHER_PATROL_SELFTEST] explicit_opt_in_starts=PASS
+[2026.10.07-19.51.21:729][394]LogTemp: Display: [TEACHER_PATROL_SELFTEST] emergency_L_binding_extinguishes_lights_and_display=PASS
+[2026.10.07-19.51.21:729][394]LogTemp: Display: [TEACHER_PATROL_SELFTEST] right_closed_dark_room_safe=PASS
+[2026.10.07-19.51.21:729][394]LogTemp: Display: [TEACHER_PATROL_SELFTEST] left_closed_dark_room_safe=PASS
+[2026.10.07-19.51.21:729][394]LogTemp: Display: [TEACHER_PATROL_SELFTEST] stage_is_not_a_hiding_room=PASS
+[2026.10.07-19.51.27:727][335]LogTemp: Display: [TEACHER_PATROL] PHASE 2 duration=1.60
+[2026.10.07-19.51.29:331][569]LogTemp: Display: [TEACHER_PATROL] PHASE 3 duration=5.00
+[2026.10.07-19.51.29:331][569]LogTemp: Display: [TEACHER_PATROL_SELFTEST] inspection_door_open=PASS
+[2026.10.07-19.51.34:339][313]LogTemp: Display: [TEACHER_PATROL] PHASE 4 duration=6.00
+[2026.10.07-19.51.34:339][313]LogTemp: Display: [TEACHER_PATROL] EVADED completed=1
+[2026.10.07-19.51.40:341][257]LogTemp: Display: [TEACHER_PATROL] PHASE 5 duration=0.00
+[2026.10.07-19.51.40:347][258]LogTemp: Display: [TEACHER_PATROL] PHASE 0 duration=0.00
+[2026.10.07-19.51.40:347][258]LogTemp: Display: [TEACHER_PATROL_SELFTEST] safe_inspection_completes=PASS
+[2026.10.07-19.51.40:347][258]LogTemp: Display: [TEACHER_PATROL_SELFTEST] door_closed_after_departure=PASS
+[2026.10.07-19.51.41:348][419]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.51.41:348][419]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_clears_failure=PASS
+[2026.10.07-19.51.41:601][463]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_returns_to_dormant=PASS
+[2026.10.07-19.51.41:601][463]LogTemp: Display: [TEACHER_PATROL_SELFTEST] PASS scenario=safe npc_travel=0.0
+
+--- walk-auto ---
+[2026.10.07-19.51.49:845][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-19.51.49:902][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-19.51.49:904][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.51.49:904][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-19.51.49:904][  0]LogTemp: Display: [TEACHER_PATROL_SELFTEST] BEGIN scenario=auto
+[2026.10.07-19.51.53:146][225]LogTemp: Display: [TEACHER_PATROL_SELFTEST] actors_ready=PASS
+[2026.10.07-19.51.53:146][225]LogTemp: Display: [TEACHER_PATROL_SELFTEST] all_five_teacher_sounds_loaded=PASS
+[2026.10.07-19.51.53:146][225]LogTemp: Display: [TEACHER_PATROL_SELFTEST] four_corridor_fixtures=PASS
+[2026.10.07-19.51.53:146][225]LogTemp: Display: [TEACHER_PATROL_SELFTEST] teacher_all_fifteen_parts_loaded=PASS
+[2026.10.07-19.51.53:146][225]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.51.53:146][225]LogTemp: Display: [TEACHER_PATROL_SELFTEST] opt_out_rejects_trigger=PASS
+[2026.10.07-19.51.53:146][225]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_default_closed=PASS
+[2026.10.07-19.51.53:146][225]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_blocks_visibility=PASS
+[2026.10.07-19.51.53:146][225]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_default_closed=PASS
+[2026.10.07-19.51.53:146][225]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_blocks_visibility=PASS
+[2026.10.07-19.51.53:146][225]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_default_closed=PASS
+[2026.10.07-19.51.53:146][225]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_blocks_visibility=PASS
+[2026.10.07-19.51.55:253][408]LogTemp: Display: [TEACHER_PATROL_SELFTEST] disabled_stays_dormant=PASS
+[2026.10.07-19.51.55:253][408]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 1
+[2026.10.07-19.51.55:253][408]LogTemp: Display: [TEACHER_PATROL_SELFTEST] right_closed_dark_room_safe=PASS
+[2026.10.07-19.51.55:253][408]LogTemp: Display: [TEACHER_PATROL_SELFTEST] left_closed_dark_room_safe=PASS
+[2026.10.07-19.51.55:253][408]LogTemp: Display: [TEACHER_PATROL_SELFTEST] stage_is_not_a_hiding_room=PASS
+[2026.10.07-19.51.55:509][449]LogTemp: Display: [TEACHER_PATROL] PHASE 1 duration=6.00
+[2026.10.07-19.51.56:254][565]LogTemp: Display: [TEACHER_PATROL_SELFTEST] enabled_timer_triggers_automatically=PASS
+[2026.10.07-19.51.56:329][566]LogTemp: Display: [TEACHER_PATROL_SELFTEST] enabled_timer_triggers_automatically=PASS
+[2026.10.07-19.52.01:514][387]LogTemp: Display: [TEACHER_PATROL] PHASE 2 duration=1.60
+[2026.10.07-19.52.03:117][631]LogTemp: Display: [TEACHER_PATROL] PHASE 3 duration=5.00
+[2026.10.07-19.52.03:117][631]LogTemp: Display: [TEACHER_PATROL_SELFTEST] inspection_door_open=PASS
+[2026.10.07-19.52.08:121][391]LogTemp: Display: [TEACHER_PATROL] PHASE 4 duration=6.00
+[2026.10.07-19.52.08:121][391]LogTemp: Display: [TEACHER_PATROL] EVADED completed=1
+[2026.10.07-19.52.14:122][336]LogTemp: Display: [TEACHER_PATROL] PHASE 5 duration=0.00
+[2026.10.07-19.52.14:128][337]LogTemp: Display: [TEACHER_PATROL] PHASE 0 duration=0.00
+[2026.10.07-19.52.14:128][337]LogTemp: Display: [TEACHER_PATROL_SELFTEST] safe_inspection_completes=PASS
+[2026.10.07-19.52.14:128][337]LogTemp: Display: [TEACHER_PATROL_SELFTEST] door_closed_after_departure=PASS
+[2026.10.07-19.52.15:130][489]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.52.15:130][489]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_clears_failure=PASS
+[2026.10.07-19.52.15:381][532]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_returns_to_dormant=PASS
+[2026.10.07-19.52.15:381][532]LogTemp: Display: [TEACHER_PATROL_SELFTEST] PASS scenario=auto npc_travel=0.0
+
+--- walk-exposed ---
+[2026.10.08-01.41.04:087][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.08-01.41.04:160][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.08-01.41.04:161][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.08-01.41.04:161][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.08-01.41.04:161][  0]LogTemp: Display: [TEACHER_PATROL_SELFTEST] BEGIN scenario=exposed
+[2026.10.08-01.41.07:845][181]LogTemp: Display: [TEACHER_PATROL_SELFTEST] actors_ready=PASS
+[2026.10.08-01.41.07:845][181]LogTemp: Display: [TEACHER_PATROL_SELFTEST] all_five_teacher_sounds_loaded=PASS
+[2026.10.08-01.41.07:845][181]LogTemp: Display: [TEACHER_PATROL_SELFTEST] four_corridor_fixtures=PASS
+[2026.10.08-01.41.07:847][181]LogTemp: Display: [TEACHER_PATROL_SELFTEST] teacher_all_fifteen_parts_loaded=PASS
+[2026.10.08-01.41.07:847][181]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.08-01.41.07:847][181]LogTemp: Display: [TEACHER_PATROL_SELFTEST] opt_out_rejects_trigger=PASS
+[2026.10.08-01.41.07:847][181]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_default_closed=PASS
+[2026.10.08-01.41.07:847][181]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_blocks_visibility=PASS
+[2026.10.08-01.41.07:847][181]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_default_closed=PASS
+[2026.10.08-01.41.07:847][181]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_blocks_visibility=PASS
+[2026.10.08-01.41.07:847][181]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_default_closed=PASS
+[2026.10.08-01.41.07:847][181]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_blocks_visibility=PASS
+[2026.10.08-01.41.10:318][333]LogTemp: Display: [TEACHER_PATROL_SELFTEST] disabled_stays_dormant=PASS
+[2026.10.08-01.41.10:319][333]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 1
+[2026.10.08-01.41.10:319][333]LogTemp: Display: [TEACHER_PATROL] PHASE 1 duration=6.00
+[2026.10.08-01.41.10:319][333]LogTemp: Display: [TEACHER_PATROL_SELFTEST] explicit_opt_in_starts=PASS
+[2026.10.08-01.41.10:319][333]LogTemp: Display: [TEACHER_PATROL_SELFTEST] emergency_L_binding_extinguishes_lights_and_display=PASS
+[2026.10.08-01.41.10:319][333]LogTemp: Display: [TEACHER_PATROL_SELFTEST] right_closed_dark_room_safe=PASS
+[2026.10.08-01.41.10:319][333]LogTemp: Display: [TEACHER_PATROL_SELFTEST] left_closed_dark_room_safe=PASS
+[2026.10.08-01.41.10:319][333]LogTemp: Display: [TEACHER_PATROL_SELFTEST] stage_is_not_a_hiding_room=PASS
+[2026.10.08-01.41.16:319][961]LogTemp: Display: [TEACHER_PATROL] PHASE 2 duration=1.60
+[2026.10.08-01.41.17:921][125]LogTemp: Display: [TEACHER_PATROL] PHASE 3 duration=5.00
+[2026.10.08-01.41.17:921][125]LogTemp: Display: [TEACHER_PATROL] PHASE 6 duration=8.00
+[2026.10.08-01.41.17:921][125]LogTemp: Display: [TEACHER_PATROL] FAILED 你没有躲进两侧暗房并关好门，老师发现了你。
+[2026.10.08-01.41.17:921][125]LogTemp: Display: [TEACHER_PATROL_SELFTEST] correct_failure_result=PASS
+[2026.10.08-01.41.17:921][125]LogTemp: Display: [TEACHER_PATROL_SELFTEST] failure_reason=你没有躲进两侧暗房并关好门，老师发现了你。
+[2026.10.08-01.41.18:927][227]LogTemp: Display: [TEACHER_PATROL_SELFTEST] player_adapts_to_visible_corridor=PASS
+[2026.10.08-01.41.18:928][227]LogTemp: Display: [TEACHER_PATROL_SELFTEST] player_corridor_exposure=-4.692
+[2026.10.08-01.41.18:928][227]LogTemp: Display: [TEACHER_PATROL] PHASE 5 duration=0.00
+[2026.10.08-01.41.18:928][227]LogTemp: Display: [TEACHER_PATROL] PHASE 0 duration=0.00
+[2026.10.08-01.41.18:928][227]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.08-01.41.18:928][227]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_clears_failure=PASS
+[2026.10.08-01.41.19:186][251]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_returns_to_dormant=PASS
+[2026.10.08-01.41.19:186][251]LogTemp: Display: [TEACHER_PATROL_SELFTEST] PASS scenario=exposed npc_travel=0.0
+
+--- walk-lights ---
+[2026.10.07-19.52.47:165][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-19.52.47:218][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-19.52.47:220][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.52.47:220][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-19.52.47:220][  0]LogTemp: Display: [TEACHER_PATROL_SELFTEST] BEGIN scenario=lights
+[2026.10.07-19.52.50:465][215]LogTemp: Display: [TEACHER_PATROL_SELFTEST] actors_ready=PASS
+[2026.10.07-19.52.50:465][215]LogTemp: Display: [TEACHER_PATROL_SELFTEST] all_five_teacher_sounds_loaded=PASS
+[2026.10.07-19.52.50:465][215]LogTemp: Display: [TEACHER_PATROL_SELFTEST] four_corridor_fixtures=PASS
+[2026.10.07-19.52.50:465][215]LogTemp: Display: [TEACHER_PATROL_SELFTEST] teacher_all_fifteen_parts_loaded=PASS
+[2026.10.07-19.52.50:465][215]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.52.50:465][215]LogTemp: Display: [TEACHER_PATROL_SELFTEST] opt_out_rejects_trigger=PASS
+[2026.10.07-19.52.50:465][215]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_default_closed=PASS
+[2026.10.07-19.52.50:465][215]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_blocks_visibility=PASS
+[2026.10.07-19.52.50:465][215]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_default_closed=PASS
+[2026.10.07-19.52.50:465][215]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_blocks_visibility=PASS
+[2026.10.07-19.52.50:465][215]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_default_closed=PASS
+[2026.10.07-19.52.50:465][215]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_blocks_visibility=PASS
+[2026.10.07-19.52.52:585][398]LogTemp: Display: [TEACHER_PATROL_SELFTEST] disabled_stays_dormant=PASS
+[2026.10.07-19.52.52:585][398]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 1
+[2026.10.07-19.52.52:585][398]LogTemp: Display: [TEACHER_PATROL] PHASE 1 duration=6.00
+[2026.10.07-19.52.52:585][398]LogTemp: Display: [TEACHER_PATROL_SELFTEST] explicit_opt_in_starts=PASS
+[2026.10.07-19.52.52:585][398]LogTemp: Display: [TEACHER_PATROL_SELFTEST] emergency_L_binding_extinguishes_lights_and_display=PASS
+[2026.10.07-19.52.52:585][398]LogTemp: Display: [TEACHER_PATROL_SELFTEST] right_closed_dark_room_safe=PASS
+[2026.10.07-19.52.52:585][398]LogTemp: Display: [TEACHER_PATROL_SELFTEST] left_closed_dark_room_safe=PASS
+[2026.10.07-19.52.52:585][398]LogTemp: Display: [TEACHER_PATROL_SELFTEST] stage_is_not_a_hiding_room=PASS
+[2026.10.07-19.52.58:591][ 20]LogTemp: Display: [TEACHER_PATROL] PHASE 2 duration=1.60
+[2026.10.07-19.53.00:197][187]LogTemp: Display: [TEACHER_PATROL] PHASE 3 duration=5.00
+[2026.10.07-19.53.00:197][187]LogTemp: Display: [TEACHER_PATROL] PHASE 6 duration=8.00
+[2026.10.07-19.53.00:197][187]LogTemp: Display: [TEACHER_PATROL] FAILED 教室灯还亮着，老师发现了你们。
+[2026.10.07-19.53.00:197][187]LogTemp: Display: [TEACHER_PATROL_SELFTEST] correct_failure_result=PASS
+[2026.10.07-19.53.00:197][187]LogTemp: Display: [TEACHER_PATROL_SELFTEST] failure_reason=教室灯还亮着，老师发现了你们。
+[2026.10.07-19.53.01:204][287]LogTemp: Display: [TEACHER_PATROL] PHASE 5 duration=0.00
+[2026.10.07-19.53.01:204][287]LogTemp: Display: [TEACHER_PATROL] PHASE 0 duration=0.00
+[2026.10.07-19.53.01:204][287]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.53.01:204][287]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_clears_failure=PASS
+[2026.10.07-19.53.01:461][314]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_returns_to_dormant=PASS
+[2026.10.07-19.53.01:461][314]LogTemp: Display: [TEACHER_PATROL_SELFTEST] PASS scenario=lights npc_travel=0.0
+
+--- walk-screen ---
+[2026.10.07-19.53.08:862][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-19.53.08:919][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-19.53.08:922][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.53.08:922][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-19.53.08:922][  0]LogTemp: Display: [TEACHER_PATROL_SELFTEST] BEGIN scenario=screen
+[2026.10.07-19.53.12:198][229]LogTemp: Display: [TEACHER_PATROL_SELFTEST] actors_ready=PASS
+[2026.10.07-19.53.12:199][229]LogTemp: Display: [TEACHER_PATROL_SELFTEST] all_five_teacher_sounds_loaded=PASS
+[2026.10.07-19.53.12:199][229]LogTemp: Display: [TEACHER_PATROL_SELFTEST] four_corridor_fixtures=PASS
+[2026.10.07-19.53.12:199][229]LogTemp: Display: [TEACHER_PATROL_SELFTEST] teacher_all_fifteen_parts_loaded=PASS
+[2026.10.07-19.53.12:199][229]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.53.12:199][229]LogTemp: Display: [TEACHER_PATROL_SELFTEST] opt_out_rejects_trigger=PASS
+[2026.10.07-19.53.12:199][229]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_default_closed=PASS
+[2026.10.07-19.53.12:199][229]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_blocks_visibility=PASS
+[2026.10.07-19.53.12:199][229]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_default_closed=PASS
+[2026.10.07-19.53.12:199][229]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_blocks_visibility=PASS
+[2026.10.07-19.53.12:199][229]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_default_closed=PASS
+[2026.10.07-19.53.12:199][229]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_blocks_visibility=PASS
+[2026.10.07-19.53.14:426][413]LogTemp: Display: [TEACHER_PATROL_SELFTEST] disabled_stays_dormant=PASS
+[2026.10.07-19.53.14:427][413]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 1
+[2026.10.07-19.53.14:427][413]LogTemp: Display: [TEACHER_PATROL] PHASE 1 duration=6.00
+[2026.10.07-19.53.14:427][413]LogTemp: Display: [TEACHER_PATROL_SELFTEST] explicit_opt_in_starts=PASS
+[2026.10.07-19.53.14:427][413]LogTemp: Display: [TEACHER_PATROL_SELFTEST] emergency_L_binding_extinguishes_lights_and_display=PASS
+[2026.10.07-19.53.14:427][413]LogTemp: Display: [TEACHER_PATROL_SELFTEST] right_closed_dark_room_safe=PASS
+[2026.10.07-19.53.14:427][413]LogTemp: Display: [TEACHER_PATROL_SELFTEST] left_closed_dark_room_safe=PASS
+[2026.10.07-19.53.14:427][413]LogTemp: Display: [TEACHER_PATROL_SELFTEST] stage_is_not_a_hiding_room=PASS
+[2026.10.07-19.53.20:431][289]LogTemp: Display: [TEACHER_PATROL] PHASE 2 duration=1.60
+[2026.10.07-19.53.22:033][494]LogTemp: Display: [TEACHER_PATROL] PHASE 3 duration=5.00
+[2026.10.07-19.53.22:033][494]LogTemp: Display: [TEACHER_PATROL] PHASE 6 duration=8.00
+[2026.10.07-19.53.22:033][494]LogTemp: Display: [TEACHER_PATROL] FAILED 教学屏幕还亮着，老师发现了你们。
+[2026.10.07-19.53.22:033][494]LogTemp: Display: [TEACHER_PATROL_SELFTEST] correct_failure_result=PASS
+[2026.10.07-19.53.22:033][494]LogTemp: Display: [TEACHER_PATROL_SELFTEST] failure_reason=教学屏幕还亮着，老师发现了你们。
+[2026.10.07-19.53.23:037][633]LogTemp: Display: [TEACHER_PATROL] PHASE 5 duration=0.00
+[2026.10.07-19.53.23:037][633]LogTemp: Display: [TEACHER_PATROL] PHASE 0 duration=0.00
+[2026.10.07-19.53.23:037][633]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.53.23:037][633]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_clears_failure=PASS
+[2026.10.07-19.53.23:289][665]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_returns_to_dormant=PASS
+[2026.10.07-19.53.23:289][665]LogTemp: Display: [TEACHER_PATROL_SELFTEST] PASS scenario=screen npc_travel=0.0
+
+--- walk-late ---
+[2026.10.07-19.53.30:990][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-19.53.31:041][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-19.53.31:043][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.53.31:043][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-19.53.31:043][  0]LogTemp: Display: [TEACHER_PATROL_SELFTEST] BEGIN scenario=late
+[2026.10.07-19.53.34:302][199]LogTemp: Display: [TEACHER_PATROL_SELFTEST] actors_ready=PASS
+[2026.10.07-19.53.34:302][199]LogTemp: Display: [TEACHER_PATROL_SELFTEST] all_five_teacher_sounds_loaded=PASS
+[2026.10.07-19.53.34:302][199]LogTemp: Display: [TEACHER_PATROL_SELFTEST] four_corridor_fixtures=PASS
+[2026.10.07-19.53.34:302][199]LogTemp: Display: [TEACHER_PATROL_SELFTEST] teacher_all_fifteen_parts_loaded=PASS
+[2026.10.07-19.53.34:302][199]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.53.34:302][199]LogTemp: Display: [TEACHER_PATROL_SELFTEST] opt_out_rejects_trigger=PASS
+[2026.10.07-19.53.34:302][199]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_default_closed=PASS
+[2026.10.07-19.53.34:302][199]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_blocks_visibility=PASS
+[2026.10.07-19.53.34:302][199]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_default_closed=PASS
+[2026.10.07-19.53.34:302][199]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_blocks_visibility=PASS
+[2026.10.07-19.53.34:302][199]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_default_closed=PASS
+[2026.10.07-19.53.34:302][199]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_blocks_visibility=PASS
+[2026.10.07-19.53.36:617][364]LogTemp: Display: [TEACHER_PATROL_SELFTEST] disabled_stays_dormant=PASS
+[2026.10.07-19.53.36:617][364]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 1
+[2026.10.07-19.53.36:617][364]LogTemp: Display: [TEACHER_PATROL] PHASE 1 duration=6.00
+[2026.10.07-19.53.36:617][364]LogTemp: Display: [TEACHER_PATROL_SELFTEST] explicit_opt_in_starts=PASS
+[2026.10.07-19.53.36:617][364]LogTemp: Display: [TEACHER_PATROL_SELFTEST] emergency_L_binding_extinguishes_lights_and_display=PASS
+[2026.10.07-19.53.36:618][364]LogTemp: Display: [TEACHER_PATROL_SELFTEST] right_closed_dark_room_safe=PASS
+[2026.10.07-19.53.36:618][364]LogTemp: Display: [TEACHER_PATROL_SELFTEST] left_closed_dark_room_safe=PASS
+[2026.10.07-19.53.36:618][364]LogTemp: Display: [TEACHER_PATROL_SELFTEST] stage_is_not_a_hiding_room=PASS
+[2026.10.07-19.53.42:620][216]LogTemp: Display: [TEACHER_PATROL] PHASE 2 duration=1.60
+[2026.10.07-19.53.44:223][436]LogTemp: Display: [TEACHER_PATROL] PHASE 3 duration=5.00
+[2026.10.07-19.53.44:223][436]LogTemp: Display: [TEACHER_PATROL_SELFTEST] inspection_door_open=PASS
+[2026.10.07-19.53.44:318][437]LogTemp: Display: [TEACHER_PATROL] PHASE 6 duration=8.00
+[2026.10.07-19.53.44:318][437]LogTemp: Display: [TEACHER_PATROL] FAILED 你没有躲进两侧暗房并关好门，老师发现了你。
+[2026.10.07-19.53.44:318][437]LogTemp: Display: [TEACHER_PATROL_SELFTEST] correct_failure_result=PASS
+[2026.10.07-19.53.44:318][437]LogTemp: Display: [TEACHER_PATROL_SELFTEST] failure_reason=你没有躲进两侧暗房并关好门，老师发现了你。
+[2026.10.07-19.53.45:323][572]LogTemp: Display: [TEACHER_PATROL] PHASE 5 duration=0.00
+[2026.10.07-19.53.45:323][572]LogTemp: Display: [TEACHER_PATROL] PHASE 0 duration=0.00
+[2026.10.07-19.53.45:323][572]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.53.45:323][572]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_clears_failure=PASS
+[2026.10.07-19.53.45:576][607]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_returns_to_dormant=PASS
+[2026.10.07-19.53.45:576][607]LogTemp: Display: [TEACHER_PATROL_SELFTEST] PASS scenario=late npc_travel=0.0
+
+--- walk-exit ---
+[2026.10.07-19.54.03:307][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-19.54.03:376][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-19.54.03:379][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.54.03:379][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-19.54.03:379][  0]LogTemp: Display: [TEACHER_PATROL_SELFTEST] BEGIN scenario=exit
+[2026.10.07-19.54.07:491][149]LogTemp: Display: [TEACHER_PATROL_SELFTEST] actors_ready=PASS
+[2026.10.07-19.54.07:491][149]LogTemp: Display: [TEACHER_PATROL_SELFTEST] all_five_teacher_sounds_loaded=PASS
+[2026.10.07-19.54.07:491][149]LogTemp: Display: [TEACHER_PATROL_SELFTEST] four_corridor_fixtures=PASS
+[2026.10.07-19.54.07:492][149]LogTemp: Display: [TEACHER_PATROL_SELFTEST] teacher_all_fifteen_parts_loaded=PASS
+[2026.10.07-19.54.07:492][149]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.54.07:492][149]LogTemp: Display: [TEACHER_PATROL_SELFTEST] opt_out_rejects_trigger=PASS
+[2026.10.07-19.54.07:492][149]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_default_closed=PASS
+[2026.10.07-19.54.07:492][149]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_blocks_visibility=PASS
+[2026.10.07-19.54.07:492][149]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_default_closed=PASS
+[2026.10.07-19.54.07:492][149]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_blocks_visibility=PASS
+[2026.10.07-19.54.07:492][149]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_default_closed=PASS
+[2026.10.07-19.54.07:492][149]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_blocks_visibility=PASS
+[2026.10.07-19.54.09:835][309]LogTemp: Display: [TEACHER_PATROL_SELFTEST] disabled_stays_dormant=PASS
+[2026.10.07-19.54.09:835][309]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 1
+[2026.10.07-19.54.09:835][309]LogTemp: Display: [TEACHER_PATROL] PHASE 1 duration=6.00
+[2026.10.07-19.54.09:836][309]LogTemp: Display: [TEACHER_PATROL_SELFTEST] explicit_opt_in_starts=PASS
+[2026.10.07-19.54.09:836][309]LogTemp: Display: [TEACHER_PATROL_SELFTEST] emergency_L_binding_extinguishes_lights_and_display=PASS
+[2026.10.07-19.54.09:836][309]LogTemp: Display: [TEACHER_PATROL_SELFTEST] right_closed_dark_room_safe=PASS
+[2026.10.07-19.54.09:836][309]LogTemp: Display: [TEACHER_PATROL_SELFTEST] left_closed_dark_room_safe=PASS
+[2026.10.07-19.54.09:836][309]LogTemp: Display: [TEACHER_PATROL_SELFTEST] stage_is_not_a_hiding_room=PASS
+[2026.10.07-19.54.15:843][968]LogTemp: Display: [TEACHER_PATROL] PHASE 2 duration=1.60
+[2026.10.07-19.54.17:449][143]LogTemp: Display: [TEACHER_PATROL] PHASE 3 duration=5.00
+[2026.10.07-19.54.17:449][143]LogTemp: Display: [TEACHER_PATROL] PHASE 6 duration=8.00
+[2026.10.07-19.54.17:449][143]LogTemp: Display: [TEACHER_PATROL] FAILED 你没有躲进两侧暗房并关好门，老师发现了你。
+[2026.10.07-19.54.17:449][143]LogTemp: Display: [TEACHER_PATROL_SELFTEST] correct_failure_result=PASS
+[2026.10.07-19.54.17:449][143]LogTemp: Display: [TEACHER_PATROL_SELFTEST] failure_reason=你没有躲进两侧暗房并关好门，老师发现了你。
+[2026.10.07-19.54.17:449][143]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exit_pending=PASS
+[2026.10.07-19.54.25:453][210]LogTemp: Display: [TEACHER_PATROL] FAILURE_EXIT
+
+--- seek-safe ---
+[2026.10.07-19.55.17:448][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-19.55.17:594][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-19.55.17:594][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.55.17:594][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-19.55.17:594][  0]LogTemp: Display: [TEACHER_PATROL_SELFTEST] BEGIN scenario=safe
+[2026.10.07-19.55.44:826][832]LogTemp: Display: [TEACHER_PATROL_SELFTEST] actors_ready=PASS
+[2026.10.07-19.55.44:826][832]LogTemp: Display: [TEACHER_PATROL_SELFTEST] all_five_teacher_sounds_loaded=PASS
+[2026.10.07-19.55.44:826][832]LogTemp: Display: [TEACHER_PATROL_SELFTEST] four_corridor_fixtures=PASS
+[2026.10.07-19.55.44:826][832]LogTemp: Display: [TEACHER_PATROL_SELFTEST] teacher_all_fifteen_parts_loaded=PASS
+[2026.10.07-19.55.44:826][832]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.55.44:826][832]LogTemp: Display: [TEACHER_PATROL_SELFTEST] opt_out_rejects_trigger=PASS
+[2026.10.07-19.55.44:826][832]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_default_closed=PASS
+[2026.10.07-19.55.44:826][832]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_blocks_visibility=PASS
+[2026.10.07-19.55.44:826][832]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_default_closed=PASS
+[2026.10.07-19.55.44:826][832]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_blocks_visibility=PASS
+[2026.10.07-19.55.44:826][832]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_default_closed=PASS
+[2026.10.07-19.55.44:826][832]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_blocks_visibility=PASS
+[2026.10.07-19.55.47:036][952]LogTemp: Display: [TEACHER_PATROL_SELFTEST] disabled_stays_dormant=PASS
+[2026.10.07-19.55.47:036][952]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 1
+[2026.10.07-19.55.47:070][952]LogTemp: Display: [TEACHER_PATROL] NPC_ESCAPE actor=HumanityTrinityRebuildHider_0 room=1 route=17 start=X=-520.000 Y=-1300.000 Z=70.000
+[2026.10.07-19.55.47:070][952]LogTemp: Display: [TEACHER_PATROL] PHASE 1 duration=26.00
+[2026.10.07-19.55.47:070][952]LogTemp: Display: [TEACHER_PATROL_SELFTEST] explicit_opt_in_starts=PASS
+[2026.10.07-19.55.47:070][952]LogTemp: Display: [TEACHER_PATROL_SELFTEST] emergency_L_binding_extinguishes_lights_and_display=PASS
+[2026.10.07-19.55.47:070][952]LogTemp: Display: [TEACHER_PATROL_SELFTEST] right_closed_dark_room_safe=PASS
+[2026.10.07-19.55.47:070][952]LogTemp: Display: [TEACHER_PATROL_SELFTEST] left_closed_dark_room_safe=PASS
+[2026.10.07-19.55.47:070][952]LogTemp: Display: [TEACHER_PATROL_SELFTEST] stage_is_not_a_hiding_room=PASS
+[2026.10.07-19.55.48:042][ 39]LogTemp: Display: [TEACHER_PATROL_SELFTEST] round_timer_paused=PASS
+[2026.10.07-19.55.48:136][ 40]LogTemp: Display: [TEACHER_PATROL_SELFTEST] round_timer_paused=PASS
+[2026.10.07-19.55.48:240][ 41]LogTemp: Display: [TEACHER_PATROL_SELFTEST] round_timer_paused=PASS
+[2026.10.07-19.55.52:434][379]LogTemp: Display: [TEACHER_PATROL] NPC_HIDDEN actor=HumanityTrinityRebuildHider_0 room=1 position=X=-510.310 Y=-1670.184 Z=90.248
+[2026.10.07-19.56.13:040][761]LogTemp: Display: [TEACHER_PATROL] PHASE 2 duration=1.60
+[2026.10.07-19.56.14:641][889]LogTemp: Display: [TEACHER_PATROL] PHASE 3 duration=5.00
+[2026.10.07-19.56.14:641][889]LogTemp: Display: [TEACHER_PATROL_SELFTEST] inspection_door_open=PASS
+[2026.10.07-19.56.14:641][889]LogTemp: Display: [TEACHER_PATROL_SELFTEST] npc_physically_reached_shelter=PASS
+[2026.10.07-19.56.19:649][318]LogTemp: Display: [TEACHER_PATROL] PHASE 4 duration=6.00
+[2026.10.07-19.56.19:649][318]LogTemp: Display: [TEACHER_PATROL] EVADED completed=1
+[2026.10.07-19.56.25:652][835]LogTemp: Display: [TEACHER_PATROL] PHASE 5 duration=0.00
+[2026.10.07-19.56.30:609][276]LogTemp: Display: [TEACHER_PATROL] NPC_RESUMED actor=HumanityTrinityRebuildHider_0 position=X=-515.983 Y=-1300.036 Z=90.000
+[2026.10.07-19.56.30:609][276]LogTemp: Display: [TEACHER_PATROL] PHASE 0 duration=0.00
+[2026.10.07-19.56.30:609][276]LogTemp: Display: [TEACHER_PATROL_SELFTEST] safe_inspection_completes=PASS
+[2026.10.07-19.56.30:609][276]LogTemp: Display: [TEACHER_PATROL_SELFTEST] door_closed_after_departure=PASS
+[2026.10.07-19.56.30:609][276]LogTemp: Display: [TEACHER_PATROL_SELFTEST] npc_resumes_after_return=PASS
+[2026.10.07-19.56.30:609][276]LogTemp: Display: [TEACHER_PATROL_SELFTEST] round_remains_running=PASS
+[2026.10.07-19.56.31:616][364]LogTemp: Display: [TEACHER_PATROL_SELFTEST] timer_resumes=PASS
+[2026.10.07-19.56.31:616][364]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.56.31:616][364]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_clears_failure=PASS
+[2026.10.07-19.56.31:873][387]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_returns_to_dormant=PASS
+[2026.10.07-19.56.31:873][387]LogTemp: Display: [TEACHER_PATROL_SELFTEST] PASS scenario=safe npc_travel=1938.0
+
+--- hide-safe ---
+[2026.10.07-19.56.46:406][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-19.56.46:457][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-19.56.46:460][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.56.46:460][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-19.56.46:460][  0]LogTemp: Display: [TEACHER_PATROL_SELFTEST] BEGIN scenario=safe
+[2026.10.07-19.56.50:026][163]LogTemp: Display: [TEACHER_PATROL_SELFTEST] actors_ready=PASS
+[2026.10.07-19.56.50:026][163]LogTemp: Display: [TEACHER_PATROL_SELFTEST] all_five_teacher_sounds_loaded=PASS
+[2026.10.07-19.56.50:026][163]LogTemp: Display: [TEACHER_PATROL_SELFTEST] four_corridor_fixtures=PASS
+[2026.10.07-19.56.50:026][163]LogTemp: Display: [TEACHER_PATROL_SELFTEST] teacher_all_fifteen_parts_loaded=PASS
+[2026.10.07-19.56.50:026][163]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.56.50:026][163]LogTemp: Display: [TEACHER_PATROL_SELFTEST] opt_out_rejects_trigger=PASS
+[2026.10.07-19.56.50:026][163]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_default_closed=PASS
+[2026.10.07-19.56.50:026][163]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_blocks_visibility=PASS
+[2026.10.07-19.56.50:026][163]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_default_closed=PASS
+[2026.10.07-19.56.50:026][163]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_blocks_visibility=PASS
+[2026.10.07-19.56.50:026][163]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_default_closed=PASS
+[2026.10.07-19.56.50:026][163]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_blocks_visibility=PASS
+[2026.10.07-19.56.52:249][309]LogTemp: Display: [TEACHER_PATROL_SELFTEST] disabled_stays_dormant=PASS
+[2026.10.07-19.56.52:250][309]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 1
+[2026.10.07-19.56.52:250][309]LogTemp: Display: [TEACHER_PATROL] NPC_ESCAPE actor=HumanityTrinityRebuildSeeker_0 room=0 route=72 start=X=293.257 Y=-240.000 Z=90.000
+[2026.10.07-19.56.52:250][309]LogTemp: Display: [TEACHER_PATROL] PHASE 1 duration=26.00
+[2026.10.07-19.56.52:250][309]LogTemp: Display: [TEACHER_PATROL_SELFTEST] explicit_opt_in_starts=PASS
+[2026.10.07-19.56.52:250][309]LogTemp: Display: [TEACHER_PATROL_SELFTEST] emergency_L_binding_extinguishes_lights_and_display=PASS
+[2026.10.07-19.56.52:250][309]LogTemp: Display: [TEACHER_PATROL_SELFTEST] right_closed_dark_room_safe=PASS
+[2026.10.07-19.56.52:250][309]LogTemp: Display: [TEACHER_PATROL_SELFTEST] left_closed_dark_room_safe=PASS
+[2026.10.07-19.56.52:250][309]LogTemp: Display: [TEACHER_PATROL_SELFTEST] stage_is_not_a_hiding_room=PASS
+[2026.10.07-19.56.53:258][398]LogTemp: Display: [TEACHER_PATROL_SELFTEST] round_timer_paused=PASS
+[2026.10.07-19.56.53:365][399]LogTemp: Display: [TEACHER_PATROL_SELFTEST] round_timer_paused=PASS
+[2026.10.07-19.57.07:212][756]LogTemp: Display: [TEACHER_PATROL] NPC_HIDDEN actor=HumanityTrinityRebuildSeeker_0 room=0 position=X=508.420 Y=-1669.251 Z=90.248
+[2026.10.07-19.57.18:259][693]LogTemp: Display: [TEACHER_PATROL] PHASE 2 duration=1.60
+[2026.10.07-19.57.19:868][835]LogTemp: Display: [TEACHER_PATROL] PHASE 3 duration=5.00
+[2026.10.07-19.57.19:868][835]LogTemp: Display: [TEACHER_PATROL_SELFTEST] inspection_door_open=PASS
+[2026.10.07-19.57.19:868][835]LogTemp: Display: [TEACHER_PATROL_SELFTEST] npc_physically_reached_shelter=PASS
+[2026.10.07-19.57.24:868][255]LogTemp: Display: [TEACHER_PATROL] PHASE 4 duration=6.00
+[2026.10.07-19.57.24:868][255]LogTemp: Display: [TEACHER_PATROL] EVADED completed=1
+[2026.10.07-19.57.30:871][747]LogTemp: Display: [TEACHER_PATROL] PHASE 5 duration=0.00
+[2026.10.07-19.57.45:907][999]LogTemp: Display: [TEACHER_PATROL] NPC_RESUMED actor=HumanityTrinityRebuildSeeker_0 position=X=288.290 Y=-240.000 Z=90.000
+[2026.10.07-19.57.45:908][999]LogTemp: Display: [TEACHER_PATROL] PHASE 0 duration=0.00
+[2026.10.07-19.57.45:908][999]LogTemp: Display: [TEACHER_PATROL_SELFTEST] safe_inspection_completes=PASS
+[2026.10.07-19.57.45:908][999]LogTemp: Display: [TEACHER_PATROL_SELFTEST] door_closed_after_departure=PASS
+[2026.10.07-19.57.45:908][999]LogTemp: Display: [TEACHER_PATROL_SELFTEST] npc_resumes_after_return=PASS
+[2026.10.07-19.57.45:908][999]LogTemp: Display: [TEACHER_PATROL_SELFTEST] round_remains_running=PASS
+[2026.10.07-19.57.46:909][ 79]LogTemp: Display: [TEACHER_PATROL_SELFTEST] timer_resumes=PASS
+[2026.10.07-19.57.46:909][ 79]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.57.46:909][ 79]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_clears_failure=PASS
+[2026.10.07-19.57.47:163][ 99]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_returns_to_dormant=PASS
+[2026.10.07-19.57.47:163][ 99]LogTemp: Display: [TEACHER_PATROL_SELFTEST] PASS scenario=safe npc_travel=6408.3
+
+--- practice-safe ---
+[2026.10.07-19.57.56:711][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-19.57.56:765][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-19.57.56:767][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.57.56:767][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-19.57.56:767][  0]LogTemp: Display: [TEACHER_PATROL_SELFTEST] BEGIN scenario=safe
+[2026.10.07-19.58.09:117][927]LogTemp: Display: [TEACHER_PATROL_SELFTEST] actors_ready=PASS
+[2026.10.07-19.58.09:117][927]LogTemp: Display: [TEACHER_PATROL_SELFTEST] all_five_teacher_sounds_loaded=PASS
+[2026.10.07-19.58.09:117][927]LogTemp: Display: [TEACHER_PATROL_SELFTEST] four_corridor_fixtures=PASS
+[2026.10.07-19.58.09:117][927]LogTemp: Display: [TEACHER_PATROL_SELFTEST] teacher_all_fifteen_parts_loaded=PASS
+[2026.10.07-19.58.09:117][927]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.58.09:117][927]LogTemp: Display: [TEACHER_PATROL_SELFTEST] opt_out_rejects_trigger=PASS
+[2026.10.07-19.58.09:117][927]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_default_closed=PASS
+[2026.10.07-19.58.09:117][927]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_0_blocks_visibility=PASS
+[2026.10.07-19.58.09:117][927]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_default_closed=PASS
+[2026.10.07-19.58.09:117][927]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_1_blocks_visibility=PASS
+[2026.10.07-19.58.09:117][927]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_default_closed=PASS
+[2026.10.07-19.58.09:117][927]LogTemp: Display: [TEACHER_PATROL_SELFTEST] exterior_door_2_blocks_visibility=PASS
+[2026.10.07-19.58.11:306][ 89]LogTemp: Display: [TEACHER_PATROL_SELFTEST] disabled_stays_dormant=PASS
+[2026.10.07-19.58.11:306][ 89]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 1
+[2026.10.07-19.58.11:337][ 89]LogTemp: Display: [TEACHER_PATROL] NPC_ESCAPE actor=HumanityTrinityRebuildHider_0 room=1 route=17 start=X=-520.000 Y=-1300.000 Z=70.000
+[2026.10.07-19.58.11:337][ 89]LogTemp: Display: [TEACHER_PATROL] PHASE 1 duration=26.00
+[2026.10.07-19.58.11:337][ 89]LogTemp: Display: [TEACHER_PATROL_SELFTEST] explicit_opt_in_starts=PASS
+[2026.10.07-19.58.11:337][ 89]LogTemp: Display: [TEACHER_PATROL_SELFTEST] emergency_L_binding_extinguishes_lights_and_display=PASS
+[2026.10.07-19.58.11:337][ 89]LogTemp: Display: [TEACHER_PATROL_SELFTEST] right_closed_dark_room_safe=PASS
+[2026.10.07-19.58.11:337][ 89]LogTemp: Display: [TEACHER_PATROL_SELFTEST] left_closed_dark_room_safe=PASS
+[2026.10.07-19.58.11:337][ 89]LogTemp: Display: [TEACHER_PATROL_SELFTEST] stage_is_not_a_hiding_room=PASS
+[2026.10.07-19.58.12:312][217]LogTemp: Display: [TEACHER_PATROL_SELFTEST] round_timer_paused=PASS
+[2026.10.07-19.58.12:393][218]LogTemp: Display: [TEACHER_PATROL_SELFTEST] round_timer_paused=PASS
+[2026.10.07-19.58.16:513][708]LogTemp: Display: [TEACHER_PATROL] NPC_HIDDEN actor=HumanityTrinityRebuildHider_0 room=1 position=X=-509.273 Y=-1669.674 Z=90.248
+[2026.10.07-19.58.37:319][713]LogTemp: Display: [TEACHER_PATROL] PHASE 2 duration=1.60
+[2026.10.07-19.58.38:920][838]LogTemp: Display: [TEACHER_PATROL] PHASE 3 duration=5.00
+[2026.10.07-19.58.38:920][838]LogTemp: Display: [TEACHER_PATROL_SELFTEST] inspection_door_open=PASS
+[2026.10.07-19.58.38:920][838]LogTemp: Display: [TEACHER_PATROL_SELFTEST] npc_physically_reached_shelter=PASS
+[2026.10.07-19.58.43:921][257]LogTemp: Display: [TEACHER_PATROL] PHASE 4 duration=6.00
+[2026.10.07-19.58.43:921][257]LogTemp: Display: [TEACHER_PATROL] EVADED completed=1
+[2026.10.07-19.58.49:926][767]LogTemp: Display: [TEACHER_PATROL] PHASE 5 duration=0.00
+[2026.10.07-19.58.54:925][168]LogTemp: Display: [TEACHER_PATROL] NPC_RESUMED actor=HumanityTrinityRebuildHider_0 position=X=-516.323 Y=-1300.042 Z=90.000
+[2026.10.07-19.58.54:926][168]LogTemp: Display: [TEACHER_PATROL] PHASE 0 duration=0.00
+[2026.10.07-19.58.54:926][168]LogTemp: Display: [TEACHER_PATROL_SELFTEST] safe_inspection_completes=PASS
+[2026.10.07-19.58.54:926][168]LogTemp: Display: [TEACHER_PATROL_SELFTEST] door_closed_after_departure=PASS
+[2026.10.07-19.58.54:926][168]LogTemp: Display: [TEACHER_PATROL_SELFTEST] npc_resumes_after_return=PASS
+[2026.10.07-19.58.54:926][168]LogTemp: Display: [TEACHER_PATROL_SELFTEST] round_remains_running=PASS
+[2026.10.07-19.58.55:939][223]LogTemp: Display: [TEACHER_PATROL_SELFTEST] timer_resumes=PASS
+[2026.10.07-19.58.55:939][223]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.58.55:939][223]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_clears_failure=PASS
+[2026.10.07-19.58.56:190][243]LogTemp: Display: [TEACHER_PATROL_SELFTEST] cancel_returns_to_dormant=PASS
+[2026.10.07-19.58.56:190][243]LogTemp: Display: [TEACHER_PATROL_SELFTEST] PASS scenario=safe npc_travel=1936.1
+
+--- SeekRegression ---
+[2026.10.07-19.53.45:420][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-19.53.45:483][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-19.53.45:486][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.53.45:486][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-19.53.48:547][569]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] proximity_silent=PASS crouch=PASS quiet_range=PASS
+[2026.10.07-19.54.10:768][205]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] movement_cm=793.0 footsteps=18 route=21 settled=YES
+[2026.10.07-19.54.10:774][206]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] touch_occlusion=PASS catch=PASS
+[2026.10.07-19.54.10:774][206]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] core=PASS
+[2026.10.07-19.54.17:222][250]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] practice_restart=PASS practice_lit=PASS
+[2026.10.07-19.54.17:775][620]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] actual_player_footsteps=PASS heard=1
+[2026.10.07-19.54.18:076][809]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] timeout=PASS dark_restart=PASS
+[2026.10.07-19.54.18:076][809]LogTemp: Display: [HIDE_AND_SEEK_SELFTEST] PASS
+
+--- HideRegression ---
+[2026.10.07-19.55.43:992][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-19.55.44:106][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-19.55.44:111][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.55.44:111][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-19.55.45:602][560]LogTemp: Display: [PLAYER_HIDING_SELFTEST] role_and_preparation=PASS
+[2026.10.07-19.55.45:603][560]LogTemp: Display: [PLAYER_HIDING_SELFTEST] model_and_audio=PASS
+[2026.10.07-19.55.45:603][560]LogTemp: Display: [PLAYER_HIDING_SELFTEST] counting_does_not_hear=PASS
+[2026.10.07-19.55.45:603][560]LogTemp: Display: [PLAYER_HIDING_SELFTEST] stage_boundary=PASS
+[2026.10.07-19.55.46:662][127]LogTemp: Display: [PLAYER_HIDING_SELFTEST] navigation_uses_loaded_furniture=PASS
+[2026.10.07-19.55.46:662][127]LogTemp: Display: [PLAYER_HIDING_SELFTEST] ready_starts_search=PASS
+[2026.10.07-19.55.46:662][127]LogTemp: Display: [PLAYER_HIDING_SELFTEST] dark_round=PASS
+[2026.10.07-19.55.48:006][  1]LogTemp: Display: [PLAYER_HIDING_SELFTEST] silent_player_not_tracked=PASS
+[2026.10.07-19.55.48:007][  1]LogTemp: Display: [PLAYER_HIDING_SELFTEST] player_crouch=PASS
+[2026.10.07-19.55.48:007][  1]LogTemp: Display: [PLAYER_HIDING_SELFTEST] quiet_steps_have_short_range=PASS
+[2026.10.07-19.55.48:007][  1]LogTemp: Display: [PLAYER_HIDING_SELFTEST] sound_obstruction=PASS
+[2026.10.07-19.55.48:008][  1]LogTemp: Display: [PLAYER_HIDING_SELFTEST] audible_event_causes_listening=PASS
+[2026.10.07-19.55.49:307][994]LogTemp: Display: [PLAYER_HIDING_SELFTEST] investigates_snapshot_not_player=PASS
+[2026.10.07-19.56.03:762][140]LogTemp: Display: [PLAYER_HIDING_SELFTEST] observed_travel=1539.0 steps=36 position=X=0.611 Y=-604.942 Z=72.271 sound=X=25.136 Y=-578.483 Z=90.000
+[2026.10.07-19.56.03:762][140]LogTemp: Display: [PLAYER_HIDING_SELFTEST] npc_moves_and_emits_footsteps=PASS
+[2026.10.07-19.56.03:762][140]LogTemp: Display: [PLAYER_HIDING_SELFTEST] searches_after_arrival=PASS
+[2026.10.07-19.56.03:762][140]LogTemp: Display: [PLAYER_HIDING_SELFTEST] reaches_sound_area=PASS
+[2026.10.07-19.56.03:764][140]LogTemp: Display: [PLAYER_HIDING_SELFTEST] cannot_catch_through_wall=PASS
+[2026.10.07-19.56.03:765][140]LogTemp: Display: [PLAYER_HIDING_SELFTEST] physical_crouched_contact_loses=PASS
+[2026.10.07-19.56.05:069][138]LogTemp: Display: [PLAYER_HIDING_SELFTEST] practice_restart_keeps_role=PASS
+[2026.10.07-19.56.05:124][138]LogTemp: Display: [PLAYER_HIDING_SELFTEST] practice_round_is_lit=PASS
+[2026.10.07-19.56.05:715][645]LogTemp: Display: [PLAYER_HIDING_SELFTEST] actual_player_steps_are_heard=PASS
+[2026.10.07-19.56.06:617][390]LogTemp: Display: [PLAYER_HIDING_SELFTEST] surviving_timer_wins=PASS
+[2026.10.07-19.56.07:120][764]LogTemp: Display: [PLAYER_HIDING_SELFTEST] dark_restart_resets_round=PASS
+[2026.10.07-19.56.07:120][764]LogTemp: Display: [PLAYER_HIDING_SELFTEST] restart_has_one_npc=PASS
+[2026.10.07-19.56.07:120][764]LogTemp: Display: [PLAYER_HIDING_SELFTEST] PASS
+
+--- RoomRegression ---
+[2026.10.07-19.57.22:726][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-19.57.22:825][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-19.57.22:829][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.57.22:829][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-19.57.23:323][  0]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] START main=9 residual=0 exposure=-4.700
+[2026.10.07-19.57.24:823][322]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR0 trace=PASS
+[2026.10.07-19.57.27:125][557]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR0 open=PASS
+[2026.10.07-19.57.27:825][262]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR0 capsule_entry=PASS blocker=none
+[2026.10.07-19.57.30:025][332]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR0 walk_up_steps=PASS distance=189.1 z=136.3
+[2026.10.07-19.57.31:726][976]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR0 closed_blocks=PASS
+[2026.10.07-19.57.33:226][479]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR1 trace=PASS
+[2026.10.07-19.57.35:526][661]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR1 open=PASS
+[2026.10.07-19.57.36:227][377]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR1 capsule_entry=PASS blocker=none
+[2026.10.07-19.57.38:429][377]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR1 walk_up_steps=PASS distance=189.2 z=136.3
+[2026.10.07-19.57.40:129][849]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR1 closed_blocks=PASS
+[2026.10.07-19.57.40:129][849]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PASS
+
+--- FullRoomRegression ---
+[2026.10.07-19.58.46:826][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-19.58.46:923][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-19.58.46:927][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-19.58.46:927][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-19.58.47:380][  0]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] START main=9 residual=0 exposure=-4.700
+[2026.10.07-19.58.47:381][  0]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PANELS on=yes zones_dark=yes recovered=yes
+[2026.10.07-19.58.50:179][795]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] OFF main=0 residual=2 exposure_start=-4.700
+[2026.10.07-19.58.58:151][632]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] DARK_ADAPTED exposure=-0.404
+[2026.10.07-19.59.00:724][368]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] LIGHT_RECOVERY main=9 residual=0 exposure_after_bright=-4.680
+[2026.10.07-19.59.02:316][777]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] SWITCH trace=PASS actor=HumanityTrinityRebuildLightSwitch_0 distance=94.1 toggled_off=yes restored=yes
+[2026.10.07-19.59.06:083][724]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] CURTAIN_OPEN fraction=1.000 passage_clear=yes mesh=yes
+[2026.10.07-19.59.06:083][724]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] CURTAIN_USE trace=PASS
+[2026.10.07-19.59.09:285][640]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] CURTAIN_CLOSED fraction=0.000 passage_blocked=yes
+[2026.10.07-19.59.12:481][145]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] CURTAIN_REOPENED PASS
+[2026.10.07-19.59.12:481][145]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] BOARD_INITIAL_CLOSED PASS
+[2026.10.07-19.59.15:470][542]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] SCREEN_USE trace=PASS powered=on local_light=off
+[2026.10.07-19.59.16:373][292]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] BOARD_MID_TRAVEL_REVERSE PASS
+[2026.10.07-19.59.19:374][ 13]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] BOARD_REVEAL_RIGHT_SCREEN PASS
+[2026.10.07-19.59.22:762][340]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] SCREEN_OFF PASS
+[2026.10.07-19.59.25:362][959]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] BOARD_RETURN_AND_OCCLUDE PASS
+[2026.10.07-19.59.28:162][330]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] TABLE_VIEW on_table=yes eye_z=236.1 ceiling_clearance=103.9 bounce=9
+[2026.10.07-19.59.32:499][744]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR0 trace=PASS
+[2026.10.07-19.59.34:799][657]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR0 open=PASS
+[2026.10.07-19.59.35:498][604]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR0 capsule_entry=PASS blocker=none
+[2026.10.07-19.59.37:700][350]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR0 walk_up_steps=PASS distance=189.3 z=136.2
+[2026.10.07-19.59.39:398][253]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR0 closed_blocks=PASS
+[2026.10.07-19.59.40:896][920]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR1 trace=PASS
+[2026.10.07-19.59.43:199][399]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR1 open=PASS
+[2026.10.07-19.59.43:897][ 14]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR1 capsule_entry=PASS blocker=none
+[2026.10.07-19.59.46:099][380]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR1 walk_up_steps=PASS distance=189.2 z=136.2
+[2026.10.07-19.59.47:800][434]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PROP_DOOR1 closed_blocks=PASS
+[2026.10.07-19.59.47:800][434]LogTemp: Display: [HUMANITY_TRINITY_REBUILD_SELFTEST] PASS
+
+--- MenuRegression ---
+[2026.10.07-20.00.15:966][  0]LogTemp: Display: [TEACHER_PATROL] CORRIDOR_READY doors=3 default_closed=YES lights=4 parts=28
+[2026.10.07-20.00.16:017][  0]LogTemp: Display: [TEACHER_PATROL] TEACHER_READY parts=15/15 modeled_adult=YES
+[2026.10.07-20.00.16:019][  0]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-20.00.16:019][  0]LogTemp: Display: [TEACHER_PATROL] READY enabled=0 audio=1 teacher_parts=15
+[2026.10.07-20.00.17:290][ 58]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 1
+[2026.10.07-20.00.17:290][ 58]LogTemp: Display: [TEACHER_PATROL] SET_ENABLED 0
+[2026.10.07-20.00.17:290][ 58]LogTemp: Display: [MODE_MENU_SELFTEST] teacher_checkbox=PASS preference_restored=YES
+[2026.10.07-20.00.17:290][ 58]LogTemp: Display: [MODE_MENU_SELFTEST] MENU_VISIBLE requested=../../../../../Projects/HumanityTrinityRebuild/UnrealProject/Saved/Screenshots/ModeMenu.png
+[2026.10.07-20.00.18:081][ 76]LogTemp: Display: [MODE_MENU_SELFTEST] walkthrough=PASS

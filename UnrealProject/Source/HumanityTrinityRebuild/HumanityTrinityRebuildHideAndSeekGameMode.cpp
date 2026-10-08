@@ -5,6 +5,7 @@
 #include "HumanityTrinityRebuildLightingController.h"
 #include "HumanityTrinityRebuildPlayerCharacter.h"
 #include "HumanityTrinityRebuildRoomInteraction.h"
+#include "HumanityTrinityRebuildTeacherPatrol.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
 #include "HAL/PlatformMisc.h"
@@ -42,6 +43,11 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPlay()
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPreparation()
 {
+    if (auto* Patrol = AHumanityTrinityRebuildTeacherPatrol::Find(GetWorld()))
+    {
+        if (Patrol->HasFailed()) return;
+        Patrol->CancelPatrol();
+    }
     APlayerController* Controller = GetWorld()->GetFirstPlayerController();
     Seeker = Controller ? Cast<AHumanityTrinityRebuildPlayerCharacter>(Controller->GetPawn()) : nullptr;
     if (!Seeker)
@@ -64,6 +70,12 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPreparation()
     bRoundFinished = false;
     bSeekerWon = false;
     SecondsRemaining = 180.0f;
+    bBoundaryRestorePending = false;
+    if (HidingBoundary)
+    {
+        HidingBoundary->SetActorEnableCollision(true);
+        HidingBoundary->SetActorHiddenInGame(false);
+    }
     if (Hider)
     {
         Hider->Destroy();
@@ -128,7 +140,7 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::BeginPreparation()
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::StartRound()
 {
-    if (!Seeker)
+    if (!Seeker || bTeacherPatrolSuspended)
     {
         return;
     }
@@ -179,6 +191,18 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::StartRound()
 void AHumanityTrinityRebuildHideAndSeekGameMode::Tick(const float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    if (bTeacherPatrolSuspended) return;
+    // The teacher sends everybody into the stage rooms. Keep the temporary
+    // play-area rail lowered until the player has walked back into the classroom.
+    if (bBoundaryRestorePending && Seeker && Seeker->GetActorLocation().Y > -1310.0f)
+    {
+        bBoundaryRestorePending = false;
+        if (HidingBoundary)
+        {
+            HidingBoundary->SetActorEnableCollision(true);
+            HidingBoundary->SetActorHiddenInGame(false);
+        }
+    }
     if (SelfTestMoveUntil > GetWorld()->GetTimeSeconds() && Seeker)
         Seeker->AddMovementInput(FVector(1, 0, 0), 1.f);
     if (bRoundRunning)
@@ -191,8 +215,41 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::Tick(const float DeltaSeconds)
     }
 }
 
+void AHumanityTrinityRebuildHideAndSeekGameMode::SetTeacherPatrolSuspended(const bool bSuspended)
+{
+    if (bTeacherPatrolSuspended == bSuspended) return;
+    Super::SetTeacherPatrolSuspended(bSuspended);
+    if (bSuspended)
+    {
+        PreparationSuspendedAt = GetWorld()->GetTimeSeconds();
+        GetWorldTimerManager().PauseTimer(PreparationTimer);
+        bBoundaryRestorePending = false;
+        if (HidingBoundary)
+        {
+            HidingBoundary->SetActorEnableCollision(false);
+            HidingBoundary->SetActorHiddenInGame(true);
+        }
+    }
+    else
+    {
+        if (GetWorldTimerManager().IsTimerPaused(PreparationTimer))
+        {
+            PreparationEndsAt += GetWorld()->GetTimeSeconds() - PreparationSuspendedAt;
+            GetWorldTimerManager().UnPauseTimer(PreparationTimer);
+        }
+        bBoundaryRestorePending = HidingBoundary != nullptr;
+        if (bRoundRunning)
+            for (TActorIterator<AHumanityTrinityRebuildLightingController> It(GetWorld()); It; ++It)
+            {
+                It->SetMasterLights(bPracticeMode);
+                break;
+            }
+    }
+}
+
 void AHumanityTrinityRebuildHideAndSeekGameMode::TryCatchHider(AActor* TouchedActor)
 {
+    if (bTeacherPatrolSuspended) return;
     if (bPlayerHiding)
     {
         // Reaching into the searcher's hands is also physical contact.
@@ -207,6 +264,7 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::TryCatchHider(AActor* TouchedAc
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::FinishRound(const bool bCaught)
 {
+    if (bTeacherPatrolSuspended) return;
     bRoundRunning = false;
     bRoundFinished = true;
     bSeekerWon = bCaught;
@@ -227,6 +285,8 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::FinishRound(const bool bCaught)
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::RestartRound()
 {
+    if (auto* Patrol = AHumanityTrinityRebuildTeacherPatrol::Find(GetWorld()))
+        if (Patrol->IsActive() || Patrol->HasFailed()) return;
     GetWorldTimerManager().ClearTimer(PreparationTimer);
     BeginPreparation();
 }
@@ -264,6 +324,8 @@ FString AHumanityTrinityRebuildHideAndSeekGameMode::GetStatusLine() const
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::TogglePracticeMode()
 {
+    if (auto* Patrol = AHumanityTrinityRebuildTeacherPatrol::Find(GetWorld()))
+        if (Patrol->IsActive() || Patrol->HasFailed()) return;
     if (bSelfTest)
         return;
     bPracticeMode = !bPracticeMode;
@@ -271,6 +333,7 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::TogglePracticeMode()
 }
 void AHumanityTrinityRebuildHideAndSeekGameMode::ReportPlayerNoise(const FVector& Location, float Loudness)
 {
+    if (bTeacherPatrolSuspended) return;
     if (bRoundRunning && Hider)
         Hider->HearNoise(Location, Loudness);
     if (bRoundRunning && SearchingNPC)
@@ -289,7 +352,7 @@ FString AHumanityTrinityRebuildHideAndSeekGameMode::GetPracticeHint() const
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::ReadyToHide()
 {
-    if (!bPlayerHiding || bRoundRunning || bRoundFinished)
+    if (!bPlayerHiding || bRoundRunning || bRoundFinished || bTeacherPatrolSuspended)
         return;
     GetWorldTimerManager().ClearTimer(PreparationTimer);
     StartRound();
@@ -297,6 +360,7 @@ void AHumanityTrinityRebuildHideAndSeekGameMode::ReadyToHide()
 
 void AHumanityTrinityRebuildHideAndSeekGameMode::NotifyPlayerCaught(AActor* SearchingActor)
 {
+    if (bTeacherPatrolSuspended) return;
     if (bPlayerHiding && bRoundRunning && SearchingNPC && SearchingActor == SearchingNPC)
         FinishRound(true);
 }

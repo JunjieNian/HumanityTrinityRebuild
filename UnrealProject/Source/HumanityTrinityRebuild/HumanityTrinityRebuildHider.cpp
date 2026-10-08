@@ -1,4 +1,6 @@
 #include "HumanityTrinityRebuildHider.h"
+#include "HumanityTrinityRebuildRoomInteraction.h"
+#include "HumanityTrinityRebuildDoorLayout.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -19,6 +21,7 @@ AHumanityTrinityRebuildHider::AHumanityTrinityRebuildHider()
     PrimaryActorTick.bCanEverTick = true;
     Body = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HiderBody"));
     Body->InitCapsuleSize(24, 88);
+    Body->SetCollisionObjectType(ECC_Pawn);
     Body->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     Body->SetCollisionResponseToAllChannels(ECR_Block);
     // Hands touch the posed meshes instead of the empty space in a capsule.
@@ -189,7 +192,7 @@ int32 AHumanityTrinityRebuildHider::NearestNode(const FVector& P) const
 }
 void AHumanityTrinityRebuildHider::HearNoise(const FVector& Location, float Loudness)
 {
-    if (!Seeker || ShowcasePose >= 0 || State == EHiderState::Caught)
+    if (bEmergencyActive || !Seeker || ShowcasePose >= 0 || State == EHiderState::Caught)
         return;
     const float Distance = FVector::Dist2D(Location, GetActorLocation());
     float Range = FMath::Clamp(Loudness, 0.f, 1.f) * 700.f;
@@ -310,6 +313,8 @@ void AHumanityTrinityRebuildHider::SetShowcasePose(int32 Pose)
 void AHumanityTrinityRebuildHider::Tick(float Dt)
 {
     Super::Tick(Dt);
+    if (TickEmergency(Dt))
+        return;
     const FVector Before = GetActorLocation();
     const float Now = GetWorld()->GetTimeSeconds();
     if (Seeker && ShowcasePose < 0)
@@ -381,6 +386,8 @@ void AHumanityTrinityRebuildHider::UpdateBodyAndFootsteps(float Dt, const FVecto
 }
 bool AHumanityTrinityRebuildHider::WantsCrouch() const
 {
+    if (bEmergencyActive)
+        return bEmergencyHolding;
     return ShowcasePose >= 0 ? ShowcasePose == 1 : State == EHiderState::Hidden || State == EHiderState::Listening;
 }
 void AHumanityTrinityRebuildHider::Animate(float Dt, float Distance)
@@ -390,7 +397,7 @@ void AHumanityTrinityRebuildHider::Animate(float Dt, float Distance)
     const float Half = 88 - CrouchAlpha * 20;
     Body->SetCapsuleHalfHeight(Half, false);
     FVector P = GetActorLocation();
-    P.Z = Half + 2;
+    P.Z = Half + 2 + (bEmergencyActive ? EmergencyFloorHeight : 0.f);
     SetActorLocation(P, false);
     const float Speed = Dt > 0 ? Distance / Dt : 0;
     WalkAlpha = FMath::FInterpTo(WalkAlpha, (Speed > 5 || ShowcasePose == 2) ? 1.f : 0.f, Dt, 9);

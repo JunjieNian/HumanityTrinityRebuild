@@ -1,0 +1,23 @@
+{
+  "editable_closed_doors": 3,
+  "corridor_parts": 28,
+  "teacher_source_meshes": 9,
+  "teacher_assembly_parts": 15,
+  "source_and_shared_layout_match": true,
+  "full_glb_retains_editable_objects": true,
+  "sha256": {
+    "HumanityTrinityRebuild.blend": "96cd704063b1fb9d26b2288886a0fb865a53040e227db6115b28277f88a4779d",
+    "HumanityTrinityRebuild.glb": "76fd6e130280ad1e184e25ab8ba8abde7b4b7b99b29811d94a81daa31444f281",
+    "UnrealProject\\Content\\SourceAssets\\HumanityTrinityRebuildEnvironment_Runtime.glb": "ef5deb8e5cde2b74575d9c1fd5b7e33f3abf7bf0fc771cd30d405fe620173334",
+    "Assets\\Teacher\\Trinity_Teacher.blend": "11937a6fc06804eeabd5dc058d8cce007d0eb258465b41f64d2e23cebae21748",
+    "Assets\\Teacher\\SM_Teacher_Forearm.glb": "c61f7edb68d6b00c95e1ee6de3260390cf3ee26869cc86119bd3a8d86aebb9ff",
+    "Assets\\Teacher\\SM_Teacher_Hand.glb": "d87d83b2ff2917592419a05f09dc5fb0061224000f84af12804226d4e2b09fa5",
+    "Assets\\Teacher\\SM_Teacher_Head.glb": "1fc48e89639512b1c7de27e17c2646f8e248321767ce1f698c1a7dfcad1468a4",
+    "Assets\\Teacher\\SM_Teacher_Pelvis.glb": "7536f0153237f41eda2897260280988a379046460b918d901f7e7a5b06cec0d8",
+    "Assets\\Teacher\\SM_Teacher_Shin.glb": "9b1f032649eb5fa1e67e3fff57306ec1e39ee1570f07c85790dfac71fb3a57c9",
+    "Assets\\Teacher\\SM_Teacher_Shoe.glb": "6eb5f4397496ef6da089f33b2b599b993ee87df5296679194557f48a93f735b1",
+    "Assets\\Teacher\\SM_Teacher_Thigh.glb": "e006a0d8c4228e5a7d55782a536f993b0231d2f6218fd7f34d5d1bfd27e07136",
+    "Assets\\Teacher\\SM_Teacher_Torso.glb": "9c9d34ca7369673a1da43be9c579ccbddda7859e1358be8c65f3fd63ac0e3c02",
+    "Assets\\Teacher\\SM_Teacher_UpperArm.glb": "82167d090deec32c99d2a45851ee14f03035cc20f870ae6aefc5692afb3fac75"
+  }
+}

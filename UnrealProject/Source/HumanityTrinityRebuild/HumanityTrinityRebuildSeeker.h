@@ -33,6 +33,7 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildSeeker : public AHumanit
   protected:
     virtual bool WantsCrouch() const override;
     virtual float GetReachPose() const override;
+    virtual void EmergencyFinished(float PausedSeconds) override;
 
   private:
     friend class AHumanityTrinityRebuildHideAndSeekGameMode;

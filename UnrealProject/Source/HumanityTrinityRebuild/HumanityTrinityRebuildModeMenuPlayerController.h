@@ -18,4 +18,5 @@ class HUMANITYTRINITYREBUILD_API AHumanityTrinityRebuildModeMenuPlayerController
     void ChoosePlayerHiding();
     void ClickMenu();
     void ReturnToModeMenu();
+    void ToggleTeacherPatrol();
 };

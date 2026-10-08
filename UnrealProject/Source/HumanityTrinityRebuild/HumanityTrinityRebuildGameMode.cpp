@@ -6,6 +6,9 @@
 #include "HumanityTrinityRebuildLightingController.h"
 #include "HumanityTrinityRebuildPlayerCharacter.h"
 #include "HumanityTrinityRebuildRoomInteraction.h"
+#include "HumanityTrinityRebuildCorridor.h"
+#include "HumanityTrinityRebuildTeacherPatrol.h"
+#include "HumanityTrinityRebuildTeacherPatrolTests.h"
 #include "HumanityTrinityRebuildDoorLayout.h"
 #include "HumanityTrinityRebuildTeachingLayout.h"
 #include "Components/CapsuleComponent.h"
@@ -87,6 +90,22 @@ void AHumanityTrinityRebuildGameMode::BeginPlay()
     {
         SelfTestRoom = GetWorld()->SpawnActor<AHumanityTrinityRebuildRoomInteraction>(
             AHumanityTrinityRebuildRoomInteraction::StaticClass(), FTransform::Identity);
+    }
+
+    if (!AHumanityTrinityRebuildCorridor::Find(GetWorld()))
+    {
+        GetWorld()->SpawnActor<AHumanityTrinityRebuildCorridor>(
+            AHumanityTrinityRebuildCorridor::StaticClass(), FTransform::Identity);
+    }
+    if (!AHumanityTrinityRebuildTeacherPatrol::Find(GetWorld()))
+    {
+        GetWorld()->SpawnActor<AHumanityTrinityRebuildTeacherPatrol>(
+            AHumanityTrinityRebuildTeacherPatrol::StaticClass(), FTransform::Identity);
+    }
+    if (FParse::Param(FCommandLine::Get(), TEXT("TeacherPatrolSelfTest")))
+    {
+        GetWorld()->SpawnActor<AHumanityTrinityRebuildTeacherPatrolTests>(
+            AHumanityTrinityRebuildTeacherPatrolTests::StaticClass(), FTransform::Identity);
     }
 
     if (FParse::Param(FCommandLine::Get(), TEXT("HumanityTrinityRebuildSelfTest")))

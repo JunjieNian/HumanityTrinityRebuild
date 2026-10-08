@@ -17,6 +17,14 @@ void AHumanityTrinityRebuildModeMenuPlayerController::SetupInputComponent()
                             &AHumanityTrinityRebuildModeMenuPlayerController::ClickMenu);
     InputComponent->BindKey(EKeys::M, IE_Pressed, this,
                             &AHumanityTrinityRebuildModeMenuPlayerController::ReturnToModeMenu);
+    InputComponent->BindKey(EKeys::T, IE_Pressed, this,
+                            &AHumanityTrinityRebuildModeMenuPlayerController::ToggleTeacherPatrol).bConsumeInput = false;
+}
+
+void AHumanityTrinityRebuildModeMenuPlayerController::ToggleTeacherPatrol()
+{
+    if (auto* Menu = GetWorld()->GetAuthGameMode<AHumanityTrinityRebuildModeMenuGameMode>())
+        if (Menu->IsChoosingMode()) Menu->ToggleTeacherPatrol();
 }
 
 void AHumanityTrinityRebuildModeMenuPlayerController::ChooseWalkthrough()

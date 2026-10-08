@@ -4,7 +4,7 @@ An editable Blender reconstruction and Unreal Engine interactive walkthrough of 
 
 ## Start playing
 
-Double-click the existing **Humanity Trinity Space** desktop shortcut. The 3D
+Run `Launch_HumanityTrinityRebuild.cmd` (or the **Humanity Trinity Space** shortcut, if installed). The 3D
 classroom opens with three choices in the same window: **1 — Walk through the
 space**, **2 — You seek / NPC hides**, or **3 — You hide / NPC seeks**. Click a
 card or press its number. Press **M** while playing to return to this menu.
@@ -12,7 +12,15 @@ When seeking, you have 12 lit seconds to memorize the room. When hiding, you hav
 20 seconds to choose a spot, or press **Space** when ready. Both roles then play
 a three-minute dark round. **Esc** exits.
 
-![Mode selection inside the room](Docs/Previews/HumanityTrinityRebuild_ModeMenu.png)
+The menu also offers **Allow surprise teacher inspections**, switched **OFF** by
+default. Click the checkbox or press **T** to opt in for any mode, including bright
+practice. Footsteps, keys and a Chinese warning give you time to press **L**, head
+into either room beside the stage, and close its door with **E**. The teacher opens
+the classroom door and inspects the room in the corridor light. Discovery ends the
+run and closes the game. See [the teacher inspection guide](Docs/TeacherPatrol.md)
+for timing, controls, editable assets and rules.
+
+![Mode selection and optional teacher inspections](Docs/Previews/TeacherPatrol_Menu.png)
 
 ![Unreal runtime with classroom lights on](Docs/Previews/HumanityTrinityRebuild_00_LightsOn.png)
 
@@ -30,6 +38,8 @@ a three-minute dark round. **Esc** exits.
 - A wall-mounted light switch operated with a camera-center visibility trace.
 - Animated curtain opening/closing and a separately switchable teaching display, with close-range controls.
 - Two flush wooden doors in the sloping stage walls, opening into the prop rooms with E.
+- Three initially closed classroom doors, a lit exterior corridor and an optional teacher inspection shared by every mode.
+- An editable articulated teacher model, Chinese speech, approaching footsteps and key sounds.
 - Checked chair clearances and circuit-linked ceiling bounce for stable lighting when looking up from a tabletop.
 - Slow dark adaptation and faster bright adaptation through manual exposure control.
 - Directional door-leak and display-standby residual light assumptions for the almost-black state.
@@ -75,7 +85,7 @@ The complete editable reconstruction before game development is preserved at
 
 Run `Launch_HumanityTrinityRebuild_HideAndSeek.cmd`. You have 12 seconds to
 memorize the lit room, followed by a three-minute search in complete darkness.
-The existing **Humanity Trinity Space** desktop shortcut opens the 3D room with
+`Launch_HumanityTrinityRebuild.cmd` and the optional **Humanity Trinity Space** desktop shortcut open the 3D room with
 three choices: walkthrough, seeking, or hiding. The selection stays in one window;
 press **M** during any mode to return to the menu.
 Use headphones: the hider's steps are spatialized and muffled by obstacles.
@@ -121,7 +131,9 @@ your footstep range; staying still produces no footstep event.
 and read its behavior. **R** starts another round in the current role. Winning
 or being found restores the lights. A temporary visible rail marks the stage
 boundary: this mode uses the classroom floor, keeping every hiding area within
-the NPC's supported search space. The stage and prop rooms remain available in
+the NPC's supported search space. During an enabled teacher inspection, this rail
+lowers and everyone uses the stage-side rooms. The ordinary round resumes after
+the player and NPC return to the classroom. These rooms are also available in
 walkthrough mode.
 
 The [player-hiding validation record](Docs/Validation/PlayerHiding.md) includes
@@ -142,7 +154,7 @@ script after building the C++ module:
   --python '.\Tools\Blender\build_hider.py'
 & 'D:\EpicGames\UE_5.7\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' `
   '.\UnrealProject\HumanityTrinityRebuild.uproject' `
-  '-ExecutePythonScript=D:\HumanityTrinityRebuild\Tools\Unreal\import_hider.py' `
+  "-ExecutePythonScript=$((Resolve-Path '.\Tools\Unreal\import_hider.py').Path)" `
   -unattended -nop4 -nosplash -nullrhi
 ```
 
@@ -201,8 +213,9 @@ If Unreal is elsewhere, set `UE_ROOT` to the UE_5.7 directory before running the
 | Mouse | Look |
 | Space | Jump |
 | Shift (hold) | Walk slowly for close inspection |
-| E | Use a nearby light switch, curtain, display control, or concealed prop-room door |
-| L | Toggle all main lights from anywhere for comparison/debugging |
+| E | Use a nearby light switch, curtain, display control, classroom door, or concealed prop-room door |
+| L | Toggle all main lights; during a teacher inspection, always switch main lights and display off |
+| T | Enable/disable teacher inspections before an event starts; the current application session remembers the choice |
 | C | Open/close the curtains smoothly |
 | P | Toggle the teaching display |
 | 1 | Toggle front teaching-zone lights |
@@ -210,6 +223,7 @@ If Unreal is elsewhere, set `UE_ROOT` to the UE_5.7 directory before running the
 | 3 | Toggle rear table-zone lights |
 | 4 | Toggle stage-zone lights |
 | Esc | Exit the standalone walkthrough |
+| M | Return to the mode menu; unavailable after teacher discovery |
 
 ## Repository layout
 
